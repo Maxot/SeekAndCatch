@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 sealed class Goal {
     abstract fun getString(): String
+
     class Colored(val color: Color) : Goal() {
 
         override fun getString(): String {
@@ -11,6 +12,12 @@ sealed class Goal {
                 Color.Red -> "Red"
                 else -> "Error"
             }
+        }
+
+    }
+    class Figured(figured: Figure) : Goal(){
+        override fun getString(): String {
+            TODO("Not yet implemented")
         }
 
     }

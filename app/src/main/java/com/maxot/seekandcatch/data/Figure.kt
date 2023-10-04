@@ -10,9 +10,5 @@ data class Figure(
 sealed class FigureType {
     object Triangle : FigureType()
     object Square : FigureType()
-    object Rectangle : FigureType()
-
-    fun getRandom(): FigureType {
-        return Square
-    }
+    object Circle : FigureType()
 }

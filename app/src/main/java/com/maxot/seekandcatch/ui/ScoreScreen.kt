@@ -14,10 +14,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ScoreScreen(score: Int, onStartGameClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+fun ScoreScreen(
+    bestScore: Int,
+    score: Int,
+    onStartGameClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         Text(
             text = "Your score: $score",
+            textAlign = TextAlign.Center,
+            style = TextStyle(color = Color.Black, fontSize = 30.sp)
+        )
+        Text(
+            text = "Your best score: $bestScore",
             textAlign = TextAlign.Center,
             style = TextStyle(color = Color.Black, fontSize = 30.sp)
         )

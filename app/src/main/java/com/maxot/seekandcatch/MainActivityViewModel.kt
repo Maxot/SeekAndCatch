@@ -5,12 +5,18 @@ import androidx.lifecycle.ViewModel
 import com.maxot.seekandcatch.data.Figure
 import com.maxot.seekandcatch.data.FigureType
 import com.maxot.seekandcatch.data.Goal
+import com.maxot.seekandcatch.data.repository.ScoreRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 import kotlin.random.Random
 
-class MainActivityViewModel : ViewModel() {
+@HiltViewModel
+class MainActivityViewModel
+@Inject
+constructor(private val scoreRepository: ScoreRepository) : ViewModel() {
     private val delay = 2000L
     private var delayCoefficient = 1.0
     private val maxCountItems = 28
@@ -41,10 +47,11 @@ class MainActivityViewModel : ViewModel() {
 
     fun stopGame(score: Int) {
         _isGameActive.value = false
+        scoreRepository.saveBestScore(score)
         _lastScore.value = score
     }
 
-    private fun decreaseDelayCoefficient(){
+    private fun decreaseDelayCoefficient() {
         if (delayCoefficient >= 0.4) {
             delayCoefficient -= 0.05
         }
@@ -59,17 +66,29 @@ class MainActivityViewModel : ViewModel() {
     }
 
     private fun createRandomFigure(): Figure {
-        val figureType = FigureType.Square
+        val figureType = getRandomFigureType(Random.nextInt(4))
         val color = getRandomColor(Random.nextInt(4))
         return Figure(figureType, color)
     }
+
+    fun getBestScore() = scoreRepository.getBestScore()
 }
 
-fun getRandomColor(seed: Int): Color {
+private fun getRandomFigureType(seed: Int): FigureType {
+    return when (seed) {
+        0 -> FigureType.Circle
+        1 -> FigureType.Square
+        2 -> FigureType.Triangle
+        else -> FigureType.Circle
+    }
+}
+
+private fun getRandomColor(seed: Int): Color {
     return when (seed) {
         0 -> Color.Red
         1 -> Color.Blue
         2 -> Color.Green
+        3 -> Color.Yellow
         else -> Color.White
     }
 }
