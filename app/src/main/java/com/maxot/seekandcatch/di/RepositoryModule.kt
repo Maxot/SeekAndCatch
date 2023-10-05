@@ -12,5 +12,5 @@ import dagger.hilt.components.SingletonComponent
 interface RepositoryModule {
 
     @Binds
-    abstract fun provideScoreRepository(impl: ScoreRepositoryImpl): ScoreRepository
+    fun provideScoreRepository(impl: ScoreRepositoryImpl): ScoreRepository
 }

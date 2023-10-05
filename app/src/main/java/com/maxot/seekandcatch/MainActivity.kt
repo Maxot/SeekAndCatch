@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maxot.seekandcatch.ui.GameScreen
 import com.maxot.seekandcatch.ui.MainScreen
+import com.maxot.seekandcatch.ui.NextLevelScreen
 import com.maxot.seekandcatch.ui.ScoreScreen
 import com.maxot.seekandcatch.ui.theme.SeekAndCatchTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +27,10 @@ class MainActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 val isGameActive = viewModel.isGameActive.collectAsState()
                 val lastScore = viewModel.lastScore.collectAsState()
+                val goals = viewModel.goals.collectAsState()
+                val score = viewModel.score.collectAsState()
+                val level = viewModel.level.collectAsState()
+                val isLevelChanged = viewModel.levelChanged.collectAsState()
 
                 if (!isGameActive.value) {
                     if (lastScore.value > 0) {
@@ -41,10 +46,25 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 } else {
-                    GameScreen(
-                        goal = viewModel.goal,
-                        figures = viewModel.figures.collectAsState(),
-                        onStopGame = { score -> viewModel.stopGame(score) })
+                    if (isLevelChanged.value) {
+                        NextLevelScreen(nextLevel = level.value, goals = goals)
+                    } else {
+                        GameScreen(
+                            goals = goals,
+                            figures = viewModel.figures.collectAsState(),
+                            score = score,
+                            onFigureClickAction = { figure ->
+                                val condition = viewModel.gameplayUseCase.checkGoalCondition(
+                                    goals = goals.value,
+                                    figure = figure
+                                )
+                                if (condition) {
+                                    viewModel.incrementScore()
+                                } else {
+                                    viewModel.stopGame()
+                                }
+                            })
+                    }
                 }
             }
         }
