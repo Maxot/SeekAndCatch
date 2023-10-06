@@ -30,7 +30,7 @@ import com.maxot.seekandcatch.data.getShapeForFigure
 @ExperimentalFoundationApi
 @Composable
 fun GameScreen(
-    goals: State<List<Goal<Any>>>,
+    goals: State<Set<Goal<Any>>>,
     figures: State<List<Figure>>,
     score: State<Int>,
     onFigureClickAction: (Figure) -> Unit,
@@ -48,7 +48,7 @@ fun GameScreen(
                 textAlign = TextAlign.Center,
                 fontSize = 30.sp
             )
-            GoalView(goals = goals.value)
+            TaskView(goals = goals.value)
 
             LazyVerticalGrid(
                 cells = GridCells.Adaptive(minSize = 80.dp)
@@ -65,7 +65,7 @@ fun GameScreen(
 }
 
 @Composable
-fun GoalView(goals: List<Goal<Any>>) {
+fun TaskView(goals: Set<Goal<Any>>) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -79,20 +79,22 @@ fun GoalView(goals: List<Goal<Any>>) {
 }
 
 @Composable
-fun ListOfGoalsView(goals: List<Goal<Any>>) {
+fun ListOfGoalsView(goals: Set<Goal<Any>>) {
     val textStyle = TextStyle(Color.Black, fontSize = 30.sp)
     goals.forEach { goal ->
         when (goal) {
             is Goal.Colored -> {
-                Text(text = "All of: ", style = textStyle)
+                Text(text = stringResource(id = R.string.label_list_of_goal), style = textStyle)
                 Box(
                     Modifier
                         .size(50.dp)
                         .padding(4.dp)
                         .background(goal.getGoal())
                 )
+                Text(text = "color", style = textStyle)
             }
             is Goal.Figured -> {
+                Text(text = stringResource(id = R.string.label_list_of_goal), style = textStyle)
                 ColoredFigure(
                     size = 50.dp,
                     color = goal.getGoal().color,
@@ -104,7 +106,7 @@ fun ListOfGoalsView(goals: List<Goal<Any>>) {
 }
 
 @Composable
-fun ColoredFigure(size: Dp = 100.dp, color: Color, shape: Shape, onItemClick: () -> Unit = {}) {
+fun ColoredFigure(size: Dp = 100.dp, color: Color?, shape: Shape, onItemClick: () -> Unit = {}) {
     var colorState by remember {
         mutableStateOf(color)
     }
@@ -116,7 +118,7 @@ fun ColoredFigure(size: Dp = 100.dp, color: Color, shape: Shape, onItemClick: ()
             .size(size)
             .padding(5.dp)
             .clip(shape)
-            .background(colorState)
+            .background(colorState ?: Color.White)
             .border(width = 2.dp, color = Color.Black, shape = shape)
             .clickable {
                 if (!alreadyClicked) {
@@ -129,7 +131,7 @@ fun ColoredFigure(size: Dp = 100.dp, color: Color, shape: Shape, onItemClick: ()
 }
 
 @Composable
-fun NextLevelScreen(nextLevel: Int, goals: State<List<Goal<Any>>>) {
+fun NextLevelScreen(nextLevel: Int, goals: State<Set<Goal<Any>>>) {
     val textStyle = TextStyle(Color.Black, fontSize = 30.sp)
     Column(
         modifier = Modifier.fillMaxSize(),

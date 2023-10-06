@@ -25,10 +25,12 @@ constructor(
     private val scoreRepository: ScoreRepository
 ) : ViewModel() {
 
-    private val delay = 2000L
+    private val oneFigureDuration = 200L
+    private val baseFrameDuration = 500L
     private val levelDuration = 10000L
-    private var delayCoefficient = 1.0
-    private var minnDelayCoefficient = 0.5
+    private var delayCoefficient = 1.0f
+    private val minDelayCoefficient = 0.7
+    private val delayStep = 0.05f
     private val maxCountItems = 28
 
     private var _level = MutableStateFlow(0)
@@ -38,7 +40,7 @@ constructor(
     val levelChanged: StateFlow<Boolean> = _levelChanged
 
     private var _goals = MutableStateFlow(generateRandomGoals(getRandomNumber()))
-    val goals: StateFlow<List<Goal<Any>>> = _goals
+    val goals: StateFlow<Set<Goal<Any>>> = _goals
 
     private var _lastScore = MutableStateFlow(0)
     val lastScore: StateFlow<Int> = _lastScore
@@ -52,10 +54,11 @@ constructor(
     private var _figures = MutableStateFlow(listOf<Figure>())
     val figures: StateFlow<List<Figure>> = _figures
 
+    private var gameJob: Job = Job()
     private var levelJob: Job = Job()
 
     suspend fun startGame() {
-        delayCoefficient = 1.0
+        delayCoefficient = 1.0f
         _lastScore.value = 0
         _isGameActive.value = true
 
@@ -63,18 +66,20 @@ constructor(
     }
 
     private suspend fun startLevelsUpdate() {
-        while (isGameActive.value) {
-            _goals.value = generateRandomGoals()
-            _level.value += 1
-            _levelChanged.value = true
-            // Show level screen
-            delay(3000)
-            _levelChanged.value = false
-            // Show game screen
-            startNextLevel()
-            delay(levelDuration)
-            levelJob.cancel()
-            decreaseDelayCoefficient()
+        gameJob = CoroutineScope(Job()).launch {
+            while (isGameActive.value) {
+                _goals.value = generateRandomGoals()
+                _level.value += 1
+                _levelChanged.value = true
+                // Show level screen
+                delay(3000)
+                _levelChanged.value = false
+                // Show game screen
+                startNextLevel()
+                delay(levelDuration)
+                levelJob.cancel()
+                decreaseDelayCoefficient()
+            }
         }
     }
 
@@ -84,7 +89,14 @@ constructor(
                 _figures.emit(emptyList())
                 delay(200)
                 _figures.emit(generateFigures())
-                delay((delay * delayCoefficient).toLong())
+                delay(
+                    gameplayUseCase.calculateFrameDuration(
+                        baseDuration = baseFrameDuration,
+                        oneFigureDuration = oneFigureDuration,
+                        delayCoefficient = delayCoefficient,
+                        frameFigures = figures.value, goals = goals.value
+                    )
+                )
             }
         }
     }
@@ -95,11 +107,13 @@ constructor(
         _lastScore.value = score.value
         _score.value = 0
         _level.value = 0
+        gameJob.cancel()
+        levelJob.cancel()
     }
 
     private fun decreaseDelayCoefficient() {
-        if (delayCoefficient >= minnDelayCoefficient) {
-            delayCoefficient -= 0.1
+        if (delayCoefficient >= minDelayCoefficient) {
+            delayCoefficient -= delayStep
         }
     }
 
@@ -123,18 +137,18 @@ constructor(
         return Figure(figureType, color)
     }
 
-    private fun generateRandomGoals(seed: Int = getRandomNumber()): List<Goal<Any>> {
+    private fun generateRandomGoals(seed: Int = getRandomNumber()): Set<Goal<Any>> {
         return when (seed) {
-            0 -> listOf(getRandomGoal())
-            1 -> listOf(getRandomGoal(), getRandomGoal())
-            else -> listOf(Goal.Colored(Color.Red))
+            0 -> setOf(getRandomGoal())
+            1 -> setOf(getRandomGoal(), getRandomGoal())
+            else -> setOf(Goal.Colored(Color.Red))
         }
     }
 
     private fun getRandomGoal(seed: Int = getRandomNumber()): Goal<Any> {
         return when (seed) {
             0 -> Goal.Colored(getRandomColor())
-            1 -> Goal.Figured(Figure(getRandomFigureType(), Color.White))
+            1 -> Goal.Figured(Figure(getRandomFigureType(), null))
 //            2 -> Goal.Figured(Figure(getRandomFigureType(), getRandomColor()))
             else -> Goal.Colored(getRandomColor())
         }
@@ -164,4 +178,3 @@ constructor(
     }
 
 }
-

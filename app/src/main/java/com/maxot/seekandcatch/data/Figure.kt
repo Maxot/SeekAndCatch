@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Shape
 
 data class Figure(
     val type: FigureType,
-    val color: Color,
+    val color: Color?,
 )
 
 sealed class FigureType {
