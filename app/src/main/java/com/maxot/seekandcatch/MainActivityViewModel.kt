@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.maxot.seekandcatch.data.Figure
 import com.maxot.seekandcatch.data.FigureType
+import com.maxot.seekandcatch.data.GameMode
 import com.maxot.seekandcatch.data.Goal
 import com.maxot.seekandcatch.data.repository.ScoreRepository
 import com.maxot.seekandcatch.usecase.GameplayUseCase
@@ -21,7 +22,7 @@ import kotlin.random.Random
 class MainActivityViewModel
 @Inject
 constructor(
-    val gameplayUseCase: GameplayUseCase,
+    private val gameplayUseCase: GameplayUseCase,
     private val scoreRepository: ScoreRepository
 ) : ViewModel() {
 
@@ -32,6 +33,9 @@ constructor(
     private val minDelayCoefficient = 0.7
     private val delayStep = 0.05f
     private val maxCountItems = 28
+
+    private var _gameMode = MutableStateFlow<GameMode>(GameMode.LevelsGameMode)
+    val gameMode: StateFlow<GameMode> = _gameMode
 
     private var _level = MutableStateFlow(0)
     val level: StateFlow<Int> = _level
@@ -48,8 +52,8 @@ constructor(
     private var _score = MutableStateFlow(0)
     val score: StateFlow<Int> = _score
 
-    private var _isGameActive = MutableStateFlow(false)
-    val isGameActive: StateFlow<Boolean> = _isGameActive
+    private var _isGameActive = MutableStateFlow<Boolean?>(null)
+    val isGameActive: StateFlow<Boolean?> = _isGameActive
 
     private var _figures = MutableStateFlow(listOf<Figure>())
     val figures: StateFlow<List<Figure>> = _figures
@@ -57,7 +61,40 @@ constructor(
     private var gameJob: Job = Job()
     private var levelJob: Job = Job()
 
-    suspend fun startGame() {
+    suspend fun startGame(gameMode: GameMode){
+        when (gameMode){
+            GameMode.FlowGameMode -> {
+                startFlowModeGame()
+            }
+            GameMode.LevelsGameMode -> {
+                startLevelsGame()
+            }
+
+        }
+    }
+
+    /**
+     * Game mode where the screen scrolls infinitely down and show new items.
+     */
+    private suspend fun startFlowModeGame(){
+        _gameMode.value = GameMode.FlowGameMode
+        _isGameActive.value = true
+        gameJob = CoroutineScope(Job()).launch {
+            while (isGameActive.value != null && isGameActive.value == true) {
+                _goals.value = generateRandomGoals()
+                // Show game screen
+                _figures.emit(generateFigures(1000))
+                delay(10000)
+            }
+        }
+    }
+
+
+    /**
+     * Game mode where levels and frames changes infinitely .
+     */
+    private suspend fun startLevelsGame() {
+        _gameMode.value = GameMode.LevelsGameMode
         delayCoefficient = 1.0f
         _lastScore.value = 0
         _isGameActive.value = true
@@ -67,7 +104,7 @@ constructor(
 
     private suspend fun startLevelsUpdate() {
         gameJob = CoroutineScope(Job()).launch {
-            while (isGameActive.value) {
+            while (isGameActive.value != null && isGameActive.value == true) {
                 _goals.value = generateRandomGoals()
                 _level.value += 1
                 _levelChanged.value = true
@@ -85,7 +122,7 @@ constructor(
 
     private suspend fun startNextLevel() {
         levelJob = CoroutineScope(Job()).launch {
-            while (isGameActive.value) {
+            while (isGameActive.value != null && isGameActive.value == true) {
                 _figures.emit(emptyList())
                 delay(200)
                 _figures.emit(generateFigures())
@@ -101,7 +138,7 @@ constructor(
         }
     }
 
-    fun stopGame() {
+    private fun stopGame() {
         _isGameActive.value = false
         scoreRepository.saveBestScore(score.value)
         _lastScore.value = score.value
@@ -117,9 +154,9 @@ constructor(
         }
     }
 
-    private fun generateFigures(): List<Figure> {
+    private fun generateFigures(itemsCount: Int = maxCountItems): List<Figure> {
         val listOfFigures = mutableListOf<Figure>()
-        for (i in 1..maxCountItems) {
+        for (i in 1..itemsCount) {
             listOfFigures.add(createRandomFigure())
         }
         return listOfFigures
@@ -127,8 +164,20 @@ constructor(
 
     fun getBestScore() = scoreRepository.getBestScore()
 
-    fun incrementScore() {
+    private fun incrementScore() {
         _score.value += 1
+    }
+
+    fun onFigureClick(figure: Figure){
+        val condition = gameplayUseCase.checkGoalCondition(
+            goals = goals.value,
+            figure = figure
+        )
+        if (condition) {
+            incrementScore()
+        } else {
+            stopGame()
+        }
     }
 
     private fun createRandomFigure(): Figure {

@@ -1,5 +1,6 @@
 package com.maxot.seekandcatch.di
 
+import com.maxot.seekandcatch.data.FigureType
 import com.maxot.seekandcatch.data.repository.ScoreRepository
 import com.maxot.seekandcatch.data.repository.ScoreRepositoryImpl
 import dagger.Binds

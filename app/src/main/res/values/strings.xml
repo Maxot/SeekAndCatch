@@ -9,7 +9,7 @@
     <string name="label_your_best_score">Your best score: %1$d</string>
 
     //Score Screen
-    <string name="button_start_new_game">Start New Game</string>
+    <string name="button_to_main_screen">To main screen</string>
 
     //Game Screen
     <string name="label_goal">Goals: </string>

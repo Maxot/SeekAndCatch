@@ -5,9 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -22,45 +22,60 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.maxot.seekandcatch.MainActivityViewModel
 import com.maxot.seekandcatch.R
-import com.maxot.seekandcatch.data.Figure
+import com.maxot.seekandcatch.data.GameMode
 import com.maxot.seekandcatch.data.Goal
 import com.maxot.seekandcatch.data.getShapeForFigure
 
 @ExperimentalFoundationApi
 @Composable
 fun GameScreen(
-    goals: State<Set<Goal<Any>>>,
-    figures: State<List<Figure>>,
-    score: State<Int>,
-    onFigureClickAction: (Figure) -> Unit,
+    navController: NavController,
+    viewModel: MainActivityViewModel
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
-    ) {
-        Column {
-            Text(
-                text = stringResource(id = R.string.label_score, score.value), modifier = Modifier
-                    .height(50.dp)
-                    .fillMaxWidth(),
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                fontSize = 30.sp
-            )
-            TaskView(goals = goals.value)
+    val goals = viewModel.goals.collectAsState()
+    val score = viewModel.score.collectAsState()
+    val figures = viewModel.figures.collectAsState()
+    val isGameActive = viewModel.isGameActive.collectAsState()
+    val isLevelChanged = viewModel.levelChanged.collectAsState()
+    val level = viewModel.level.collectAsState()
 
-            LazyVerticalGrid(
-                cells = GridCells.Adaptive(minSize = 80.dp)
-            ) {
-                items(figures.value) { figure ->
-                    val shape: Shape = figure.getShapeForFigure()
-                    ColoredFigure(color = figure.color, shape = shape) {
-                        onFigureClickAction(figure)
+    LaunchedEffect(viewModel.gameMode) {
+        viewModel.startGame(GameMode.LevelsGameMode)
+    }
+    if (!isLevelChanged.value){
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color.White
+        ) {
+            Column {
+                Text(
+                    text = stringResource(id = R.string.label_score, score.value), modifier = Modifier
+                        .height(50.dp)
+                        .fillMaxWidth(),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    fontSize = 30.sp
+                )
+                TaskView(goals = goals.value)
+
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 80.dp),
+                ) {
+                    items(figures.value) { figure ->
+                        val shape: Shape = figure.getShapeForFigure()
+                        ColoredFigure(color = figure.color, shape = shape) {
+                            viewModel.onFigureClick(figure)
+                        }
                     }
+
                 }
             }
         }
+    } else {
+        NextLevelScreen(nextLevel = level.value, goals = goals)
     }
 }
 

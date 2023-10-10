@@ -12,13 +12,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.maxot.seekandcatch.R
+import com.maxot.seekandcatch.ui.navigation.Screen
 
 @Composable
 fun ScoreScreen(
+    navController: NavController,
     bestScore: Int,
-    score: Int,
-    onStartGameClick: () -> Unit
+    score: Int
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -38,11 +40,11 @@ fun ScoreScreen(
         )
         Spacer(modifier = Modifier.height(5.dp))
         Button(
-            onClick = { onStartGameClick() },
+            onClick = { navController.navigate(Screen.MainScreen.route) },
 
             ) {
             Text(
-                text = stringResource(id = R.string.button_start_new_game, score),
+                text = stringResource(id = R.string.button_to_main_screen, score),
                 textAlign = TextAlign.Center,
                 style = TextStyle(color = Color.Black, fontSize = 30.sp)
             )
