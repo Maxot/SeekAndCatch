@@ -25,7 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maxot.seekandcatch.MainActivityViewModel
+import com.maxot.seekandcatch.GameViewModel
 import com.maxot.seekandcatch.R
 import com.maxot.seekandcatch.data.GameMode
 import com.maxot.seekandcatch.data.getShapeForFigure
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 @ExperimentalFoundationApi
 @Composable
 fun FlowModeGameScreen(
-    viewModel: MainActivityViewModel
+    viewModel: GameViewModel
 ) {
     val goals = viewModel.goals.collectAsState()
     val score = viewModel.score.collectAsState()
@@ -64,7 +64,7 @@ fun FlowModeGameScreen(
             LazyVerticalGrid(
                 userScrollEnabled = false,
                 state = gridState,
-                columns = GridCells.Adaptive(minSize = 80.dp),
+                columns = GridCells.Fixed(4),
             ) {
                 items(figures.value) { figure ->
                     val shape: Shape = figure.getShapeForFigure()
@@ -78,7 +78,6 @@ fun FlowModeGameScreen(
                         animationSpec = tween(durationMillis = 15000, easing = LinearEasing)
                     )
                 }
-
             }
         }
     }

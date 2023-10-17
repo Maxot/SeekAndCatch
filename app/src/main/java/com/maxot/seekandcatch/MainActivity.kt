@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SeekAndCatchTheme {
-                val viewModel = viewModel<MainActivityViewModel>()
+                val viewModel = viewModel<GameViewModel>()
                 Navigation(viewModel = viewModel)
             }
         }

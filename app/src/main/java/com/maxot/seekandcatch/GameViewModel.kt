@@ -2,6 +2,7 @@ package com.maxot.seekandcatch
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.data.Figure
 import com.maxot.seekandcatch.data.FigureType
 import com.maxot.seekandcatch.data.GameMode
@@ -9,7 +10,6 @@ import com.maxot.seekandcatch.data.Goal
 import com.maxot.seekandcatch.data.repository.ScoreRepository
 import com.maxot.seekandcatch.usecase.GameplayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 @HiltViewModel
-class MainActivityViewModel
+class GameViewModel
 @Inject
 constructor(
     private val gameplayUseCase: GameplayUseCase,
@@ -40,9 +40,6 @@ constructor(
     private var _level = MutableStateFlow(0)
     val level: StateFlow<Int> = _level
 
-    private var _levelChanged = MutableStateFlow(true)
-    val levelChanged: StateFlow<Boolean> = _levelChanged
-
     private var _goals = MutableStateFlow(generateRandomGoals(getRandomNumber()))
     val goals: StateFlow<Set<Goal<Any>>> = _goals
 
@@ -52,22 +49,26 @@ constructor(
     private var _score = MutableStateFlow(0)
     val score: StateFlow<Int> = _score
 
-    private var _isGameActive = MutableStateFlow<Boolean?>(null)
-    val isGameActive: StateFlow<Boolean?> = _isGameActive
-
     private var _figures = MutableStateFlow(listOf<Figure>())
     val figures: StateFlow<List<Figure>> = _figures
+
+    private val _gameUiState = MutableStateFlow<GameUiState>(GameUiState.LevelPreview)
+    val gameUiState: StateFlow<GameUiState>
+        get() = _gameUiState
 
     private var gameJob: Job = Job()
     private var levelJob: Job = Job()
 
-    suspend fun startGame(gameMode: GameMode){
-        when (gameMode){
+    /**
+     * Starts the game in the one of the possible modes.
+     */
+    suspend fun startGame(gameMode: GameMode) {
+        when (gameMode) {
             GameMode.FlowGameMode -> {
                 startFlowModeGame()
             }
             GameMode.LevelsGameMode -> {
-                startLevelsGame()
+                startLevelsModeGame()
             }
 
         }
@@ -76,16 +77,16 @@ constructor(
     /**
      * Game mode where the screen scrolls infinitely down and show new items.
      */
-    private suspend fun startFlowModeGame(){
+    private suspend fun startFlowModeGame() {
         _gameMode.value = GameMode.FlowGameMode
-        _isGameActive.value = true
-        gameJob = CoroutineScope(Job()).launch {
-            while (isGameActive.value != null && isGameActive.value == true) {
-                _goals.value = generateRandomGoals()
-                // Show game screen
-                _figures.emit(generateFigures(1000))
-                delay(10000)
-            }
+        _gameUiState.value = GameUiState.InProgress
+        gameJob = viewModelScope.launch {
+//            while (isGameActive.value != null && isGameActive.value == true) {
+//                _goals.value = generateRandomGoals()
+            // Show game screen
+            _figures.emit(generateFigures(1000))
+//                delay(10000)
+//            }
         }
     }
 
@@ -93,24 +94,24 @@ constructor(
     /**
      * Game mode where levels and frames changes infinitely .
      */
-    private suspend fun startLevelsGame() {
+    private suspend fun startLevelsModeGame() {
         _gameMode.value = GameMode.LevelsGameMode
         delayCoefficient = 1.0f
         _lastScore.value = 0
-        _isGameActive.value = true
+        _gameUiState.value = GameUiState.InProgress
 
         startLevelsUpdate()
     }
 
     private suspend fun startLevelsUpdate() {
-        gameJob = CoroutineScope(Job()).launch {
-            while (isGameActive.value != null && isGameActive.value == true) {
+        gameJob = viewModelScope.launch {
+            while (gameUiState.value == GameUiState.InProgress) {
                 _goals.value = generateRandomGoals()
                 _level.value += 1
-                _levelChanged.value = true
+                _gameUiState.value = GameUiState.LevelPreview
                 // Show level screen
                 delay(3000)
-                _levelChanged.value = false
+                _gameUiState.value = GameUiState.InProgress
                 // Show game screen
                 startNextLevel()
                 delay(levelDuration)
@@ -121,8 +122,8 @@ constructor(
     }
 
     private suspend fun startNextLevel() {
-        levelJob = CoroutineScope(Job()).launch {
-            while (isGameActive.value != null && isGameActive.value == true) {
+        levelJob = viewModelScope.launch {
+            while (gameUiState.value == GameUiState.InProgress) {
                 _figures.emit(emptyList())
                 delay(200)
                 _figures.emit(generateFigures())
@@ -139,7 +140,7 @@ constructor(
     }
 
     private fun stopGame() {
-        _isGameActive.value = false
+        _gameUiState.value = GameUiState.GameEnded
         scoreRepository.saveBestScore(score.value)
         _lastScore.value = score.value
         _score.value = 0
@@ -168,7 +169,7 @@ constructor(
         _score.value += 1
     }
 
-    fun onFigureClick(figure: Figure){
+    fun onFigureClick(figure: Figure) {
         val condition = gameplayUseCase.checkGoalCondition(
             goals = goals.value,
             figure = figure
@@ -226,4 +227,9 @@ constructor(
         return Random.nextInt(4)
     }
 
+    sealed class GameUiState {
+        object InProgress : GameUiState()
+        object LevelPreview : GameUiState()
+        object GameEnded : GameUiState()
+    }
 }

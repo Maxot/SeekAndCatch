@@ -23,8 +23,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.maxot.seekandcatch.MainActivityViewModel
+import com.maxot.seekandcatch.GameViewModel
 import com.maxot.seekandcatch.R
+import com.maxot.seekandcatch.data.Figure
 import com.maxot.seekandcatch.data.GameMode
 import com.maxot.seekandcatch.data.Goal
 import com.maxot.seekandcatch.data.getShapeForFigure
@@ -33,49 +34,66 @@ import com.maxot.seekandcatch.data.getShapeForFigure
 @Composable
 fun GameScreen(
     navController: NavController,
-    viewModel: MainActivityViewModel
+    viewModel: GameViewModel
 ) {
+    val gameUiState = viewModel.gameUiState.collectAsState()
     val goals = viewModel.goals.collectAsState()
     val score = viewModel.score.collectAsState()
     val figures = viewModel.figures.collectAsState()
-    val isGameActive = viewModel.isGameActive.collectAsState()
-    val isLevelChanged = viewModel.levelChanged.collectAsState()
     val level = viewModel.level.collectAsState()
 
     LaunchedEffect(viewModel.gameMode) {
         viewModel.startGame(GameMode.LevelsGameMode)
     }
-    if (!isLevelChanged.value){
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color.White
-        ) {
-            Column {
-                Text(
-                    text = stringResource(id = R.string.label_score, score.value), modifier = Modifier
-                        .height(50.dp)
-                        .fillMaxWidth(),
-                    color = Color.Black,
-                    textAlign = TextAlign.Center,
-                    fontSize = 30.sp
-                )
-                TaskView(goals = goals.value)
 
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 80.dp),
-                ) {
-                    items(figures.value) { figure ->
-                        val shape: Shape = figure.getShapeForFigure()
-                        ColoredFigure(color = figure.color, shape = shape) {
-                            viewModel.onFigureClick(figure)
-                        }
-                    }
-
-                }
+   when (gameUiState.value) {
+        is GameViewModel.GameUiState.GameEnded -> {
+//            navController.navigate(Screen.ScoreScreen.route)
+        }
+        is GameViewModel.GameUiState.InProgress -> {
+            FiguresView(
+                score = score.value,
+                goals = goals.value,
+                figures = figures.value
+            ) { figure ->
+                viewModel.onFigureClick(figure)
             }
         }
-    } else {
-        NextLevelScreen(nextLevel = level.value, goals = goals)
+        is GameViewModel.GameUiState.LevelPreview -> {
+            NextLevelScreen(nextLevel = level.value, goals = goals)
+        }
+    }
+}
+
+@Composable
+fun FiguresView(
+    score: Int,
+    goals: Set<Goal<Any>>,
+    figures: List<Figure>,
+    onFigureClick: (Figure) -> Unit
+) {
+    Column {
+        Text(
+            text = stringResource(id = R.string.label_score, score), modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth(),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            fontSize = 30.sp
+        )
+        TaskView(goals = goals)
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+        ) {
+            items(figures) { figure ->
+                val shape: Shape = figure.getShapeForFigure()
+                ColoredFigure(color = figure.color, shape = shape) {
+                    onFigureClick(figure)
+                }
+            }
+
+        }
     }
 }
 

@@ -6,7 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.maxot.seekandcatch.MainActivityViewModel
+import com.maxot.seekandcatch.GameViewModel
 import com.maxot.seekandcatch.ui.FlowModeGameScreen
 import com.maxot.seekandcatch.ui.GameScreen
 import com.maxot.seekandcatch.ui.MainScreen
@@ -14,16 +14,17 @@ import com.maxot.seekandcatch.ui.ScoreScreen
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Navigation(viewModel: MainActivityViewModel){
+fun Navigation(viewModel: GameViewModel){
     val navController = rememberNavController()
-    val isGameActive = viewModel.isGameActive.collectAsState()
+    val gameUiState = viewModel.gameUiState.collectAsState()
+    val lastScore = viewModel.lastScore.collectAsState()
 
     NavHost(navController = navController, startDestination = Screen.MainScreen.route){
         composable(Screen.MainScreen.route){
             MainScreen(bestScore = viewModel.getBestScore(), navController = navController)
         }
         composable(Screen.ScoreScreen.route){
-            ScoreScreen(navController = navController, bestScore = viewModel.getBestScore(), score = 0)
+            ScoreScreen(navController = navController, bestScore = viewModel.getBestScore(), score = lastScore.value)
         }
         composable(Screen.FlowGameScreen.route){
             FlowModeGameScreen(viewModel)
@@ -33,7 +34,7 @@ fun Navigation(viewModel: MainActivityViewModel){
         }
     }
     // Need to fix this
-    if (isGameActive.value == false){
+    if (gameUiState.value == GameViewModel.GameUiState.GameEnded){
         navController.navigate(Screen.ScoreScreen.route)
     }
 }
