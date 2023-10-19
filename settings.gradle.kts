@@ -13,4 +13,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Seek and Catch"
-include ':app'
+
+include(":app")
