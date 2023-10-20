@@ -25,20 +25,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.GameViewModel
 import com.maxot.seekandcatch.R
 import com.maxot.seekandcatch.data.GameMode
 import com.maxot.seekandcatch.data.getShapeForFigure
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
 @Composable
 fun FlowModeGameScreen(
-    viewModel: GameViewModel
+    viewModel: GameViewModel = hiltViewModel()
 ) {
     val goals = viewModel.goals.collectAsState()
     val score = viewModel.score.collectAsState()
     val figures = viewModel.figures.collectAsState()
+    val uiState = viewModel.gameUiState.collectAsState()
+    val level = viewModel.level.collectAsState()
 
     LaunchedEffect(viewModel.gameMode) {
         viewModel.startGame(GameMode.FlowGameMode)
@@ -46,39 +50,57 @@ fun FlowModeGameScreen(
 
     val gridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
-    ) {
-        Column {
-            Text(
-                text = stringResource(id = R.string.label_score, score.value), modifier = Modifier
-                    .height(50.dp)
-                    .fillMaxWidth(),
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                fontSize = 30.sp
-            )
-            TaskView(goals = goals.value)
 
-            LazyVerticalGrid(
-                userScrollEnabled = false,
-                state = gridState,
-                columns = GridCells.Fixed(4),
+    when (uiState.value) {
+        GameViewModel.GameUiState.GameEnded -> {
+
+        }
+        GameViewModel.GameUiState.InProgress -> {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = Color.White
             ) {
-                items(figures.value) { figure ->
-                    val shape: Shape = figure.getShapeForFigure()
-                    ColoredFigure(color = figure.color, shape = shape) {
-                        viewModel.onFigureClick(figure)
-                    }
-                }
-                coroutineScope.launch {
-                    gridState.animateScrollBy(
-                        value = 8000f,
-                        animationSpec = tween(durationMillis = 15000, easing = LinearEasing)
+                Column {
+                    Text(
+                        text = stringResource(id = R.string.label_score, score.value),
+                        modifier = Modifier
+                            .height(50.dp)
+                            .fillMaxWidth(),
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        fontSize = 30.sp
                     )
+                    TaskView(goals = goals.value)
+
+                    LazyVerticalGrid(
+                        userScrollEnabled = false,
+                        state = gridState,
+                        columns = GridCells.Fixed(4),
+                    ) {
+                        items(figures.value) { figure ->
+                            val shape: Shape = figure.getShapeForFigure()
+                            ColoredFigure(color = figure.color, shape = shape) {
+                                viewModel.onFigureClick(figure)
+                            }
+                        }
+                    }
+                    LaunchedEffect(key1 = true) {
+                        coroutineScope.launch {
+                            delay(1000)
+                            gridState.animateScrollBy(
+                                value = 8000f,
+                                animationSpec = tween(durationMillis = 15000, easing = LinearEasing)
+                            )
+//                            gridState.animateScrollToItem(figures.value.size)
+                        }
+                    }
                 }
             }
         }
+        GameViewModel.GameUiState.LevelPreview -> {
+            NextLevelScreen(nextLevel = level.value, goals = goals)
+        }
     }
+
+
 }

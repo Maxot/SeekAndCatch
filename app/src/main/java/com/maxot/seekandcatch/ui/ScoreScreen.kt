@@ -1,6 +1,10 @@
 package com.maxot.seekandcatch.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -12,16 +16,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.maxot.seekandcatch.GameViewModel
 import com.maxot.seekandcatch.R
-import com.maxot.seekandcatch.ui.navigation.Screen
 
 @Composable
 fun ScoreScreen(
-    navController: NavController,
-    bestScore: Int,
-    score: Int
+    viewModel: GameViewModel = hiltViewModel(),
+    toMainScreenClick: () -> Unit
 ) {
+    val score = viewModel.lastScore
+    val bestScore = viewModel.getBestScore()
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -40,7 +46,7 @@ fun ScoreScreen(
         )
         Spacer(modifier = Modifier.height(5.dp))
         Button(
-            onClick = { navController.navigate(Screen.MainScreen.route) },
+            onClick = { toMainScreenClick },
 
             ) {
             Text(

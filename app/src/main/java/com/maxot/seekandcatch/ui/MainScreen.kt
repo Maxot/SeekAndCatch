@@ -1,7 +1,12 @@
 package com.maxot.seekandcatch.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -11,18 +16,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.maxot.seekandcatch.GameViewModel
 import com.maxot.seekandcatch.R
 import com.maxot.seekandcatch.ui.navigation.Screen
 
 @Composable
-fun MainScreen(bestScore: Int = 0, navController: NavController) {
+fun MainScreen(
+    viewModel: GameViewModel = hiltViewModel(),
+    navigateToOtherScreen: (route: String) -> Unit
+) {
+    val bestScore = viewModel.getBestScore()
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { contentDescription = "Main Screen" },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -39,7 +54,7 @@ fun MainScreen(bestScore: Int = 0, navController: NavController) {
         )
         Spacer(modifier = Modifier.size(50.dp))
         Button(
-            onClick = { navController.navigate(Screen.ScoreScreen.route) },
+            onClick = { navigateToOtherScreen(Screen.ScoreScreen.route) },
 
             ) {
             Text(
@@ -50,7 +65,7 @@ fun MainScreen(bestScore: Int = 0, navController: NavController) {
         }
         Spacer(modifier = Modifier.size(50.dp))
         Button(
-            onClick = { navController.navigate(Screen.FrameGameScreen.route) },
+            onClick = { navigateToOtherScreen(Screen.FrameGameScreen.route) },
 
             ) {
             Text(
@@ -62,11 +77,10 @@ fun MainScreen(bestScore: Int = 0, navController: NavController) {
 
         Spacer(modifier = Modifier.size(50.dp))
         Button(
-            onClick = { navController.navigate(Screen.FlowGameScreen.route) },
+            onClick = { navigateToOtherScreen(Screen.FlowGameScreen.route) },
 
             ) {
             Text(
-//                text = stringResource(id = R.string.button_start_game),
                 text = "Start flow mode game",
                 textAlign = TextAlign.Center,
                 style = TextStyle(color = Color.Black, fontSize = 30.sp)
