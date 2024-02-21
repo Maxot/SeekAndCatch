@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 class SeekAndCatchAppState(
     val navController: NavHostController,
     val coroutineScope: CoroutineScope
-
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController

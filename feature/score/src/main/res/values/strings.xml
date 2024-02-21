@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_score">Score: %1$d</string>
+    <string name="label_your_best_score">Your best score: %1$d</string>
+    <string name="button_to_main_screen">To main screen</string>
+</resources>

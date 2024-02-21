@@ -12,6 +12,8 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Seek and Catch"
+rootProject.name = "seekandcatch"
 
 include(":app")
+include(":feature:gameplay")
+include(":feature:score")

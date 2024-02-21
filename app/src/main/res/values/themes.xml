@@ -2,6 +2,7 @@
 <resources>
 
     <style name="Theme.SeekAndCatch" parent="android:Theme.Material.Light.NoActionBar">
+<!--    <style name="Theme.SeekAndCatch" parent="Theme.AppCompat">-->
         <item name="android:statusBarColor">@color/purple_700</item>
     </style>
 </resources>

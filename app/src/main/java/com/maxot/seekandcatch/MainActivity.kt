@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val coroutineScope = rememberCoroutineScope()
-            val appState = SeekAndCatchAppState(navController,coroutineScope)
+            val appState = SeekAndCatchAppState(navController, coroutineScope)
 
             SeekAndCatchTheme {
                 SeekCatchNavHost(appState = appState)
