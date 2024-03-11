@@ -5,12 +5,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.data.FigureType
 import com.maxot.seekandcatch.feature.gameplay.data.GameMode
 import com.maxot.seekandcatch.feature.gameplay.data.Goal
+import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository
+import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository.Companion.getRandomColor
+import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository.Companion.getRandomFigureType
+import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository.Companion.getRandomNumber
 import com.maxot.seekandcatch.feature.gameplay.usecase.GameplayUseCase
 import com.maxot.seekandcatch.feature.score.data.repository.ScoreRepository
-
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -18,14 +20,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class GameViewModel
 @Inject
 constructor(
     private val gameplayUseCase: GameplayUseCase,
-    private val scoreRepository: ScoreRepository
+    private val scoreRepository: ScoreRepository,
+    private val figuresRepository: FiguresRepository
 ) : ViewModel() {
 
     private val oneFigureDuration = 200L
@@ -107,7 +109,7 @@ constructor(
                 _gameUiState.value = GameUiState.LevelPreview
                 delay(previewDelay)
                 _gameUiState.value = GameUiState.InProgress
-                _figures.emit(generateFigures(500))
+                _figures.emit(figuresRepository.generateFigures(500))
                 timer.start()
                 delay(getLevelDuration())
                 timer.cancel()
@@ -151,7 +153,7 @@ constructor(
             while (gameUiState.value == GameUiState.InProgress) {
                 _figures.emit(emptyList())
                 delay(1000)
-                _figures.emit(generateFigures())
+                _figures.emit(figuresRepository.generateFigures(maxCountItems))
                 delay(
                     gameplayUseCase.calculateFrameDuration(
                         baseDuration = baseFrameDuration,
@@ -180,14 +182,6 @@ constructor(
         }
     }
 
-    private fun generateFigures(itemsCount: Int = maxCountItems): List<Figure> {
-        val listOfFigures = mutableListOf<Figure>()
-        for (i in 1..itemsCount) {
-            listOfFigures.add(createRandomFigure())
-        }
-        return listOfFigures
-    }
-
     fun getBestScore() = scoreRepository.getBestScore()
 
     private fun incrementScore() {
@@ -208,12 +202,6 @@ constructor(
         }
     }
 
-    private fun createRandomFigure(): Figure {
-        val figureType = getRandomFigureType(Random.nextInt(4))
-        val color = getRandomColor(Random.nextInt(4))
-        return Figure(figureType, color)
-    }
-
     private fun generateRandomGoals(seed: Int = getRandomNumber()): Set<Goal<Any>> {
         return when (seed) {
             0 -> setOf(getRandomGoal())
@@ -229,29 +217,6 @@ constructor(
 //            2 -> Goal.Figured(Figure(getRandomFigureType(), getRandomColor()))
             else -> Goal.Colored(getRandomColor())
         }
-    }
-
-    private fun getRandomFigureType(seed: Int = getRandomNumber()): FigureType {
-        return when (seed) {
-            0 -> FigureType.Circle
-            1 -> FigureType.Square
-            2 -> FigureType.Triangle
-            else -> FigureType.Circle
-        }
-    }
-
-    private fun getRandomColor(seed: Int = getRandomNumber()): Color {
-        return when (seed) {
-            0 -> Color.Red
-            1 -> Color.Blue
-            2 -> Color.Green
-            3 -> Color.Yellow
-            else -> Color.Red
-        }
-    }
-
-    private fun getRandomNumber(): Int {
-        return Random.nextInt(4)
     }
 
     sealed class GameUiState {

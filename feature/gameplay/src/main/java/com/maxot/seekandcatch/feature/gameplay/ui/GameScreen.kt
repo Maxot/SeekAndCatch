@@ -110,7 +110,7 @@ fun FiguresLayout(
         LazyVerticalGrid(
             columns = GridCells.Fixed(4),
         ) {
-            items(figures) { figure ->
+            items(figures, contentType = {it.type} ) { figure ->
                 val shape: Shape = figure.getShapeForFigure()
                 ColoredFigureLayout(color = figure.color, shape = shape) {
                     onFigureClick(figure)

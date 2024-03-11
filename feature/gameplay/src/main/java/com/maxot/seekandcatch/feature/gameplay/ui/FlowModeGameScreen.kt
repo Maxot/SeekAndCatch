@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.feature.gameplay.GameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.data.GameMode
 import com.maxot.seekandcatch.feature.gameplay.data.getShapeForFigure
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -58,7 +61,7 @@ fun FlowModeGameScreen(
     var scrollAnimationJob: Job = Job()
 
     LaunchedEffect(viewModel.gameMode) {
-        viewModel.startGame(com.maxot.seekandcatch.feature.gameplay.data.GameMode.FlowGameMode)
+        viewModel.startGame(GameMode.FlowGameMode)
     }
 
     val gridState = rememberLazyGridState()
@@ -102,7 +105,7 @@ fun FlowModeGameScreen(
                         state = gridState,
                         columns = GridCells.Fixed(4),
                     ) {
-                        items(figures.value) { figure ->
+                        items(figures.value, contentType = { it.type }) { figure ->
                             val shape: Shape = figure.getShapeForFigure()
                             ColoredFigureLayout(
                                 color = figure.color,

@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +51,7 @@ fun MainScreen(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(Color.Red)
+                .background(MaterialTheme.colorScheme.onPrimary)
         )
         Text(
             text = stringResource(id = R.string.label_your_best_score, bestScore),
