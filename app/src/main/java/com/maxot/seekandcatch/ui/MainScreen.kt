@@ -2,19 +2,17 @@ package com.maxot.seekandcatch.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -47,47 +45,57 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onPrimary)
-        )
-        Text(
-            text = stringResource(id = R.string.label_your_best_score, bestScore),
-            style = TextStyle(fontSize = 30.sp)
-        )
+//        Box(
+//            modifier = Modifier
+//                .size(100.dp)
+//                .clip(CircleShape)
+//                .background(MaterialTheme.colorScheme.onPrimary)
+//        )
+//        Text(
+//            text = stringResource(id = R.string.label_your_best_score, bestScore),
+//            style = TextStyle(fontSize = 30.sp)
+//        )
+//        Spacer(modifier = Modifier.size(50.dp))
+//        TextButton(
+//            onClick = { navigateToOtherScreen(Screen.ScoreScreen.route) },
+//        ) {
+//            Text(
+//                text = "Score Screen",
+//                textAlign = TextAlign.Center,
+//                style = TextStyle(color = Color.Black, fontSize = 30.sp)
+//            )
+//        }
+//        Spacer(modifier = Modifier.size(50.dp))
+//        Button(
+//            onClick = { navigateToOtherScreen(Screen.FrameGameScreen.route) },
+//
+//            ) {
+//            Text(
+//                text = stringResource(id = R.string.button_start_game),
+//                textAlign = TextAlign.Center,
+//                style = TextStyle(color = Color.Black, fontSize = 30.sp)
+//            )
+//        }
+//        Spacer(modifier = Modifier.size(50.dp))
+//        Button(
+//            onClick = { navigateToOtherScreen(Screen.FlowGameScreen.route) },
+//
+//            ) {
+//            Text(
+//                text = "Start flow mode game",
+//                textAlign = TextAlign.Center,
+//                style = TextStyle(color = Color.Black, fontSize = 30.sp)
+//            )
+//        }
         Spacer(modifier = Modifier.size(50.dp))
-        Button(
-            onClick = { navigateToOtherScreen(Screen.ScoreScreen.route) },
-        ) {
-            Text(
-                text = "Score Screen",
-                textAlign = TextAlign.Center,
-                style = TextStyle(color = Color.Black, fontSize = 30.sp)
-            )
-        }
-        Spacer(modifier = Modifier.size(50.dp))
-        Button(
-            onClick = { navigateToOtherScreen(Screen.FrameGameScreen.route) },
+        TextButton(
+            onClick = { navigateToOtherScreen(Screen.GameScreen.route) },
 
             ) {
             Text(
-                text = stringResource(id = R.string.button_start_game),
+                text = "Start Game",
                 textAlign = TextAlign.Center,
-                style = TextStyle(color = Color.Black, fontSize = 30.sp)
-            )
-        }
-
-        Spacer(modifier = Modifier.size(50.dp))
-        Button(
-            onClick = { navigateToOtherScreen(Screen.FlowGameScreen.route) },
-
-            ) {
-            Text(
-                text = "Start flow mode game",
-                textAlign = TextAlign.Center,
-                style = TextStyle(color = Color.Black, fontSize = 30.sp)
+                style = MaterialTheme.typography.displayLarge
             )
         }
     }

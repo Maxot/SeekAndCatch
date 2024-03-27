@@ -1,9 +1,9 @@
-package com.maxot.seekandcatch.di
+package com.maxot.seekandcatch.feature.gameplay.di
 
 import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository
 import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepositoryImpl
-import com.maxot.seekandcatch.feature.score.data.repository.ScoreRepository
-import com.maxot.seekandcatch.feature.score.data.repository.ScoreRepositoryImpl
+import com.maxot.seekandcatch.feature.gameplay.data.repository.GoalsRepository
+import com.maxot.seekandcatch.feature.gameplay.data.repository.GoalsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,8 +14,8 @@ import dagger.hilt.components.SingletonComponent
 interface RepositoryModule {
 
     @Binds
-    fun provideScoreRepository(impl: ScoreRepositoryImpl): ScoreRepository
+    fun bindFiguresRepository(impl: FiguresRepositoryImpl): FiguresRepository
 
     @Binds
-    fun provideFiguresRepository(impl: FiguresRepositoryImpl): FiguresRepository
+    fun bindGoalsRepository(impl: GoalsRepositoryImpl): GoalsRepository
 }

@@ -5,6 +5,7 @@ import com.maxot.seekandcatch.feature.gameplay.data.Figure
 import com.maxot.seekandcatch.feature.gameplay.data.Goal
 import javax.inject.Inject
 
+@Deprecated("")
 class GameplayUseCase
 @Inject constructor() {
 
@@ -16,6 +17,7 @@ class GameplayUseCase
                     is Goal.Colored -> {
                         goal.getGoal() == figure.color
                     }
+
                     is Goal.Figured -> {
                         if (goal.getGoal().color == null) {
                             goal.getGoal().type == figure.type

@@ -3,6 +3,7 @@ package com.maxot.seekandcatch.ui.navigation
 sealed class Screen(val route: String) {
     object MainScreen: Screen(mainScreen)
     object ScoreScreen: Screen(scoreScreen)
+    object GameScreen: Screen(gameScreen)
     object FlowGameScreen: Screen(flowGameScreen)
     object FrameGameScreen: Screen(frameGameScreen)
 
@@ -18,6 +19,7 @@ sealed class Screen(val route: String) {
     companion object {
         private const val mainScreen = "main_screen"
         private const val scoreScreen = "score_screen"
+        private const val gameScreen = "game_screen"
         private const val flowGameScreen = "flow_screen"
         private const val frameGameScreen = "frame_screen"
     }

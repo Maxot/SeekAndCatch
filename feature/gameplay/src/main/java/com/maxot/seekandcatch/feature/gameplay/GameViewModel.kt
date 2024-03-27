@@ -5,12 +5,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.feature.gameplay.data.Figure
+import com.maxot.seekandcatch.feature.gameplay.data.FigureType.Companion.getRandomFigureType
 import com.maxot.seekandcatch.feature.gameplay.data.GameMode
 import com.maxot.seekandcatch.feature.gameplay.data.Goal
 import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository
-import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository.Companion.getRandomColor
-import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository.Companion.getRandomFigureType
-import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository.Companion.getRandomNumber
 import com.maxot.seekandcatch.feature.gameplay.usecase.GameplayUseCase
 import com.maxot.seekandcatch.feature.score.data.repository.ScoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Deprecated("")
 @HiltViewModel
 class GameViewModel
 @Inject
@@ -45,7 +44,7 @@ constructor(
     private var _level = MutableStateFlow(0)
     val level: StateFlow<Int> = _level
 
-    private var _goals = MutableStateFlow(generateRandomGoals(getRandomNumber()))
+    private var _goals = MutableStateFlow(generateRandomGoals(Int.getRandomNumber()))
     val goals: StateFlow<Set<Goal<Any>>> = _goals
 
     private var _lastScore = MutableStateFlow(0)
@@ -67,7 +66,7 @@ constructor(
     /**
      * Timer for level
      */
-    private val timer = object : CountDownTimer(getLevelDuration(), 1){
+    private val timer = object : CountDownTimer(getLevelDuration(), 1) {
         override fun onTick(millisUntilFinished: Long) {
             _timeToEnd.value = millisUntilFinished
         }
@@ -89,6 +88,7 @@ constructor(
             GameMode.FlowGameMode -> {
                 startFlowModeGame()
             }
+
             GameMode.LevelsGameMode -> {
                 startLevelsModeGame()
             }
@@ -109,7 +109,7 @@ constructor(
                 _gameUiState.value = GameUiState.LevelPreview
                 delay(previewDelay)
                 _gameUiState.value = GameUiState.InProgress
-                _figures.emit(figuresRepository.generateFigures(500))
+                _figures.emit(figuresRepository.getRandomFigures(500))
                 timer.start()
                 delay(getLevelDuration())
                 timer.cancel()
@@ -153,7 +153,7 @@ constructor(
             while (gameUiState.value == GameUiState.InProgress) {
                 _figures.emit(emptyList())
                 delay(1000)
-                _figures.emit(figuresRepository.generateFigures(maxCountItems))
+                _figures.emit(figuresRepository.getRandomFigures(maxCountItems))
                 delay(
                     gameplayUseCase.calculateFrameDuration(
                         baseDuration = baseFrameDuration,
@@ -168,7 +168,7 @@ constructor(
 
     private fun stopGame() {
         _gameUiState.value = GameUiState.GameEnded
-        scoreRepository.saveBestScore(score.value)
+        scoreRepository.setScore(score.value)
         _lastScore.value = score.value
         _score.value = 0
         _level.value = 0
@@ -188,7 +188,8 @@ constructor(
         _score.value += 1
     }
 
-    fun getLevelDuration() = gameplayUseCase.calculateLevelDuration(baseLevelDuration, figures.value.size)
+    fun getLevelDuration() =
+        gameplayUseCase.calculateLevelDuration(baseLevelDuration, figures.value.size)
 
     fun onFigureClick(figure: Figure) {
         val condition = gameplayUseCase.checkGoalCondition(
@@ -202,7 +203,7 @@ constructor(
         }
     }
 
-    private fun generateRandomGoals(seed: Int = getRandomNumber()): Set<Goal<Any>> {
+    private fun generateRandomGoals(seed: Int = Int.getRandomNumber()): Set<Goal<Any>> {
         return when (seed) {
             0 -> setOf(getRandomGoal())
             1 -> setOf(getRandomGoal(), getRandomGoal())
@@ -210,17 +211,17 @@ constructor(
         }
     }
 
-    private fun getRandomGoal(seed: Int = getRandomNumber()): Goal<Any> {
+    private fun getRandomGoal(seed: Int = Int.getRandomNumber()): Goal<Any> {
         return when (seed) {
-            0 -> Goal.Colored(getRandomColor())
-            1 -> Goal.Figured(Figure(getRandomFigureType(), null))
+            0 -> Goal.Colored(Color.getRandomColor())
+            1 -> Goal.Figured(Figure(type = getRandomFigureType(4), color = null))
 //            2 -> Goal.Figured(Figure(getRandomFigureType(), getRandomColor()))
-            else -> Goal.Colored(getRandomColor())
+            else -> Goal.Colored(Color.getRandomColor())
         }
     }
 
     sealed class GameUiState {
-//        object Started : GameUiState()
+        //        object Started : GameUiState()
         object InProgress : GameUiState()
         object LevelPreview : GameUiState()
         object GameEnded : GameUiState()

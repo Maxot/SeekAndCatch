@@ -11,13 +11,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,11 +31,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.feature.gameplay.GameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.data.GameMode
-import com.maxot.seekandcatch.feature.gameplay.data.getShapeForFigure
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@Deprecated("")
 @ExperimentalFoundationApi
 @Composable
 fun FlowModeGameScreen(
@@ -98,7 +95,7 @@ fun FlowModeGameScreen(
 //                        fontSize = 30.sp
 //                    )
 
-                    TaskLayout(goals = goals.value)
+                    GoalsLayout(goals = goals.value)
 
                     LazyVerticalGrid(
                         userScrollEnabled = false,
@@ -106,10 +103,8 @@ fun FlowModeGameScreen(
                         columns = GridCells.Fixed(4),
                     ) {
                         items(figures.value, contentType = { it.type }) { figure ->
-                            val shape: Shape = figure.getShapeForFigure()
                             ColoredFigureLayout(
-                                color = figure.color,
-                                shape = shape
+                                figure = figure
                             ) {
                                 viewModel.onFigureClick(figure)
                             }
@@ -139,6 +134,7 @@ fun FlowModeGameScreen(
                     goals = goals
                 )
             }
+
         }
     }
 

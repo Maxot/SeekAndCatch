@@ -6,10 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -28,7 +27,7 @@ fun ScoreScreen(
     viewModel: ScoreViewModel = hiltViewModel(),
     toMainScreen: () -> Unit
 ) {
-    val score = viewModel.lastScore.collectAsState()
+    val score = viewModel.getLastScore()
     val bestScore = viewModel.getBestScore()
 
     val backgroundBrush =
@@ -40,7 +39,7 @@ fun ScoreScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.label_score, score.value),
+            text = stringResource(id = R.string.label_score, score),
             textAlign = TextAlign.Center,
             style = TextStyle(color = Color.Black, fontSize = 30.sp)
         )

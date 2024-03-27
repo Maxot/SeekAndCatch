@@ -5,21 +5,44 @@ import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import com.maxot.seekandcatch.feature.gameplay.getRandomColor
+import kotlin.random.Random
 
 data class Figure(
+    val id: Int = 0,
     val type: FigureType,
     val color: Color?,
-)
+    var isActive: Boolean = true
+) {
+    companion object {
+        fun getRandomFigure(id: Int = 0): Figure {
+            val figureType = FigureType.getRandomFigureType(Random.nextInt(4))
+            val color = Color.getRandomColor(Random.nextInt(4))
+            return Figure(id = id, type = figureType, color = color)
+        }
+    }
+}
 
-sealed class FigureType {
-    object Triangle : FigureType()
-    object Square : FigureType()
-    object Circle : FigureType()
+enum class FigureType {
+    TRIANGLE,
+    SQUARE,
+    CIRCLE;
+
+    companion object {
+        fun getRandomFigureType(seed: Int): FigureType {
+            return when (seed) {
+                0 -> CIRCLE
+                1 -> SQUARE
+                2 -> TRIANGLE
+                else -> CIRCLE
+            }
+        }
+    }
 }
 
 fun Figure.getShapeForFigure(): Shape {
     return when (this.type) {
-        FigureType.Triangle -> {
+        FigureType.TRIANGLE -> {
             GenericShape { size, _ ->
                 // 1)
                 moveTo(size.width / 2f, 0f)
@@ -29,10 +52,12 @@ fun Figure.getShapeForFigure(): Shape {
                 lineTo(0f, size.height)
             }
         }
-        FigureType.Circle -> {
+
+        FigureType.CIRCLE -> {
             CircleShape
         }
-        FigureType.Square -> {
+
+        FigureType.SQUARE -> {
             RectangleShape
         }
     }
