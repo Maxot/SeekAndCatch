@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.maxot.seekandcatch.feature.gameplay"
+    namespace = "com.maxot.seekandcatch.feature.settings"
     compileSdk = 34
     defaultConfig {
         minSdk = 30
@@ -26,14 +26,13 @@ android {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":feature:score")))
-    implementation(project(mapOf("path" to ":feature:settings")))
 
     implementation(platform(libs.androidx.compose.bom))
 
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.compose.material3)
+
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.android)
 

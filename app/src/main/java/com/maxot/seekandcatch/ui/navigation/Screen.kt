@@ -6,6 +6,8 @@ sealed class Screen(val route: String) {
     object GameScreen: Screen(gameScreen)
     object FlowGameScreen: Screen(flowGameScreen)
     object FrameGameScreen: Screen(frameGameScreen)
+    object SettingsScreen: Screen(settingsScreen)
+
 
     fun withArgs(vararg args: String): String{
         return buildString {
@@ -22,5 +24,6 @@ sealed class Screen(val route: String) {
         private const val gameScreen = "game_screen"
         private const val flowGameScreen = "flow_screen"
         private const val frameGameScreen = "frame_screen"
+        private const val settingsScreen = "settings_screen"
     }
 }

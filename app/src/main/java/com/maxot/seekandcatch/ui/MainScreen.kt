@@ -98,5 +98,16 @@ fun MainScreen(
                 style = MaterialTheme.typography.displayLarge
             )
         }
+        Spacer(modifier = Modifier.size(50.dp))
+        TextButton(
+            onClick = { navigateToOtherScreen(Screen.SettingsScreen.route) },
+
+            ) {
+            Text(
+                text = "Settings",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.displaySmall
+            )
+        }
     }
 }
