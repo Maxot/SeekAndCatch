@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.data.Figure
 import com.maxot.seekandcatch.feature.gameplay.data.Goal
 
 @Composable
@@ -44,15 +45,16 @@ fun GoalsLayout(goals: Set<Goal<Any>>) {
                     Text(text = "color", style = MaterialTheme.typography.titleSmall)
                 }
 
-                is Goal.Figured -> {
+                is Goal.Shaped -> {
                     Text(
                         text = stringResource(id = R.string.label_list_of_goal),
                         style = MaterialTheme.typography.titleSmall
                     )
                     ColoredFigureLayout(
                         size = 50.dp,
-                        figure = goal.getGoal()
+                        figure = Figure(type = goal.getGoal())
                     )
+                    Text(text = "shape", style = MaterialTheme.typography.titleSmall)
                 }
             }
         }

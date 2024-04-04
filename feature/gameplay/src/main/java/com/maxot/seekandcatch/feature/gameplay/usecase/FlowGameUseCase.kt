@@ -1,10 +1,10 @@
 package com.maxot.seekandcatch.feature.gameplay.usecase
 
 import com.maxot.seekandcatch.feature.gameplay.data.Figure
+import com.maxot.seekandcatch.feature.gameplay.data.GameParams
 import com.maxot.seekandcatch.feature.gameplay.data.Goal
 import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository
 import com.maxot.seekandcatch.feature.gameplay.data.repository.GoalsRepository
-import com.maxot.seekandcatch.feature.gameplay.getRandomNumber
 import com.maxot.seekandcatch.feature.score.data.repository.ScoreRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,31 +21,31 @@ class FlowGameUseCase
     private val goalsRepository: GoalsRepository
 ) {
     private var _goals =
-        MutableStateFlow(goalsRepository.getRandomGoals(Int.getRandomNumber()))
+        MutableStateFlow(emptySet<Goal<Any>>())
     val goals: StateFlow<Set<Goal<Any>>> = _goals
 
     private var _score = MutableStateFlow(0)
     val score: StateFlow<Int> = _score
 
-    private var _figures = MutableStateFlow(mapOf<Int, Figure>())
-    val figures: StateFlow<Map<Int, Figure>> = _figures
+    private var _figures = MutableStateFlow(listOf<Figure>())
+    val figures: StateFlow<List<Figure>> = _figures
 
-    private var _coefficient = MutableStateFlow(1)
-    val coefficient: StateFlow<Int> = _coefficient
 
-    private var _coefficientProgress = MutableStateFlow(0f)
-    val coefficientProgress: StateFlow<Float> = _coefficientProgress
+    private var _coefficient = MutableStateFlow(1f)
+    val coefficient: StateFlow<Float> = _coefficient
 
     private val _gameState =
         MutableStateFlow(GameState.STARTED)
     val gameState: StateFlow<GameState>
         get() = _gameState
 
-    fun startGame() {
-        _goals.value = goalsRepository.getRandomGoals(Int.getRandomNumber())
-        _figures.value = figuresRepository.getRandomFigures(5000).associateBy { figure ->
-            figure.id
-        }
+    fun startGame(gameParams: GameParams) {
+        _goals.value = setOf(goalsRepository.getRandomGoal())
+        _figures.value = figuresRepository.getRandomFigures(
+            itemsCount = gameParams.itemsCount,
+            percentOfGoalSuitedItems = gameParams.percentOfCorrectItem,
+            goal = _goals.value.first()
+        )
         _gameState.value = GameState.RESUMED
     }
 
@@ -57,56 +57,53 @@ class FlowGameUseCase
         _gameState.value = GameState.RESUMED
     }
 
+    fun finishGame() {
+        scoreRepository.setScore(score = score.value)
+        _gameState.value = GameState.FINISHED
+    }
+
     fun onItemClick(id: Int) {
-        figures.value[id].let { figure ->
+        //TODO: Look for some replacement for 'find' operator. Maybe use HashMap?
+        figures.value.find { figure -> figure.id == id }.let { figure ->
             if (isItemFitForGoals(goals.value, figure!!)) {
                 increaseScore()
                 increaseCoefficients()
                 figure.isActive = false
             } else {
-                _gameState.value = GameState.FINISHED
                 scoreRepository.setScore(score = score.value)
+                _gameState.value = GameState.FINISHED
             }
         }
     }
 
     fun onItemsMissed(start: Int, end: Int) {
         val missedItemsCount = getMissedItemsCount(start, end)
-        if (missedItemsCount > 0) for (i in 1..missedItemsCount) {
+        repeat(missedItemsCount) {
             decreaseCoefficients()
         }
     }
 
     private fun increaseCoefficients() {
-        _coefficientProgress.value += 0.2f
-        if (coefficientProgress.value >= 1f) {
-            _coefficientProgress.value = 0f
-            _coefficient.value += 1
-        }
+        _coefficient.value += COEFFICIENT_STEP
     }
 
     private fun decreaseCoefficients() {
-        if (coefficientProgress.value > 0)
-            _coefficientProgress.value -= 0.2f
-
-        if (coefficientProgress.value <= 0f && coefficient.value > 1) {
-            _coefficientProgress.value = 1f
-            _coefficient.value -= 1
-        }
+        if (_coefficient.value > 1)
+            _coefficient.value -= COEFFICIENT_STEP
     }
 
     private fun increaseScore() {
-        _score.value +=
-            if (coefficient.value > 1) 10 * coefficient.value else 10
+        _score.value += _coefficient.value.toInt() * SCORE_POINT
     }
 
-    private fun getMissedItemsCount(start: Int, end: Int): Int {
+    private fun getMissedItemsCount(startIndex: Int, endIndex: Int): Int {
         var count = 0
-        for (i in start..end) {
+        for (i in startIndex..endIndex) {
+            val item = figures.value[i]
             if (isItemFitForGoals(
                     goals.value,
-                    figures.value[i]!!
-                ) && figures.value[i]!!.isActive
+                    item
+                ) && item.isActive
             ) count++
         }
         return count
@@ -125,12 +122,8 @@ class FlowGameUseCase
                         goal.getGoal() == item.color
                     }
 
-                    is Goal.Figured -> {
-                        if (goal.getGoal().color == null) {
-                            goal.getGoal().type == item.type
-                        } else {
-                            goal.getGoal() == item
-                        }
+                    is Goal.Shaped -> {
+                        goal.getGoal() == item.type
                     }
                 }
                 if (condition) return@goal
@@ -140,6 +133,11 @@ class FlowGameUseCase
     }
 
     fun getAnimationDuration(): Int {
-        return figures.value.size * 50 / coefficient.value * 10
+        return figures.value.size * 50 / coefficient.value.toInt() * 10
+    }
+
+    companion object {
+        const val SCORE_POINT = 10
+        const val COEFFICIENT_STEP = 0.2f
     }
 }

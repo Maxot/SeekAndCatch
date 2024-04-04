@@ -48,10 +48,9 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.removeIntegerPart
+import com.maxot.seekandcatch.feature.gameplay.getDecimalPart
 import com.maxot.seekandcatch.feature.gameplay.usecase.GameState
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -61,24 +60,21 @@ fun FlowGameScreen(
     viewModel: FlowGameViewModel = hiltViewModel(),
     toScoreScreen: () -> Unit
 ) {
+    val backgroundBrush =
+        Brush.linearGradient(listOf(Color.Red, Color.Transparent, Color.Green, Color.Transparent))
     val beforeAnimationDelay = 1000L
 
     val goals = viewModel.goals.collectAsState()
     val score = viewModel.score.collectAsState()
     val figures = viewModel.figures.collectAsState()
     val coefficient = viewModel.coefficient.collectAsState()
-    val coefficientProgress = viewModel.coefficientProgress.collectAsState()
     val gameState = viewModel.gameState.collectAsState()
     var scrollAnimationJob: Job = Job()
 
     val coroutineScope = rememberCoroutineScope()
-
-    val backgroundBrush =
-        Brush.linearGradient(listOf(Color.Red, Color.Transparent, Color.Green, Color.Transparent))
-
-
     val gridState = rememberLazyGridState()
-    val pauseDialog = remember { mutableStateOf(false) }
+    val isPauseDialogShowed = remember { mutableStateOf(false) }
+
     /**
      * Start the game.
      */
@@ -94,14 +90,14 @@ fun FlowGameScreen(
         Column {
             Text(
                 text = stringResource(id = R.string.label_score, score.value),
-                modifier = Modifier
-                    .height(50.dp)
-                    .fillMaxWidth(),
                 style = MaterialTheme.typography.bodyLarge
             )
             GoalsLayout(goals = goals.value)
 
-            CoefficientProgressLayout(coefficientProgress.value, coefficient.value)
+            CoefficientProgressLayout(
+                progress = coefficient.value,
+                currentCoefficient = coefficient.value.toInt()
+            )
 
             GameFieldLayout(figures = figures, gridState = gridState) { id ->
                 viewModel.onItemClick(id)
@@ -109,17 +105,17 @@ fun FlowGameScreen(
         }
 
         when (gameState.value) {
-            GameState.FINISHED -> {
-                toScoreScreen()
+            GameState.STARTED -> {
+
             }
 
             GameState.RESUMED -> {
                 /**
                  * Start scroll.
                  */
-                LaunchedEffect(key1 = coefficient.value, key2 = gameState.value) {
+                LaunchedEffect(key1 = coefficient.value.toInt(), key2 = gameState.value) {
                     scrollAnimationJob = coroutineScope.launch {
-                        delay(beforeAnimationDelay)
+//                        delay(beforeAnimationDelay)
                         gridState.animateScrollBy(
                             value = 100f * figures.value.size,
                             animationSpec = tween(
@@ -131,12 +127,14 @@ fun FlowGameScreen(
                 }
                 /**
                  * Control over missed items.
+                 * TODO: look for some different solution.
                  */
                 LaunchedEffect(key1 = gridState) {
                     coroutineScope.launch {
                         snapshotFlow { gridState.firstVisibleItemIndex }
                             .collect {
-                                val start = gridState.firstVisibleItemIndex - 4
+                                //Position of item that fully disappear from the viewport
+                                val start = gridState.firstVisibleItemIndex - 8
                                 if (start >= 0)
                                     viewModel.onItemsMissed(start, start + 3)
                             }
@@ -151,21 +149,21 @@ fun FlowGameScreen(
 
                 PauseDialog(
                     onDismissRequest = {
-                        pauseDialog.value = false
+                        isPauseDialogShowed.value = false
                         viewModel.resumeGame()
                     },
                     onConfirmation = {
-                        pauseDialog.value = false
-                        viewModel.resumeGame()
-                        toScoreScreen()
+                        isPauseDialogShowed.value = false
+                        viewModel.finishGame()
                     },
-                    dialogTitle = "Pause",
-                    dialogText = "Do you really want to exit the game?"
+                    dialogTitle = stringResource(id = R.string.title_pause_dialog),
+                    dialogText = stringResource(id = R.string.text_pause_dialog)
                 )
             }
 
-            GameState.STARTED -> {
-
+            GameState.FINISHED -> {
+                viewModel.stopMusic()
+                toScoreScreen()
             }
         }
     }
@@ -175,29 +173,18 @@ fun FlowGameScreen(
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
-        coroutineScope.launch {
-            gridState.stopScroll()
-        }
+        if (gameState.value != GameState.FINISHED)
+            viewModel.pauseGame()
     }
+
     LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
-        coroutineScope.launch {
-            scrollAnimationJob = coroutineScope.launch {
-                delay(beforeAnimationDelay)
-                gridState.animateScrollBy(
-                    value = 100f * figures.value.size,
-                    animationSpec = tween(
-                        durationMillis = viewModel.getAnimationDuration(),
-                        easing = LinearEasing
-                    )
-                )
-            }
-        }
+        viewModel.resumeGame()
     }
 }
 
 @Composable
 fun GameFieldLayout(
-    figures: State<Map<Int, Figure>>,
+    figures: State<List<Figure>>,
     gridState: LazyGridState,
     onItemClick: (id: Int) -> Unit
 ) {
@@ -222,14 +209,14 @@ fun GameFieldLayout(
     ) {
         for (i in 1..gridCellsCount) {
             item {
+                //TODO: Need to change height to height of grid.
                 Spacer(modifier = Modifier.height((LocalConfiguration.current.screenHeightDp - 150).dp))
-//                    Spacer(modifier = Modifier.height(gridHeight))
             }
         }
         items(
-            figures.value.values.toList(),
-//                            contentType = { it.type },
-            key = { figure -> figure.id }) { figure ->
+            items = figures.value,
+            key = { figure -> figure.id }
+        ) { figure ->
             ColoredFigureLayout(
                 figure = figure
             ) {
@@ -251,7 +238,7 @@ fun CoefficientProgressLayout(progress: Float, currentCoefficient: Int) {
             text = "x${currentCoefficient}",
             style = MaterialTheme.typography.displaySmall
         )
-        LinearProgressIndicator(progress = { progress.removeIntegerPart() })
+        LinearProgressIndicator(progress = { progress.getDecimalPart() })
         Text(
             text = "x${(currentCoefficient + 1)}",
             style = MaterialTheme.typography.displayMedium

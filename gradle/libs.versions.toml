@@ -16,6 +16,10 @@ kotlinAndroidPlugin = "1.9.22"
 kotlinxCoroutines = "1.8.0"
 ksp = "1.9.22-1.0.18"
 datastore = "1.0.0"
+coreKtx = "1.12.0"
+junit = "1.1.5"
+appcompat = "1.6.1"
+material = "1.11.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
@@ -39,6 +43,11 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 junit = { group = "junit", name = "junit", version.ref = "junit4" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

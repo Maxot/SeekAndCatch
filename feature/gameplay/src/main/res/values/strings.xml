@@ -9,4 +9,10 @@
     //Level Screen
     <string name="label_next_level">Next level: %1$d</string>
     <string name="label_next_level_goal">Next level goal:</string>
+
+    //Pause Dialog
+    <string name="title_pause_dialog">Pause</string>
+    <string name="text_pause_dialog">Do you really want to exit the game?</string>
+    <string name="confirm_button_pause_dialog">Yes</string>
+    <string name="dismiss_button_pause_dialog">Resume</string>
 </resources>

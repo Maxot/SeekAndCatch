@@ -4,6 +4,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable
 fun PauseDialog(
@@ -22,14 +24,13 @@ fun PauseDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(onClick = { onConfirmation() }) {
-                Text(text = "Yes")
+                Text(text = stringResource(id = R.string.confirm_button_pause_dialog))
 
             }
         },
         dismissButton = {
             TextButton(onClick = { onDismissRequest() }) {
-                Text(text = "Resume")
-
+                Text(text = stringResource(id = R.string.dismiss_button_pause_dialog))
             }
         })
 }

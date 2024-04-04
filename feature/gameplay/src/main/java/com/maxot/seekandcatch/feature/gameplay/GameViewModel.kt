@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.data.FigureType.Companion.getRandomFigureType
 import com.maxot.seekandcatch.feature.gameplay.data.GameMode
 import com.maxot.seekandcatch.feature.gameplay.data.Goal
 import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository
@@ -213,10 +212,9 @@ constructor(
 
     private fun getRandomGoal(seed: Int = Int.getRandomNumber()): Goal<Any> {
         return when (seed) {
-            0 -> Goal.Colored(Color.getRandomColor())
-            1 -> Goal.Figured(Figure(type = getRandomFigureType(4), color = null))
-//            2 -> Goal.Figured(Figure(getRandomFigureType(), getRandomColor()))
-            else -> Goal.Colored(Color.getRandomColor())
+            0 -> Goal.Colored(Figure.getRandomColor())
+            1 -> Goal.Shaped(Figure.FigureType.getRandomFigureType())
+            else -> Goal.Colored(Figure.getRandomColor())
         }
     }
 

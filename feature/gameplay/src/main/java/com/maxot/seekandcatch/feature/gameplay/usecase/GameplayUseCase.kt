@@ -17,13 +17,8 @@ class GameplayUseCase
                     is Goal.Colored -> {
                         goal.getGoal() == figure.color
                     }
-
-                    is Goal.Figured -> {
-                        if (goal.getGoal().color == null) {
-                            goal.getGoal().type == figure.type
-                        } else {
-                            goal.getGoal() == figure
-                        }
+                    is Goal.Shaped -> {
+                        goal.getGoal() == figure.type
                     }
                 }
                 if (condition) return@goal
