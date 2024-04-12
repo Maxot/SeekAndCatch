@@ -78,9 +78,6 @@ fun FlowGameScreen(
     /**
      * Start the game.
      */
-    LaunchedEffect(Unit) {
-        viewModel.startGame()
-    }
 
     Box(
         modifier = Modifier
@@ -105,11 +102,11 @@ fun FlowGameScreen(
         }
 
         when (gameState.value) {
-            GameState.STARTED -> {
-
+            GameState.CREATED -> {
+                viewModel.startGame()
             }
 
-            GameState.RESUMED -> {
+            GameState.STARTED, GameState.RESUMED -> {
                 /**
                  * Start scroll.
                  */

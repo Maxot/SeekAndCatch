@@ -2,7 +2,7 @@ package com.maxot.seekandcatch.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.feature.settings.data.SettingsDataStore
+import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -10,13 +10,13 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel
 @Inject constructor(
-    private val settingsDataStore: SettingsDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
-    val soundState = settingsDataStore.soundStateFlow
+    val soundState = settingsRepository.observeSoundState()
     fun setSoundState(newState: Boolean) {
         viewModelScope.launch {
-            settingsDataStore.setSoundState(newState)
+            settingsRepository.setSoundState(newState)
         }
     }
 
