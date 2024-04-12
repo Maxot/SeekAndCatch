@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.score.data.repository
+package com.maxot.seekandcatch.data.repository
 
 import android.content.Context
 import android.content.SharedPreferences

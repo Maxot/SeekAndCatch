@@ -26,12 +26,12 @@ android {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":feature:score")))
     implementation(project(mapOf("path" to ":feature:settings")))
+    implementation(project(":data"))
+    implementation(project(":core:domain"))
 
     implementation(platform(libs.androidx.compose.bom))
 
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)

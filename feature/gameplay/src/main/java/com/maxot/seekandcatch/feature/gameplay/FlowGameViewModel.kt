@@ -2,10 +2,9 @@ package com.maxot.seekandcatch.feature.gameplay
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.data.GameParams
-import com.maxot.seekandcatch.feature.gameplay.data.Goal
-import com.maxot.seekandcatch.feature.gameplay.usecase.FlowGameUseCase
+import com.maxot.seekandcatch.core.domain.FlowGameUseCase
+import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.settings.AppSoundManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow

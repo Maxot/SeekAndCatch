@@ -26,11 +26,11 @@ android {
 }
 
 dependencies {
+    implementation(project(":data"))
 
     implementation(platform(libs.androidx.compose.bom))
 
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.androidx.lifecycle.runtime.compose)

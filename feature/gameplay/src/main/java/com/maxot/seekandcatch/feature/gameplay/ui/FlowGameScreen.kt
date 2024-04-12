@@ -47,9 +47,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
-import com.maxot.seekandcatch.feature.gameplay.data.Figure
 import com.maxot.seekandcatch.feature.gameplay.getDecimalPart
-import com.maxot.seekandcatch.feature.gameplay.usecase.GameState
+import com.maxot.seekandcatch.core.domain.GameState
+import com.maxot.seekandcatch.data.model.Figure
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 

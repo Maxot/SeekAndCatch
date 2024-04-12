@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.gameplay.data
+package com.maxot.seekandcatch.data.model
 
 import androidx.compose.ui.graphics.Color
 

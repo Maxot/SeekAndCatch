@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.feature.gameplay.R
-import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.data.Goal
+import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.Goal
 
 @Composable
 fun GoalsLayout(goals: Set<Goal<Any>>) {

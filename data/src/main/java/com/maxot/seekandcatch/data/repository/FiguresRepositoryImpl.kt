@@ -1,9 +1,9 @@
-package com.maxot.seekandcatch.feature.gameplay.data.repository
+package com.maxot.seekandcatch.data.repository
 
-import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.data.Goal
-import com.maxot.seekandcatch.feature.gameplay.data.getSuitableFigures
-import com.maxot.seekandcatch.feature.gameplay.data.getUnsuitableFigures
+import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.model.getSuitableFigures
+import com.maxot.seekandcatch.data.model.getUnsuitableFigures
 import javax.inject.Inject
 
 class FiguresRepositoryImpl
@@ -23,18 +23,18 @@ class FiguresRepositoryImpl
 
     override fun getRandomFigures(
         itemsCount: Int,
-        percentOfGoalSuitedItems: Float,
+        percentageOfSuitableGoalItems: Float,
         goal: Goal<Any>
     ): List<Figure> {
-        return getFiguresWithLoadOfSelectedItems(
+        return generateFiguresWithSelectedAndOtherItems(
             itemsCount = itemsCount,
-            percentOfSelectedItems = percentOfGoalSuitedItems,
+            percentOfSelectedItems = percentageOfSuitableGoalItems,
             selectedItems = goal.getSuitableFigures(),
             otherItems = goal.getUnsuitableFigures()
         )
     }
 
-    private fun getFiguresWithLoadOfSelectedItems(
+    private fun generateFiguresWithSelectedAndOtherItems(
         itemsCount: Int,
         percentOfSelectedItems: Float,
         selectedItems: Set<Figure>,
@@ -45,11 +45,23 @@ class FiguresRepositoryImpl
 
         for (i in 0..<selectedItemsCount) {
             val randomFigure = selectedItems.random()
-            result.add(Figure(i, type = randomFigure.type, color = randomFigure.color))
+            result.add(
+                Figure(
+                    id = i,
+                    type = randomFigure.type,
+                    color = randomFigure.color
+                )
+            )
         }
         for (i in selectedItemsCount..<itemsCount) {
             val randomFigure = otherItems.random()
-            result.add(Figure(id = i, type = randomFigure.type, color = randomFigure.color))
+            result.add(
+                Figure(
+                    id = i,
+                    type = randomFigure.type,
+                    color = randomFigure.color
+                )
+            )
         }
 
         return result.shuffled()

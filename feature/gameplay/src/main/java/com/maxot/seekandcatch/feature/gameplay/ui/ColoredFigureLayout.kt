@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.data.getShapeForFigure
+import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.getShapeForFigure
 
 @Composable
 fun ColoredFigureLayout(

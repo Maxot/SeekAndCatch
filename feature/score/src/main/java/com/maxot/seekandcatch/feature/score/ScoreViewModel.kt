@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.feature.score
 
 import androidx.lifecycle.ViewModel
-import com.maxot.seekandcatch.feature.score.data.repository.ScoreRepository
+import com.maxot.seekandcatch.data.repository.ScoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

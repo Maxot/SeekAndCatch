@@ -3,7 +3,7 @@ package com.maxot.seekandcatch.feature.settings
 import android.content.Context
 import android.media.MediaPlayer
 import android.media.PlaybackParams
-import com.maxot.seekandcatch.feature.settings.data.SettingsDataStore
+import com.maxot.seekandcatch.data.datastore.SettingsDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton

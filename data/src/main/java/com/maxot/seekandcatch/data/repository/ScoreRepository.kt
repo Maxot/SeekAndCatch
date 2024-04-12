@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.score.data.repository
+package com.maxot.seekandcatch.data.repository
 
 interface ScoreRepository {
     fun setScore(score: Int)

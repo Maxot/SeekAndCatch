@@ -1,17 +1,17 @@
-package com.maxot.seekandcatch.feature.gameplay.usecase
+package com.maxot.seekandcatch.core.domain
 
-import com.maxot.seekandcatch.feature.gameplay.data.Figure
-import com.maxot.seekandcatch.feature.gameplay.data.GameParams
-import com.maxot.seekandcatch.feature.gameplay.data.Goal
-import com.maxot.seekandcatch.feature.gameplay.data.repository.FiguresRepository
-import com.maxot.seekandcatch.feature.gameplay.data.repository.GoalsRepository
-import com.maxot.seekandcatch.feature.score.data.repository.ScoreRepository
+import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.GameParams
+import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.repository.FiguresRepository
+import com.maxot.seekandcatch.data.repository.GoalsRepository
+import com.maxot.seekandcatch.data.repository.ScoreRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 enum class GameState {
-    STARTED, RESUMED, PAUSED, FINISHED
+    CREATED, STARTED, RESUMED, PAUSED, FINISHED
 }
 
 class FlowGameUseCase
@@ -30,23 +30,26 @@ class FlowGameUseCase
     private var _figures = MutableStateFlow(listOf<Figure>())
     val figures: StateFlow<List<Figure>> = _figures
 
-
     private var _coefficient = MutableStateFlow(1f)
     val coefficient: StateFlow<Float> = _coefficient
 
     private val _gameState =
-        MutableStateFlow(GameState.STARTED)
+        MutableStateFlow(GameState.CREATED)
     val gameState: StateFlow<GameState>
         get() = _gameState
 
-    fun startGame(gameParams: GameParams) {
+    fun initGame(gameParams: GameParams){
         _goals.value = setOf(goalsRepository.getRandomGoal())
         _figures.value = figuresRepository.getRandomFigures(
             itemsCount = gameParams.itemsCount,
-            percentOfGoalSuitedItems = gameParams.percentOfCorrectItem,
+            percentageOfSuitableGoalItems = gameParams.percentOfSuitableItem,
             goal = _goals.value.first()
         )
-        _gameState.value = GameState.RESUMED
+        _gameState.value = GameState.CREATED
+    }
+
+    fun startGame() {
+        _gameState.value = GameState.STARTED
     }
 
     fun pauseGame() {
@@ -70,14 +73,13 @@ class FlowGameUseCase
                 increaseCoefficients()
                 figure.isActive = false
             } else {
-                scoreRepository.setScore(score = score.value)
-                _gameState.value = GameState.FINISHED
+                finishGame()
             }
         }
     }
 
-    fun onItemsMissed(start: Int, end: Int) {
-        val missedItemsCount = getMissedItemsCount(start, end)
+    fun onItemsMissed(startIndex: Int, endIndex: Int) {
+        val missedItemsCount = getMissedItemsCount(startIndex, endIndex)
         repeat(missedItemsCount) {
             decreaseCoefficients()
         }

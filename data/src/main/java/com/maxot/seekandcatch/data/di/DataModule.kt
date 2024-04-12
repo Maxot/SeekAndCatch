@@ -1,0 +1,31 @@
+package com.maxot.seekandcatch.data.di
+
+import com.maxot.seekandcatch.data.repository.FiguresRepository
+import com.maxot.seekandcatch.data.repository.FiguresRepositoryImpl
+import com.maxot.seekandcatch.data.repository.GoalsRepository
+import com.maxot.seekandcatch.data.repository.GoalsRepositoryImpl
+import com.maxot.seekandcatch.data.repository.ScoreRepository
+import com.maxot.seekandcatch.data.repository.ScoreRepositoryImpl
+import com.maxot.seekandcatch.data.repository.SettingsRepository
+import com.maxot.seekandcatch.data.repository.SettingsRepositoryImpl
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+
+@Module
+@InstallIn(SingletonComponent::class)
+interface DataModule {
+    @Binds
+    fun bindScoreRepository(impl: ScoreRepositoryImpl): ScoreRepository
+
+    @Binds
+    fun bindFiguresRepository(impl: FiguresRepositoryImpl): FiguresRepository
+
+    @Binds
+    fun bindGoalsRepository(impl: GoalsRepositoryImpl): GoalsRepository
+
+    @Binds
+    fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+}

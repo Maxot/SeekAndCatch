@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.settings.data
+package com.maxot.seekandcatch.data.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore

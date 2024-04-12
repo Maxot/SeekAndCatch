@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.maxot.seekandcatch.feature.score"
+    namespace = "com.maxot.seekandcatch.data"
     compileSdk = 34
     defaultConfig {
         minSdk = 30
@@ -23,21 +23,26 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
     }
+
 }
 
 dependencies {
-    implementation(project(":data"))
 
     implementation(platform(libs.androidx.compose.bom))
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.datastore.preferences)
 
     ksp(libs.hilt.compiler)
 
-    testImplementation(libs.junit)
-
-    androidTestImplementation(libs.androidx.test.ext)
-    androidTestImplementation(libs.androidx.test.espresso.core)
+//    testImplementation(libs.junit)
+//    testImplementation(libs.mockito.kotlin)
+//    testImplementation(libs.mockito.core)
+//
+////    androidTestImplementation(project(mapOf("path" to ":feature:score")))
+//    androidTestImplementation(libs.androidx.test.ext)
+//    androidTestImplementation(libs.androidx.test.espresso.core)
 }

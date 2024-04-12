@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.gameplay.data
+package com.maxot.seekandcatch.data.model
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
@@ -33,7 +33,7 @@ data class Figure(
         CIRCLE;
 
         companion object {
-            fun getRandomFigureType(seed: Int = Random.nextInt(0, 4)): FigureType {
+            fun getRandomFigureType(seed: Int = Random.nextInt(0, 3)): FigureType {
                 return when (seed) {
                     0 -> CIRCLE
                     1 -> SQUARE
