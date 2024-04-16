@@ -16,6 +16,7 @@ rootProject.name = "SeekAndCatch"
 
 include(":app")
 include(":core:designsystem")
+include(":data-test")
 include(":feature:gameplay")
 include(":feature:score")
 include(":feature:settings")
