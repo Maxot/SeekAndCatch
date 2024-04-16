@@ -59,6 +59,7 @@ dependencies {
     implementation(project(mapOf("path" to ":feature:gameplay")))
     implementation(project(mapOf("path" to ":feature:score")))
     implementation(project(mapOf("path" to ":feature:settings")))
+    implementation(project(":core:designsystem"))
     implementation(project(":data"))
 
     implementation(libs.androidx.activity.compose)

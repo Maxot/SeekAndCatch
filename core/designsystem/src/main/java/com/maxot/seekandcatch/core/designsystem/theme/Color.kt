@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.ui.theme
+package com.maxot.seekandcatch.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
