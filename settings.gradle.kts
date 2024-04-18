@@ -15,10 +15,11 @@ dependencyResolutionManagement {
 rootProject.name = "SeekAndCatch"
 
 include(":app")
+include(":core:domain")
 include(":core:designsystem")
+include(":data")
 include(":data-test")
+
 include(":feature:gameplay")
 include(":feature:score")
 include(":feature:settings")
-include(":data")
-include(":core:domain")

@@ -28,15 +28,14 @@ class FlowGameViewModel
     val figures: StateFlow<List<Figure>> = gameUseCase.figures
     val coefficient: StateFlow<Float> = gameUseCase.coefficient
     val gameState = gameUseCase.gameState
-    val selectedGameDifficulty: StateFlow<GameDifficulty> =
+    val selectedGameDifficulty: StateFlow<GameDifficulty?> =
         settingsRepository.observeDifficulty().stateIn(
             viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = GameDifficulty.NORMAL
+            initialValue = null
         )
 
     init {
-        gameUseCase.initGame(selectedGameDifficulty.value.gameParams)
         viewModelScope.launch {
             appSoundManager.init()
 
@@ -45,6 +44,17 @@ class FlowGameViewModel
                 appSoundManager.setMusicSpeed(musicSpeed.toFloat())
             }
         }
+        viewModelScope.launch {
+            selectedGameDifficulty.collect {
+                it?.let {
+                    initGame(it)
+                }
+            }
+        }
+    }
+
+    fun initGame(gameDifficulty: GameDifficulty) {
+        gameUseCase.initGame(gameDifficulty.gameParams)
     }
 
     fun startGame() {

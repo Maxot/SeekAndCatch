@@ -1,8 +1,10 @@
 package com.maxot.seekandcatch.core.domain
 
+import android.util.Log
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameParams
 import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.model.isFitForGoal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 import com.maxot.seekandcatch.data.repository.GoalsRepository
 import com.maxot.seekandcatch.data.repository.ScoreRepository
@@ -10,8 +12,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
+const val TAG = "FlowGameUseCase"
+
 enum class GameState {
-    CREATED, STARTED, RESUMED, PAUSED, FINISHED
+    IDLE, CREATED, STARTED, RESUMED, PAUSED, FINISHED
 }
 
 class FlowGameUseCase
@@ -20,6 +24,10 @@ class FlowGameUseCase
     private val figuresRepository: FiguresRepository,
     private val goalsRepository: GoalsRepository
 ) {
+    private var scorePoint: Int = 10
+    private var coefficientStep: Float = 0.2f
+    private var itemDuration: Int = 50
+
     private var _goals =
         MutableStateFlow(emptySet<Goal<Any>>())
     val goals: StateFlow<Set<Goal<Any>>> = _goals
@@ -34,11 +42,15 @@ class FlowGameUseCase
     val coefficient: StateFlow<Float> = _coefficient
 
     private val _gameState =
-        MutableStateFlow(GameState.CREATED)
+        MutableStateFlow(GameState.IDLE)
     val gameState: StateFlow<GameState>
         get() = _gameState
 
-    fun initGame(gameParams: GameParams){
+    fun initGame(gameParams: GameParams) {
+        scorePoint = gameParams.scorePoint
+        coefficientStep = gameParams.coefficientStep
+        itemDuration = gameParams.itemDuration
+
         _goals.value = setOf(goalsRepository.getRandomGoal())
         _figures.value = figuresRepository.getRandomFigures(
             itemsCount = gameParams.itemsCount,
@@ -67,8 +79,8 @@ class FlowGameUseCase
 
     fun onItemClick(id: Int) {
         //TODO: Look for some replacement for 'find' operator. Maybe use HashMap?
-        figures.value.find { figure -> figure.id == id }.let { figure ->
-            if (isItemFitForGoals(goals.value, figure!!)) {
+        figures.value.find { figure -> figure.id == id }?.let { figure ->
+            if (isItemFitForGoals(goals.value, figure)) {
                 increaseScore()
                 increaseCoefficients()
                 figure.isActive = false
@@ -83,19 +95,20 @@ class FlowGameUseCase
         repeat(missedItemsCount) {
             decreaseCoefficients()
         }
+        Log.i(TAG, "missedItemsCount on ($startIndex, $endIndex) diapason is $missedItemsCount")
     }
 
     private fun increaseCoefficients() {
-        _coefficient.value += COEFFICIENT_STEP
+        _coefficient.value += coefficientStep
     }
 
     private fun decreaseCoefficients() {
         if (_coefficient.value > 1)
-            _coefficient.value -= COEFFICIENT_STEP
+            _coefficient.value -= coefficientStep
     }
 
     private fun increaseScore() {
-        _score.value += _coefficient.value.toInt() * SCORE_POINT
+        _score.value += _coefficient.value.toInt() * scorePoint
     }
 
     private fun getMissedItemsCount(startIndex: Int, endIndex: Int): Int {
@@ -111,7 +124,6 @@ class FlowGameUseCase
         return count
     }
 
-
     /**
      * Check if the item is fit for the goals.
      */
@@ -119,15 +131,7 @@ class FlowGameUseCase
         var condition = false
         run goal@{
             goals.forEach { goal ->
-                condition = when (goal) {
-                    is Goal.Colored -> {
-                        goal.getGoal() == item.color
-                    }
-
-                    is Goal.Shaped -> {
-                        goal.getGoal() == item.type
-                    }
-                }
+                condition = item.isFitForGoal(goal)
                 if (condition) return@goal
             }
         }
@@ -135,11 +139,6 @@ class FlowGameUseCase
     }
 
     fun getAnimationDuration(): Int {
-        return figures.value.size * 50 / coefficient.value.toInt() * 10
-    }
-
-    companion object {
-        const val SCORE_POINT = 10
-        const val COEFFICIENT_STEP = 0.2f
+        return figures.value.size * itemDuration / coefficient.value.toInt() * 10
     }
 }

@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":feature:settings")))
+    implementation(project(":feature:settings"))
     implementation(project(":data"))
     implementation(project(":core:domain"))
 
@@ -34,6 +34,7 @@ dependencies {
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.android)
 

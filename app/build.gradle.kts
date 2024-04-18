@@ -56,10 +56,10 @@ dependencies {
     // Import the Compose BOM
     implementation(platform(libs.androidx.compose.bom))
 
-    implementation(project(mapOf("path" to ":feature:gameplay")))
-    implementation(project(mapOf("path" to ":feature:score")))
-    implementation(project(mapOf("path" to ":feature:settings")))
     implementation(project(":core:designsystem"))
+    implementation(project(":feature:gameplay"))
+    implementation(project(":feature:score"))
+    implementation(project(":feature:settings"))
     implementation(project(":data"))
 
     implementation(libs.androidx.activity.compose)

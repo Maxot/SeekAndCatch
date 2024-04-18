@@ -1,5 +1,6 @@
 package com.maxot.seekandcatch.feature.gameplay.ui
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -25,14 +26,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -45,14 +45,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.maxot.seekandcatch.core.domain.GameState
+import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.getDecimalPart
-import com.maxot.seekandcatch.core.domain.GameState
-import com.maxot.seekandcatch.data.model.Figure
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+const val TAG = "FlowGameScreen"
 
 @ExperimentalFoundationApi
 @Composable
@@ -73,11 +74,13 @@ fun FlowGameScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
-    val isPauseDialogShowed = remember { mutableStateOf(false) }
+    val showPauseDialog = remember { mutableStateOf(false) }
 
-    /**
-     * Start the game.
-     */
+    val firstPassedItemPosition = remember {
+        derivedStateOf {
+            gridState.firstVisibleItemIndex - 8 // Position of item that fully disappear from the viewport
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -96,7 +99,7 @@ fun FlowGameScreen(
                 currentCoefficient = coefficient.value.toInt()
             )
 
-            GameFieldLayout(figures = figures, gridState = gridState) { id ->
+            GameFieldLayout(figures = figures.value, gridState = gridState) { id ->
                 viewModel.onItemClick(id)
             }
         }
@@ -126,31 +129,31 @@ fun FlowGameScreen(
                  * Control over missed items.
                  * TODO: look for some different solution.
                  */
-                LaunchedEffect(key1 = gridState) {
-                    coroutineScope.launch {
-                        snapshotFlow { gridState.firstVisibleItemIndex }
-                            .collect {
-                                //Position of item that fully disappear from the viewport
-                                val start = gridState.firstVisibleItemIndex - 8
-                                if (start >= 0)
-                                    viewModel.onItemsMissed(start, start + 3)
-                            }
+                LaunchedEffect(key1 = firstPassedItemPosition.value) {
+                    if (firstPassedItemPosition.value >= 0) {
+                        val startPosition = firstPassedItemPosition.value
+                        Log.d(TAG, "firstPassedItemPosition ${firstPassedItemPosition.value}")
+                        viewModel.onItemsMissed(
+                            startPosition,
+                            startPosition + 3
+                        )
                     }
                 }
             }
 
             GameState.PAUSED -> {
+                showPauseDialog.value = true
                 LaunchedEffect(key1 = Unit) {
                     gridState.stopScroll()
                 }
 
                 PauseDialog(
                     onDismissRequest = {
-                        isPauseDialogShowed.value = false
+                        showPauseDialog.value = false
                         viewModel.resumeGame()
                     },
                     onConfirmation = {
-                        isPauseDialogShowed.value = false
+                        showPauseDialog.value = false
                         viewModel.finishGame()
                     },
                     dialogTitle = stringResource(id = R.string.title_pause_dialog),
@@ -162,6 +165,8 @@ fun FlowGameScreen(
                 viewModel.stopMusic()
                 toScoreScreen()
             }
+
+            else -> {}
         }
     }
 
@@ -175,13 +180,14 @@ fun FlowGameScreen(
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
-        viewModel.resumeGame()
+        if (showPauseDialog.value)
+            viewModel.pauseGame() else viewModel.resumeGame()
     }
 }
 
 @Composable
 fun GameFieldLayout(
-    figures: State<List<Figure>>,
+    figures: List<Figure>,
     gridState: LazyGridState,
     onItemClick: (id: Int) -> Unit
 ) {
@@ -211,7 +217,7 @@ fun GameFieldLayout(
             }
         }
         items(
-            items = figures.value,
+            items = figures,
             key = { figure -> figure.id }
         ) { figure ->
             ColoredFigureLayout(

@@ -19,7 +19,7 @@ data class Figure(
     companion object {
         val availableColors = arrayOf(Color.Red, Color.Blue, Color.Green, Color.Yellow)
         fun getRandomFigure(id: Int = 0): Figure {
-            val figureType = FigureType.getRandomFigureType(Random.nextInt(4))
+            val figureType = FigureType.entries.random()
             val color = availableColors.random()
             return Figure(id = id, type = figureType, color = color)
         }
@@ -33,13 +33,8 @@ data class Figure(
         CIRCLE;
 
         companion object {
-            fun getRandomFigureType(seed: Int = Random.nextInt(0, 3)): FigureType {
-                return when (seed) {
-                    0 -> CIRCLE
-                    1 -> SQUARE
-                    2 -> TRIANGLE
-                    else -> CIRCLE
-                }
+            fun getRandomFigureType(): FigureType {
+                return FigureType.entries.random()
             }
         }
     }
@@ -66,6 +61,21 @@ fun Figure.getShapeForFigure(): Shape {
 
         Figure.FigureType.SQUARE -> {
             RectangleShape
+        }
+    }
+}
+
+/**
+ * Check if the [Figure] is fit for the [Goal].
+ */
+fun Figure.isFitForGoal(goal: Goal<Any>): Boolean {
+    return when (goal) {
+        is Goal.Colored -> {
+            goal.getGoal() == this.color
+        }
+
+        is Goal.Shaped -> {
+            goal.getGoal() == this.type
         }
     }
 }
