@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":feature:gameplay"))
     implementation(project(":feature:score"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:leaderboard"))
     implementation(project(":data"))
 
     implementation(libs.androidx.activity.compose)
