@@ -65,6 +65,16 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        TextButton(
+            onClick = { navigateToOtherScreen(Screen.LeaderBoardScreen.route) },
+
+            ) {
+            Text(
+                text = "Leaderboard",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.displaySmall
+            )
+        }
         StartGameLayout(
             modifier = Modifier.fillMaxWidth(),
             selectedDifficulty = selectedDifficulty,

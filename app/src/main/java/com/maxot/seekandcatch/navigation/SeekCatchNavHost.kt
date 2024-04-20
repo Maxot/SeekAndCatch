@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.maxot.seekandcatch.feature.gameplay.ui.FlowGameScreenRoute
+import com.maxot.seekandcatch.feature.leaderboard.ui.LeaderBoardScreenRoute
 import com.maxot.seekandcatch.feature.score.ui.ScoreScreen
 import com.maxot.seekandcatch.feature.settings.ui.SettingsScreen
 import com.maxot.seekandcatch.ui.MainScreenRoute
@@ -31,6 +32,9 @@ fun SeekCatchNavHost(
         }
         composable(Screen.SettingsScreen.route) {
             SettingsScreen()
+        }
+        composable(Screen.LeaderBoardScreen.route) {
+            LeaderBoardScreenRoute()
         }
     }
 }
