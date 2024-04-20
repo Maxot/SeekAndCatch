@@ -5,7 +5,8 @@
     <string name="label_score">Score: %1$d</string>
 
     //Main Screen
-    <string name="button_start_game">Start Game</string>
+    <string name="main_screen_content_desc">Main Screen</string>
+    <string name="button_start_game_text">Start Game</string>
     <string name="label_your_best_score">Your best score: %1$d</string>
 
 </resources>

@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import com.maxot.seekandcatch.ui.SeekAndCatchAppState
-import com.maxot.seekandcatch.ui.navigation.SeekCatchNavHost
+import com.maxot.seekandcatch.navigation.SeekCatchNavHost
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import dagger.hilt.android.AndroidEntryPoint
 

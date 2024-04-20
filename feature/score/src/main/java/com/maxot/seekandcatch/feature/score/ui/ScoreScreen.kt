@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,10 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.feature.score.R
 import com.maxot.seekandcatch.feature.score.ScoreViewModel
@@ -41,23 +40,23 @@ fun ScoreScreen(
         Text(
             text = stringResource(id = R.string.label_score, score),
             textAlign = TextAlign.Center,
-            style = TextStyle(color = Color.Black, fontSize = 30.sp)
+            style = MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(5.dp))
         Text(
             text = stringResource(id = R.string.label_your_best_score, bestScore),
             textAlign = TextAlign.Center,
-            style = TextStyle(color = Color.Black, fontSize = 30.sp)
+            style = MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(5.dp))
-        Button(
+        OutlinedButton(
             onClick = { toMainScreen() },
 
             ) {
             Text(
                 text = stringResource(id = R.string.button_to_main_screen, score),
                 textAlign = TextAlign.Center,
-                style = TextStyle(color = Color.Black, fontSize = 30.sp)
+                style = MaterialTheme.typography.titleLarge
             )
         }
     }

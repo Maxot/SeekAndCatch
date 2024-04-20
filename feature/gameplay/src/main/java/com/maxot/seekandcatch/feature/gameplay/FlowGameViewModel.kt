@@ -3,6 +3,7 @@ package com.maxot.seekandcatch.feature.gameplay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.domain.FlowGameUseCase
+import com.maxot.seekandcatch.core.domain.GameState
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.Goal
@@ -11,6 +12,7 @@ import com.maxot.seekandcatch.feature.settings.AppSoundManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,9 +32,35 @@ class FlowGameViewModel
     val gameState = gameUseCase.gameState
     val selectedGameDifficulty: StateFlow<GameDifficulty?> =
         settingsRepository.observeDifficulty().stateIn(
-            viewModelScope,
+            scope = viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = null
+        )
+
+    val flowGameUiState: StateFlow<FlowGameUiState> =
+        gameUseCase.gameState.map {
+            when (it) {
+                GameState.IDLE, GameState.CREATED -> {
+                    FlowGameUiState.Loading
+                }
+
+                GameState.STARTED, GameState.RESUMED -> {
+                    FlowGameUiState.Active
+                }
+
+                GameState.PAUSED -> {
+                    FlowGameUiState.Paused
+                }
+
+                GameState.FINISHED -> {
+                    stopMusic() // ????
+                    FlowGameUiState.Finished
+                }
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = FlowGameUiState.Loading
         )
 
     init {
@@ -103,4 +131,11 @@ class FlowGameViewModel
         super.onCleared()
         appSoundManager.release()
     }
+}
+
+sealed interface FlowGameUiState {
+    data object Active : FlowGameUiState
+    data object Paused : FlowGameUiState
+    data object Loading : FlowGameUiState
+    data object Finished : FlowGameUiState
 }

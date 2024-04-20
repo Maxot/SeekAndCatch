@@ -13,15 +13,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 
 @Composable
-fun GoalsLayout(goals: Set<Goal<Any>>) {
+fun GoalsLayout(
+    modifier: Modifier = Modifier,
+    goals: Set<Goal<Any>>
+) {
+    val goalsLayoutContentDesc = stringResource(id = R.string.goals_layout_content_desc)
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .then(modifier)
+            .semantics { contentDescription = goalsLayoutContentDesc }
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -58,5 +70,13 @@ fun GoalsLayout(goals: Set<Goal<Any>>) {
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun GoalsLayoutPreview() {
+    SeekAndCatchTheme {
+        GoalsLayout(goals = setOf(Goal.getRandomGoal()))
     }
 }

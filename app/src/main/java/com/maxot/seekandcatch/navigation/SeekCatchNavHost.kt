@@ -1,16 +1,14 @@
-package com.maxot.seekandcatch.ui.navigation
+package com.maxot.seekandcatch.navigation
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.maxot.seekandcatch.feature.gameplay.ui.FlowGameScreen
+import com.maxot.seekandcatch.feature.gameplay.ui.FlowGameScreenRoute
 import com.maxot.seekandcatch.feature.score.ui.ScoreScreen
 import com.maxot.seekandcatch.feature.settings.ui.SettingsScreen
-import com.maxot.seekandcatch.ui.MainScreen
+import com.maxot.seekandcatch.ui.MainScreenRoute
 import com.maxot.seekandcatch.ui.SeekAndCatchAppState
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SeekCatchNavHost(
     appState: SeekAndCatchAppState
@@ -19,7 +17,7 @@ fun SeekCatchNavHost(
 
     NavHost(navController = navController, startDestination = Screen.MainScreen.route) {
         composable(Screen.MainScreen.route) {
-            MainScreen { route ->
+            MainScreenRoute { route ->
                 navController.navigate(route = route)
             }
         }
@@ -29,9 +27,7 @@ fun SeekCatchNavHost(
             }
         }
         composable(Screen.GameScreen.route) {
-            FlowGameScreen(
-                toScoreScreen = { navController.navigate(Screen.ScoreScreen.route) }
-            )
+            FlowGameScreenRoute { navController.navigate(Screen.ScoreScreen.route) }
         }
         composable(Screen.SettingsScreen.route) {
             SettingsScreen()

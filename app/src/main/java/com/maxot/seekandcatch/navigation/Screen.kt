@@ -1,13 +1,6 @@
-package com.maxot.seekandcatch.ui.navigation
+package com.maxot.seekandcatch.navigation
 
 sealed class Screen(val route: String) {
-    object MainScreen: Screen(mainScreen)
-    object ScoreScreen: Screen(scoreScreen)
-    object GameScreen: Screen(gameScreen)
-    object FlowGameScreen: Screen(flowGameScreen)
-    object FrameGameScreen: Screen(frameGameScreen)
-    object SettingsScreen: Screen(settingsScreen)
-
     object MainScreen : Screen(mainScreen)
     object ScoreScreen : Screen(scoreScreen)
     object GameScreen : Screen(gameScreen)

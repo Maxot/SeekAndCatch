@@ -38,11 +38,10 @@ dependencies {
 
     ksp(libs.hilt.compiler)
 
-//    testImplementation(libs.junit)
-//    testImplementation(libs.mockito.kotlin)
-//    testImplementation(libs.mockito.core)
-//
-////    androidTestImplementation(project(mapOf("path" to ":feature:score")))
-//    androidTestImplementation(libs.androidx.test.ext)
-//    androidTestImplementation(libs.androidx.test.espresso.core)
+    testImplementation(libs.hilt.android.testing)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.androidx.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+
 }

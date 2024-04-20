@@ -13,21 +13,31 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.feature.gameplay.R
 import kotlin.enums.EnumEntries
 
 @Composable
 fun GameDifficultSelectorLayout(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     variants: EnumEntries<GameDifficulty>,
     defaultVariant: GameDifficulty,
     onDifficultChanged: (GameDifficulty) -> Unit
 ) {
+    val gameDifficultSelectorContentDesc = stringResource(id = R.string.game_difficult_selector_content_desc)
+
     var selectedVariantIndex = variants.indexOf(defaultVariant)
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .then(modifier)
+            .semantics { contentDescription =  gameDifficultSelectorContentDesc}
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
@@ -53,5 +63,16 @@ fun GameDifficultSelectorLayout(
             }) {
             Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
         }
+    }
+}
+
+@Preview
+@Composable
+fun GameDifficultSelectorLayoutPreview() {
+    GameDifficultSelectorLayout(
+        variants = GameDifficulty.entries,
+        defaultVariant = GameDifficulty.HARD
+    ) {
+
     }
 }

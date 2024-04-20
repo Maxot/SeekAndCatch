@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.stopScroll
@@ -26,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,12 +39,17 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import com.maxot.seekandcatch.core.domain.GameState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.feature.gameplay.FlowGameUiState
 import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.getDecimalPart
@@ -55,21 +58,54 @@ import kotlinx.coroutines.launch
 
 const val TAG = "FlowGameScreen"
 
-@ExperimentalFoundationApi
 @Composable
-fun FlowGameScreen(
+fun FlowGameScreenRoute(
     viewModel: FlowGameViewModel = hiltViewModel(),
     toScoreScreen: () -> Unit
 ) {
+    val goals by viewModel.goals.collectAsStateWithLifecycle()
+    val score by viewModel.score.collectAsStateWithLifecycle()
+    val figures by viewModel.figures.collectAsStateWithLifecycle()
+    val coefficient by viewModel.coefficient.collectAsStateWithLifecycle()
+    val flowGameUiState by viewModel.flowGameUiState.collectAsStateWithLifecycle()
+
+    FlowGameScreen(
+        goals = goals,
+        score = score,
+        figures = figures,
+        coefficient = coefficient,
+        flowGameUiState = flowGameUiState,
+        onItemClick = { viewModel.onItemClick(it) },
+        onItemsMissed = { start, end -> viewModel.onItemsMissed(start, end) },
+        getAnimationDuration = { viewModel.getAnimationDuration() },
+        toScoreScreen = toScoreScreen,
+        resumeGame = { viewModel.resumeGame() },
+        pauseGame = { viewModel.pauseGame() },
+        finishGame = { viewModel.finishGame() }
+    )
+}
+
+@Composable
+fun FlowGameScreen(
+    modifier: Modifier = Modifier,
+    goals: Set<Goal<Any>>,
+    score: Int,
+    figures: List<Figure>,
+    coefficient: Float,
+    flowGameUiState: FlowGameUiState,
+    onItemClick: (id: Int) -> Unit = {},
+    onItemsMissed: (start: Int, end: Int) -> Unit = { i: Int, i1: Int -> },
+    getAnimationDuration: () -> Int = { 10000 },
+    toScoreScreen: () -> Unit = {},
+    resumeGame: () -> Unit = {},
+    pauseGame: () -> Unit = {},
+    finishGame: () -> Unit = {}
+) {
+
+    val flowGameScreenContentDesc = stringResource(id = R.string.flow_game_screen_content_desc)
     val backgroundBrush =
         Brush.linearGradient(listOf(Color.Red, Color.Transparent, Color.Green, Color.Transparent))
     val beforeAnimationDelay = 1000L
-
-    val goals = viewModel.goals.collectAsState()
-    val score = viewModel.score.collectAsState()
-    val figures = viewModel.figures.collectAsState()
-    val coefficient = viewModel.coefficient.collectAsState()
-    val gameState = viewModel.gameState.collectAsState()
     var scrollAnimationJob: Job = Job()
 
     val coroutineScope = rememberCoroutineScope()
@@ -84,42 +120,36 @@ fun FlowGameScreen(
 
     Box(
         modifier = Modifier
+            .then(modifier)
+            .semantics { contentDescription = flowGameScreenContentDesc }
             .background(backgroundBrush)
             .fillMaxSize()
     ) {
         Column {
             Text(
-                text = stringResource(id = R.string.label_score, score.value),
+                text = stringResource(id = R.string.label_score, score),
                 style = MaterialTheme.typography.bodyLarge
             )
-            GoalsLayout(goals = goals.value)
+            GoalsLayout(goals = goals)
 
             CoefficientProgressLayout(
-                progress = coefficient.value,
-                currentCoefficient = coefficient.value.toInt()
+                progress = coefficient,
+                currentCoefficient = coefficient.toInt()
             )
 
-            GameFieldLayout(figures = figures.value, gridState = gridState) { id ->
-                viewModel.onItemClick(id)
+            GameFieldLayout(figures = figures, gridState = gridState) { id ->
+                onItemClick(id)
             }
         }
-
-        when (gameState.value) {
-            GameState.CREATED -> {
-                viewModel.startGame()
-            }
-
-            GameState.STARTED, GameState.RESUMED -> {
-                /**
-                 * Start scroll.
-                 */
-                LaunchedEffect(key1 = coefficient.value.toInt(), key2 = gameState.value) {
+        when (flowGameUiState) {
+            FlowGameUiState.Active -> {
+                LaunchedEffect(key1 = coefficient.toInt(), key2 = flowGameUiState) {
                     scrollAnimationJob = coroutineScope.launch {
 //                        delay(beforeAnimationDelay)
                         gridState.animateScrollBy(
-                            value = 100f * figures.value.size,
+                            value = 100f * figures.size,
                             animationSpec = tween(
-                                durationMillis = viewModel.getAnimationDuration(),
+                                durationMillis = getAnimationDuration(),
                                 easing = LinearEasing
                             )
                         )
@@ -133,7 +163,7 @@ fun FlowGameScreen(
                     if (firstPassedItemPosition.value >= 0) {
                         val startPosition = firstPassedItemPosition.value
                         Log.d(TAG, "firstPassedItemPosition ${firstPassedItemPosition.value}")
-                        viewModel.onItemsMissed(
+                        onItemsMissed(
                             startPosition,
                             startPosition + 3
                         )
@@ -141,7 +171,11 @@ fun FlowGameScreen(
                 }
             }
 
-            GameState.PAUSED -> {
+            FlowGameUiState.Loading -> {
+
+            }
+
+            FlowGameUiState.Paused -> {
                 showPauseDialog.value = true
                 LaunchedEffect(key1 = Unit) {
                     gridState.stopScroll()
@@ -150,47 +184,47 @@ fun FlowGameScreen(
                 PauseDialog(
                     onDismissRequest = {
                         showPauseDialog.value = false
-                        viewModel.resumeGame()
+                        resumeGame()
                     },
                     onConfirmation = {
                         showPauseDialog.value = false
-                        viewModel.finishGame()
+                        finishGame()
                     },
                     dialogTitle = stringResource(id = R.string.title_pause_dialog),
                     dialogText = stringResource(id = R.string.text_pause_dialog)
                 )
             }
 
-            GameState.FINISHED -> {
-                viewModel.stopMusic()
+            FlowGameUiState.Finished -> {
                 toScoreScreen()
             }
-
-            else -> {}
         }
     }
 
     BackHandler {
-        viewModel.pauseGame()
+        pauseGame()
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
-        if (gameState.value != GameState.FINISHED)
-            viewModel.pauseGame()
+        if (flowGameUiState != FlowGameUiState.Finished)
+            pauseGame()
+
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
         if (showPauseDialog.value)
-            viewModel.pauseGame() else viewModel.resumeGame()
+            pauseGame() else resumeGame()
     }
 }
 
 @Composable
 fun GameFieldLayout(
+    modifier: Modifier = Modifier,
     figures: List<Figure>,
     gridState: LazyGridState,
     onItemClick: (id: Int) -> Unit
 ) {
+    val gameFieldLayoutContentDesc = stringResource(id = R.string.game_field_layout_content_desc)
     //initial height set at 0.dp
     var gridHeight by remember { mutableStateOf(0.dp) }
 
@@ -200,12 +234,15 @@ fun GameFieldLayout(
     val gridCellsCount = 4
 
     LazyVerticalGrid(
-        modifier = Modifier.onGloballyPositioned {
-            gridHeight = with(density) {
-                it.size.height.toDp()
-            }
+        modifier = Modifier
+            .then(modifier)
+            .semantics { contentDescription = gameFieldLayoutContentDesc }
+            .onGloballyPositioned {
+                gridHeight = with(density) {
+                    it.size.height.toDp()
+                }
 
-        },
+            },
         userScrollEnabled = false,
         state = gridState,
         columns = GridCells.Fixed(gridCellsCount),
@@ -231,9 +268,18 @@ fun GameFieldLayout(
 }
 
 @Composable
-fun CoefficientProgressLayout(progress: Float, currentCoefficient: Int) {
+fun CoefficientProgressLayout(
+    modifier: Modifier = Modifier,
+    progress: Float,
+    currentCoefficient: Int
+) {
+    val coefficientProgressLayoutContentDesc =
+        stringResource(id = R.string.coefficient_progress_layout_content_desc)
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .then(modifier)
+            .semantics { contentDescription = coefficientProgressLayoutContentDesc }
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -247,4 +293,48 @@ fun CoefficientProgressLayout(progress: Float, currentCoefficient: Int) {
             style = MaterialTheme.typography.displayMedium
         )
     }
+}
+
+
+@Preview
+@Composable
+fun FlowGameScreenActivePreview() {
+    val figures = listOf(
+        Figure.getRandomFigure(1),
+        Figure.getRandomFigure(2),
+        Figure.getRandomFigure(3),
+        Figure.getRandomFigure(4),
+        Figure.getRandomFigure(5),
+        Figure.getRandomFigure(6),
+    )
+
+    FlowGameScreen(
+        goals = setOf(Goal.getRandomGoal()),
+        score = 11,
+        figures = figures,
+        coefficient = 1f,
+        flowGameUiState = FlowGameUiState.Active,
+        toScoreScreen = { },
+    )
+}
+
+@Preview
+@Composable
+fun FlowGameScreenPausedPreview() {
+    val figures = listOf(
+        Figure.getRandomFigure(1),
+        Figure.getRandomFigure(2),
+        Figure.getRandomFigure(3),
+        Figure.getRandomFigure(4),
+        Figure.getRandomFigure(5),
+        Figure.getRandomFigure(6),
+    )
+
+    FlowGameScreen(
+        goals = setOf(Goal.getRandomGoal()),
+        score = 11,
+        figures = figures,
+        coefficient = 1f,
+        flowGameUiState = FlowGameUiState.Paused,
+    )
 }
