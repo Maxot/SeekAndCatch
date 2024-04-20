@@ -95,7 +95,7 @@ class FlowGameUseCase
         repeat(missedItemsCount) {
             decreaseCoefficients()
         }
-        Log.i(TAG, "missedItemsCount on ($startIndex, $endIndex) diapason is $missedItemsCount")
+//        Log.d(TAG, "missedItemsCount on ($startIndex, $endIndex) diapason is $missedItemsCount")
     }
 
     private fun increaseCoefficients() {
