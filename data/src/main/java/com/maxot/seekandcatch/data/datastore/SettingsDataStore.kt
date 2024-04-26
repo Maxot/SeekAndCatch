@@ -24,6 +24,7 @@ class SettingsDataStore
 
     private val soundStateKey = booleanPreferencesKey(SETTINGS_SOUND_KEY)
     private val difficultyKey = stringPreferencesKey(SETTINGS_DIFFICULTY_KEY)
+    private val userNameKey = stringPreferencesKey(USER_NAME_KEY)
 
     val soundStateFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[soundStateKey] ?: true
@@ -48,9 +49,20 @@ class SettingsDataStore
         }
     }
 
+    val userNameFlow: Flow<String> =  dataStore.data.map { preferences ->
+        preferences[userNameKey] ?: "Unknown"
+    }
+
+    suspend fun setUserName(name: String) {
+        dataStore.edit { settings ->
+            settings[userNameKey] = name
+        }
+    }
+
     companion object {
         const val SETTINGS_DATA_STORE_NAME = "Settings"
         const val SETTINGS_SOUND_KEY = "Sound_key"
         const val SETTINGS_DIFFICULTY_KEY = "Difficulty_key"
+        const val USER_NAME_KEY = "User_name_key"
     }
 }

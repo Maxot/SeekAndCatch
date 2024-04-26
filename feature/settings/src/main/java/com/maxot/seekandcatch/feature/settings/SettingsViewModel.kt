@@ -14,9 +14,17 @@ class SettingsViewModel
 ) : ViewModel() {
 
     val soundState = settingsRepository.observeSoundState()
+    val userName = settingsRepository.observeUserName()
+
     fun setSoundState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setSoundState(newState)
+        }
+    }
+
+    fun setUserName(name: String) {
+        viewModelScope.launch {
+            settingsRepository.setUserName(name)
         }
     }
 

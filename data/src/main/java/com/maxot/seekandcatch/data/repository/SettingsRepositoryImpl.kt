@@ -14,10 +14,15 @@ class SettingsRepositoryImpl
     }
 
     override fun observeSoundState(): Flow<Boolean> = settingsDataStore.soundStateFlow
+
     override suspend fun setDifficulty(newDifficulty: GameDifficulty) {
         settingsDataStore.setDifficulty(newDifficulty)
     }
 
     override fun observeDifficulty(): Flow<GameDifficulty> = settingsDataStore.difficultyFlow
+
+    override suspend fun setUserName(name: String) = settingsDataStore.setUserName(name)
+
+    override fun observeUserName(): Flow<String> = settingsDataStore.userNameFlow
 
 }
