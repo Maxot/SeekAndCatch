@@ -53,14 +53,11 @@ fun GameSelectionScreen(
     onDifficultChanged: (GameDifficulty) -> Unit
 ) {
     val gameSelectionScreenContentDesc = stringResource(id = R.string.game_selection_screen_content_desc)
-    val backgroundBrush =
-        Brush.linearGradient(listOf(Color.Transparent, Color.Yellow, Color.Green, Color.Blue))
 
     Column(
         modifier = Modifier
             .then(modifier)
             .fillMaxSize()
-            .background(backgroundBrush)
             .semantics { contentDescription = gameSelectionScreenContentDesc },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

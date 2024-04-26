@@ -1,4 +1,4 @@
-package com
+package com.maxot.seekandcatch
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
