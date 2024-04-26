@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "20838502192",
+    "project_id": "seekandcatch-fdf21",
+    "storage_bucket": "seekandcatch-fdf21.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:20838502192:android:67cd9cbd26f0c7d77a02f5",
+        "android_client_info": {
+          "package_name": "com.maxot.seekandcatch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnIVHBI6sNO3sZ0VDJmnvEFdQOX6nNkHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

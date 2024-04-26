@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -55,6 +56,7 @@ android {
 dependencies {
     // Import the Compose BOM
     implementation(platform(libs.androidx.compose.bom))
+    implementation(platform(libs.firebase.bom))
 
     implementation(project(":core:designsystem"))
     implementation(project(":feature:gameplay"))
@@ -68,6 +70,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.firebase.analytics)
     implementation(libs.hilt.android)
 
     ksp(libs.hilt.compiler)
