@@ -10,6 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -26,14 +29,20 @@ fun ScoreScreen(
     viewModel: ScoreViewModel = hiltViewModel(),
     toMainScreen: () -> Unit
 ) {
-    val score = viewModel.getLastScore()
-    val bestScore = viewModel.getBestScore()
+    val score by rememberSaveable {
+        mutableStateOf(viewModel.getLastScore())
+    }
+    val bestScore by rememberSaveable {
+        mutableStateOf(viewModel.getBestScore())
+    }
 
     val backgroundBrush =
         Brush.linearGradient(listOf(Color.Blue, Color.Transparent, Color.Cyan, Color.Transparent))
 
     Column(
-        modifier = Modifier.fillMaxSize().background(backgroundBrush),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundBrush),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -55,6 +64,19 @@ fun ScoreScreen(
             ) {
             Text(
                 text = stringResource(id = R.string.button_to_main_screen, score),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
+
+        OutlinedButton(
+            onClick = {
+                viewModel.addToLeaderboard(score)
+                toMainScreen()
+            },
+        ) {
+            Text(
+                text = "Add to leaderboard",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
