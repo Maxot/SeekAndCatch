@@ -3,8 +3,14 @@ package com.maxot.seekandcatch.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navOptions
+import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToGameSelection
+import com.maxot.seekandcatch.feature.leaderboard.navigation.navigateToLeaderboard
+import com.maxot.seekandcatch.feature.settings.navigation.navigateToSettings
+import com.maxot.seekandcatch.navigation.TopLevelDestination
 import kotlinx.coroutines.CoroutineScope
 
 @Stable
@@ -15,4 +21,29 @@ class SeekAndCatchAppState(
     val currentDestination: NavDestination?
         @Composable get() = navController
             .currentBackStackEntryAsState().value?.destination
+
+    val shouldShowBottomBar: Boolean
+        @Composable get() = currentDestination.isTopLevelDestination()
+
+    fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
+        val topLevelNavOptions = navOptions {
+        }
+        when (topLevelDestination) {
+            TopLevelDestination.LEADERBOARD -> navController.navigateToLeaderboard(
+                topLevelNavOptions
+            )
+
+            TopLevelDestination.GAME -> navController.navigateToGameSelection(topLevelNavOptions)
+            TopLevelDestination.SETTINGS -> navController.navigateToSettings(topLevelNavOptions)
+        }
+
+    }
 }
+
+fun NavDestination?.isTopLevelDestination() =
+    this?.hierarchy?.any { navDestination ->
+        TopLevelDestination.entries.forEach { destination ->
+            if (destination.route == navDestination.route) return@any true
+        }
+        false
+    } ?: false

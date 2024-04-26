@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="feature_gameplay_title">Game</string>
     <string name="label_score">Score: %1$d</string>
     <string name="start_game_button_text">Start Game</string>
 
@@ -25,4 +26,5 @@
     <string name="game_difficult_selector_content_desc">Game Difficult Selector</string>
     <string name="coefficient_progress_layout_content_desc">Coefficient Progress</string>
     <string name="game_field_layout_content_desc">Game Field</string>
+    <string name="game_selection_screen_content_desc">Game Selection</string>
 </resources>

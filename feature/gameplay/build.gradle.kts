@@ -28,6 +28,7 @@ android {
 
 dependencies {
     implementation(project(":feature:settings"))
+    implementation(project(":feature:score"))
     implementation(project(":data"))
     implementation(project(":core:domain"))
     implementation(project(":core:designsystem"))
