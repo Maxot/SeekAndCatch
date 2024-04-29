@@ -52,7 +52,7 @@ fun GameSelectionScreen(
     navigateToFlowGame: () -> Unit,
     onDifficultChanged: (GameDifficulty) -> Unit
 ) {
-    val gameSelectionScreenContentDesc = stringResource(id = R.string.game_selection_screen_content_desc)
+    val gameSelectionScreenContentDesc = stringResource(id = R.string.feature_gameplay_game_selection_screen_content_desc)
 
     Column(
         modifier = Modifier

@@ -4,5 +4,6 @@
     <string name="feature_settings_sounds_title">Sounds</string>
     <string name="feature_settings_ok">OK</string>
     <string name="feature_settings_dialog_content_description">Settings Dialog</string>
+    <string name="feature_settings_top_app_bar_action_icon_content_desc">Settings</string>
 
 </resources>

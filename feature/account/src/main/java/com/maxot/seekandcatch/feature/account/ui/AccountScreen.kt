@@ -18,6 +18,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +49,7 @@ fun AccountScreen(
     userName: String,
     onUserNameChanged: (userName: String) -> Unit
 ) {
+    val contentDesc = stringResource(id = R.string.feature_account_screen_content_desc)
 
     var text by rememberSaveable { mutableStateOf("") }
     var editTextEnabled by rememberSaveable { mutableStateOf(false) }
@@ -56,7 +59,12 @@ fun AccountScreen(
     }
 
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .then(modifier)
+            .fillMaxSize()
+            .semantics {
+                contentDescription = contentDesc
+            },
         verticalArrangement = Arrangement.Center
     ) {
         Row(

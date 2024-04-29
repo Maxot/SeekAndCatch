@@ -26,5 +26,5 @@
     <string name="game_difficult_selector_content_desc">Game Difficult Selector</string>
     <string name="coefficient_progress_layout_content_desc">Coefficient Progress</string>
     <string name="game_field_layout_content_desc">Game Field</string>
-    <string name="game_selection_screen_content_desc">Game Selection</string>
+    <string name="feature_gameplay_game_selection_screen_content_desc">Game Selection</string>
 </resources>

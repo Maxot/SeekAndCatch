@@ -2,5 +2,6 @@
 <resources>
     <string name="feature_account_title">Account</string>
     <string name="feature_account_user_name_title">User name</string>
+    <string name="feature_account_screen_content_desc">Account Screen</string>
 
 </resources>

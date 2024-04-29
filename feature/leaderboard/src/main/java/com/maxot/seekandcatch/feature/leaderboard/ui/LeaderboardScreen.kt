@@ -19,14 +19,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.LeaderboardRecord
-import com.maxot.seekandcatch.feature.leaderboard.LeaderboardViewModel
 import com.maxot.seekandcatch.feature.leaderboard.LeaderboardUiState
+import com.maxot.seekandcatch.feature.leaderboard.LeaderboardViewModel
+import com.maxot.seekandcatch.feature.leaderboard.R
 
 @Composable
 fun LeaderBoardScreenRoute(
@@ -42,12 +46,13 @@ fun LeaderBoardScreen(
     leaderboardUiState: LeaderboardUiState,
     modifier: Modifier = Modifier
 ) {
+    val contentDesc = stringResource(id = R.string.feature_leaderboard_screen_content_desc)
     when (leaderboardUiState) {
-        LeaderboardUiState.Failed -> {
+        is LeaderboardUiState.Failed -> {
 
         }
 
-        LeaderboardUiState.Loading -> {
+        is LeaderboardUiState.Loading -> {
             CircularProgressIndicator(modifier = Modifier.fillMaxSize())
         }
 
@@ -55,6 +60,9 @@ fun LeaderBoardScreen(
             LazyColumn(
                 modifier = Modifier
                     .then(modifier)
+                    .semantics {
+                        contentDescription = contentDesc
+                    }
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -85,7 +93,6 @@ fun LeaderLayout(
         2 -> Color.Gray
         else -> Color.Gray
     }
-
 
     ElevatedCard(
         modifier = Modifier

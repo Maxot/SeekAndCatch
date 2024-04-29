@@ -21,6 +21,7 @@ import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.feature.settings.ui.SettingsDialog
 import com.maxot.seekandcatch.navigation.SeekCatchNavHost
 import com.maxot.seekandcatch.navigation.TopLevelDestination
+import com.maxot.seekandcatch.feature.settings.R as SettingsR
 
 @Composable
 fun SeekAndCatchApp(
@@ -80,7 +81,7 @@ fun SaCTopBar(
             ) {
                 Icon(
                     imageVector = SaCIcons.Settings,
-                    contentDescription = ""
+                    contentDescription = stringResource(id = SettingsR.string.feature_settings_top_app_bar_action_icon_content_desc)
                 )
             }
         })
