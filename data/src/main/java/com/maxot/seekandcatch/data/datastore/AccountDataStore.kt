@@ -22,7 +22,7 @@ class AccountDataStore
     private val userNameKey = stringPreferencesKey(USER_NAME_KEY)
 
     val userNameFlow: Flow<String> = dataStore.data.map { preferences ->
-        preferences[userNameKey] ?: "Unknown"
+        preferences[userNameKey] ?: ""
     }
 
     suspend fun setUserName(name: String) {
