@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_settings_title">Settings</string>
+    <string name="feature_settings_sounds_title">Sounds</string>
+    <string name="feature_settings_ok">OK</string>
+    <string name="feature_settings_dialog_content_description">Settings Dialog</string>
 
 </resources>
