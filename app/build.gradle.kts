@@ -59,6 +59,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
 
     implementation(project(":core:designsystem"))
+    implementation(project(":feature:account"))
     implementation(project(":feature:gameplay"))
     implementation(project(":feature:score"))
     implementation(project(":feature:settings"))

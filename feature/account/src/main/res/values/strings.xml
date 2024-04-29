@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_account_title">Account</string>
+    <string name="feature_account_user_name_title">User name</string>
+
+</resources>

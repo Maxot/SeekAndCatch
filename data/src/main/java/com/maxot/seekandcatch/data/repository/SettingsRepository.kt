@@ -13,8 +13,4 @@ interface SettingsRepository {
 
     fun observeDifficulty(): Flow<GameDifficulty>
 
-    suspend fun setUserName(name: String)
-
-    fun observeUserName(): Flow<String>
-
 }

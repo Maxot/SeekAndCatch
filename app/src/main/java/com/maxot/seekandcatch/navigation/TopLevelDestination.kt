@@ -2,12 +2,12 @@ package com.maxot.seekandcatch.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
+import com.maxot.seekandcatch.feature.account.navigation.ACCOUNT_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_SELECTION_ROUTE
 import com.maxot.seekandcatch.feature.leaderboard.navigation.LEADERBOARD_ROUTE
-import com.maxot.seekandcatch.feature.settings.navigation.SETTINGS_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.R as gameplayR
 import com.maxot.seekandcatch.feature.leaderboard.R as leaderboardR
-import com.maxot.seekandcatch.feature.settings.R as settingsR
+import com.maxot.seekandcatch.feature.account.R as accountR
 
 /**
  * Type for the top level destinations in the application. Each of these destinations
@@ -35,11 +35,11 @@ enum class TopLevelDestination(
         titleTextId = gameplayR.string.feature_gameplay_title,
         route = GAME_SELECTION_ROUTE
     ),
-    SETTINGS(
-        selectedIcon = SaCIcons.Settings,
-        unselectedIcon = SaCIcons.UnselectedSettings,
-        iconTextId = settingsR.string.feature_settings_title,
-        titleTextId = settingsR.string.feature_settings_title,
-        route = SETTINGS_ROUTE
+    ACCOUNT(
+        selectedIcon = SaCIcons.Account,
+        unselectedIcon = SaCIcons.UnselectedAccount,
+        iconTextId = accountR.string.feature_account_title,
+        titleTextId = accountR.string.feature_account_title,
+        route = ACCOUNT_ROUTE
     ),
 }

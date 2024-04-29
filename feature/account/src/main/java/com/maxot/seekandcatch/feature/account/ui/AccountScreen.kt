@@ -1,45 +1,58 @@
-package com.maxot.seekandcatch.feature.settings.ui
+package com.maxot.seekandcatch.feature.account.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
-import com.maxot.seekandcatch.feature.settings.SettingsViewModel
+import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
+import com.maxot.seekandcatch.feature.account.AccountViewModel
+import com.maxot.seekandcatch.feature.account.R
+
 
 @Composable
-fun SettingsScreen(
+fun AccountScreenRoute(
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: AccountViewModel = hiltViewModel()
 ) {
+    val userName by viewModel.userName.collectAsStateWithLifecycle("")
 
-    val isSoundEnabled = viewModel.soundState.collectAsState(false)
-    val userName = viewModel.userName.collectAsStateWithLifecycle("")
+    AccountScreen(
+        modifier = modifier,
+        userName = userName,
+        onUserNameChanged = viewModel::setUserName
+    )
+}
+
+@Composable
+fun AccountScreen(
+    modifier: Modifier = Modifier,
+    userName: String,
+    onUserNameChanged: (userName: String) -> Unit
+) {
 
     var text by rememberSaveable { mutableStateOf("") }
     var editTextEnabled by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = userName.value) {
-        text = userName.value
+    LaunchedEffect(key1 = userName) {
+        text = userName
     }
 
     Column(
@@ -58,12 +71,12 @@ fun SettingsScreen(
                     text = it
                 },
                 label = {
-                    Text("User Name")
+                    Text(stringResource(id = R.string.feature_account_user_name_title))
                 })
             IconButton(onClick = {
                 editTextEnabled = !editTextEnabled
                 if (text.isNotEmpty())
-                    viewModel.setUserName(text)
+                    onUserNameChanged(text)
             }) {
                 Icon(
                     imageVector = if (editTextEnabled) SaCIcons.Done else SaCIcons.Edit,
@@ -71,21 +84,15 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+}
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Sounds")
-            Switch(checked = isSoundEnabled.value, onCheckedChange = {
-                viewModel.setSoundState(it)
-            })
+@Preview
+@Composable
+fun AccountScreenPreview() {
+    SeekAndCatchTheme {
+        AccountScreen(userName = "User name") {
+
         }
     }
-
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-        Text(text = "Version 0.0.1", textAlign = TextAlign.Center, modifier = Modifier)
-    }
-
 }

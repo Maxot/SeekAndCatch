@@ -21,8 +21,4 @@ class SettingsRepositoryImpl
 
     override fun observeDifficulty(): Flow<GameDifficulty> = settingsDataStore.difficultyFlow
 
-    override suspend fun setUserName(name: String) = settingsDataStore.setUserName(name)
-
-    override fun observeUserName(): Flow<String> = settingsDataStore.userNameFlow
-
 }
