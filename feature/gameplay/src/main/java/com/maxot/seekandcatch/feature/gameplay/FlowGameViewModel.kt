@@ -24,12 +24,11 @@ class FlowGameViewModel
     private val settingsRepository: SettingsRepository,
     private val appSoundManager: AppSoundManager
 ) : ViewModel() {
-
     val goals: StateFlow<Set<Goal<Any>>> = gameUseCase.goals
     val score: StateFlow<Int> = gameUseCase.score
     val figures: StateFlow<List<Figure>> = gameUseCase.figures
     val coefficient: StateFlow<Float> = gameUseCase.coefficient
-    val gameState = gameUseCase.gameState
+    val gameDuration: StateFlow<Long> = gameUseCase.gameDuration
     val selectedGameDifficulty: StateFlow<GameDifficulty?> =
         settingsRepository.observeDifficulty().stateIn(
             scope = viewModelScope,
@@ -76,16 +75,17 @@ class FlowGameViewModel
             selectedGameDifficulty.collect {
                 it?.let {
                     initGame(it)
+                    startGame()
                 }
             }
         }
     }
 
-    fun initGame(gameDifficulty: GameDifficulty) {
+    private fun initGame(gameDifficulty: GameDifficulty) {
         gameUseCase.initGame(gameDifficulty.gameParams)
     }
 
-    fun startGame() {
+    private fun startGame() {
         appSoundManager.startMusic()
         gameUseCase.startGame()
     }
@@ -105,7 +105,7 @@ class FlowGameViewModel
         gameUseCase.finishGame()
     }
 
-    fun stopMusic() {
+    private fun stopMusic() {
         appSoundManager.stopMusic()
     }
 
@@ -113,19 +113,17 @@ class FlowGameViewModel
         gameUseCase.onItemClick(id)
     }
 
-    fun onItemsMissed(start: Int, end: Int) {
-        gameUseCase.onItemsMissed(start, end)
+    fun getRowWidth() = gameUseCase.getRowWidth()
+
+    fun getPixelsToScroll(): Float = gameUseCase.getPixelsToScroll()
+
+    fun getScrollDuration(): Int = gameUseCase.getScrollDuration()
+
+    fun onFirstVisibleItemIndexChanged(index: Int) {
+        gameUseCase.setFirstVisibleItemIndex(index)
     }
 
-    fun getAnimationDuration(): Int {
-        return gameUseCase.getAnimationDuration()
-    }
-
-    fun setSelectedDifficulty(gameDifficulty: GameDifficulty) {
-        viewModelScope.launch {
-            settingsRepository.setDifficulty(gameDifficulty)
-        }
-    }
+    fun setItemHeight(height: Int) = gameUseCase.setItemHeight(height)
 
     override fun onCleared() {
         super.onCleared()

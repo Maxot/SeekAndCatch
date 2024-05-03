@@ -1,11 +1,12 @@
 package com.maxot.seekandcatch.data.model
 
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import kotlin.random.Random
+import androidx.compose.ui.unit.dp
 
 /**
  * Represent an object(figure) that is main block of the game and used in game process.
@@ -60,7 +61,7 @@ fun Figure.getShapeForFigure(): Shape {
         }
 
         Figure.FigureType.SQUARE -> {
-            RectangleShape
+            RoundedCornerShape(corner = CornerSize(10.dp))
         }
     }
 }

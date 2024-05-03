@@ -1,6 +1,8 @@
-package com.maxot.seekandcatch.feature.gameplay.ui
+package com.maxot.seekandcatch.feature.gameplay.ui.layout
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -63,8 +65,11 @@ fun GoalsLayout(
                         style = MaterialTheme.typography.titleSmall
                     )
                     ColoredFigureLayout(
-                        size = 50.dp,
-                        figure = Figure(type = goal.getGoal())
+                        modifier = Modifier
+                            .focusable(false)
+                            .clickable(enabled = false, onClick = {}),
+                        figure = Figure(type = goal.getGoal()),
+                        size = 50.dp
                     )
                     Text(text = "shape", style = MaterialTheme.typography.titleSmall)
                 }

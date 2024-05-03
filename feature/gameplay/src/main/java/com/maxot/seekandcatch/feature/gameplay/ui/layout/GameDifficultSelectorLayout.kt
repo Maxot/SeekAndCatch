@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.gameplay.ui
+package com.maxot.seekandcatch.feature.gameplay.ui.layout
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

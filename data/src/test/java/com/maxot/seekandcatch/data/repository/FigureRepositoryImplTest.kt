@@ -14,7 +14,12 @@ class FigureRepositoryImplTest {
 
     @Test
     fun getRandomFigures_halfSuitableFigures() {
-        val figures = repository.getRandomFigures(10, 0.5f, goal)
+        val figures = repository.getRandomFigures(
+            itemsCount = 10,
+            startId = 0,
+            percentageOfSuitableGoalItems = 0.5f,
+            goal = goal
+        )
         var suitableFiguresCount = 0
 
         figures.forEach { figure ->

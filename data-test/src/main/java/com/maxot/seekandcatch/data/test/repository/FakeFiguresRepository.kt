@@ -17,6 +17,7 @@ class FakeFiguresRepository() : FiguresRepository {
 
     override fun getRandomFigures(
         itemsCount: Int,
+        startId: Int,
         percentageOfSuitableGoalItems: Float,
         goal: Goal<Any>
     ): List<Figure> {

@@ -7,26 +7,29 @@ package com.maxot.seekandcatch.data.model
 enum class GameDifficulty(val gameParams: GameParams) {
     EASY(
         GameParams(
-            percentOfSuitableItem = 0.2f,
+            percentOfSuitableItem = 0.4f,
             coefficientStep = 0.25f,
             scorePoint = 10,
-            itemDuration = 50
+            rowWidth = 3,
+            rowDuration = 700
         )
     ),
     NORMAL(
         GameParams(
-            percentOfSuitableItem = 0.35f,
+            percentOfSuitableItem = 0.3f,
             coefficientStep = 0.2f,
             scorePoint = 15,
-            itemDuration = 40
+            rowWidth = 4,
+            rowDuration = 700
         )
     ),
     HARD(
         GameParams(
-            percentOfSuitableItem = 0.5f,
+            percentOfSuitableItem = 0.35f,
             coefficientStep = 0.1f,
             scorePoint = 20,
-            itemDuration = 30
+            rowWidth = 5,
+            rowDuration = 700
         )
     )
 }

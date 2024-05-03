@@ -15,6 +15,9 @@ import androidx.compose.ui.test.performClick
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.getShapeForFigure
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.AlphaKey
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.ShapeKey
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule

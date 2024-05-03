@@ -23,11 +23,13 @@ class FiguresRepositoryImpl
 
     override fun getRandomFigures(
         itemsCount: Int,
+        startId: Int,
         percentageOfSuitableGoalItems: Float,
         goal: Goal<Any>
     ): List<Figure> {
         return generateFiguresWithSelectedAndOtherItems(
             itemsCount = itemsCount,
+            startId = startId,
             percentOfSelectedItems = percentageOfSuitableGoalItems,
             selectedItems = goal.getSuitableFigures(),
             otherItems = goal.getUnsuitableFigures()
@@ -36,6 +38,7 @@ class FiguresRepositoryImpl
 
     private fun generateFiguresWithSelectedAndOtherItems(
         itemsCount: Int,
+        startId: Int = 0,
         percentOfSelectedItems: Float,
         selectedItems: Set<Figure>,
         otherItems: Set<Figure>
@@ -43,7 +46,7 @@ class FiguresRepositoryImpl
         val result = mutableListOf<Figure>()
         val selectedItemsCount = (percentOfSelectedItems * itemsCount).toInt()
 
-        for (i in 0..<selectedItemsCount) {
+        for (i in startId..<selectedItemsCount + startId) {
             val randomFigure = selectedItems.random()
             result.add(
                 Figure(
@@ -53,7 +56,7 @@ class FiguresRepositoryImpl
                 )
             )
         }
-        for (i in selectedItemsCount..<itemsCount) {
+        for (i in startId + selectedItemsCount..<startId + itemsCount) {
             val randomFigure = otherItems.random()
             result.add(
                 Figure(

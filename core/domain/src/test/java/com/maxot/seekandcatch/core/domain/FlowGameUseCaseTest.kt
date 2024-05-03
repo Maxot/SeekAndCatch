@@ -7,6 +7,8 @@ import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.test.repository.FakeFiguresRepository
 import com.maxot.seekandcatch.data.test.repository.FakeGoalsRepository
 import com.maxot.seekandcatch.data.test.repository.FakeScoreRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -89,18 +91,48 @@ class FlowGameUseCaseTest {
         assertEquals(beforeClickScore + gameParam.scorePoint, afterClickScore)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun onItemsMissed_coefficientDecrease() {
+    fun firstVisibleItemIndex_isNine_passedItemsProcessed() = runTest {
+        useCase.startGame()
         // Need for increase coefficient
         useCase.onItemClick(id = 0)
-        useCase.onItemClick(id = 6)
-        useCase.onItemClick(id = 9)  // Now coefficient must be 1.75f
-
-        assertEquals(getCurrentCoefficient(), 1.75f)
-
-        useCase.onItemsMissed(0, 4) // One item missed, id = 3
+        useCase.onItemClick(id = 6) // Now coefficient must be 1.5f
 
         assertEquals(getCurrentCoefficient(), 1.5f)
+
+        useCase.setFirstVisibleItemIndex(9)
+        advanceUntilIdle()
+
+        assertEquals(getCurrentCoefficient(), 1f)
+    }
+
+    @Test
+    fun getPixelsToScroll_calculatedAsExpected() {
+        val pixelsToScroll = useCase.getPixelsToScroll()
+        val expectedPixelsToScroll =
+            useCase.figures.value.size / useCase.getRowWidth() * useCase.getItemHeight()
+
+        assertEquals(pixelsToScroll, expectedPixelsToScroll.toFloat())
+    }
+
+    @Test
+    fun getScrollDuration_calculatedAsExpected() {
+        val rowDuration = gameParam.rowDuration
+        val rowCount = useCase.figures.value.size / useCase.getRowWidth()
+        val coefInt = getCurrentCoefficient().toInt()
+
+        // Percentage of time that need to be subtracted from 100% of duration
+        val coefPercentage = (coefInt * coefInt / 100f).coerceAtMost(0.4f)
+//        val timePercentage = (((gameDuration.value / 1000 / 30) * 5) / 100f).coerceAtMost(0.2f)
+//        val actualDurationPercentage = 1f - coefPercentage - timePercentage
+        val actualDurationPercentage = 1f - coefPercentage
+
+        val scrollDuration = useCase.getScrollDuration()
+        val expectedScrollDuration: Int =
+            ((rowCount * rowDuration) * actualDurationPercentage).toInt()
+
+        assertEquals(scrollDuration, expectedScrollDuration)
     }
 
     private fun getCurrentGameState() = useCase.gameState.value
