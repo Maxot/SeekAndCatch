@@ -14,10 +14,24 @@ class SettingsViewModel
 ) : ViewModel() {
 
     val soundState = settingsRepository.observeSoundState()
+    val musicState = settingsRepository.observeMusicState()
+    val vibrationState = settingsRepository.observeVibrationState()
 
     fun setSoundState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setSoundState(newState)
+        }
+    }
+
+    fun setMusicState(newState: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setMusicState(newState)
+        }
+    }
+
+    fun setVibrationState(newState: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setVibrationState(newState)
         }
     }
 }
