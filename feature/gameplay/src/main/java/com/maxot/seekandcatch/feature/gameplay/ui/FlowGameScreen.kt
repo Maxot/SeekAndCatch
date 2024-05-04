@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,6 +52,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.FlowGameUiState
@@ -70,6 +73,7 @@ fun FlowGameScreenRoute(
     toScoreScreen: () -> Unit
 ) {
     val rowWidth = viewModel.getRowWidth()
+    val lifeCount by viewModel.lifeCount.collectAsStateWithLifecycle()
     val goals by viewModel.goals.collectAsStateWithLifecycle()
     val score by viewModel.score.collectAsStateWithLifecycle()
     val figures by viewModel.figures.collectAsStateWithLifecycle()
@@ -79,6 +83,7 @@ fun FlowGameScreenRoute(
 
     FlowGameScreen(
         rowWidth = rowWidth,
+        lifeCount = lifeCount,
         goals = goals,
         score = score,
         figures = figures,
@@ -101,6 +106,7 @@ fun FlowGameScreenRoute(
 fun FlowGameScreen(
     modifier: Modifier = Modifier,
     rowWidth: Int = 4,
+    lifeCount: Int = 3,
     goals: Set<Goal<Any>>,
     score: Int,
     figures: List<Figure>,
@@ -163,6 +169,7 @@ fun FlowGameScreen(
                             it.size.height.toDp() // Height of GameInfoPanel
                         }
                     },
+                lifeCount = lifeCount,
                 goals = goals,
                 score = score,
                 coefficient = coefficient,
@@ -249,18 +256,24 @@ fun FlowGameScreen(
 @Composable
 fun GameInfoPanel(
     modifier: Modifier = Modifier,
+    lifeCount: Int = 3,
     goals: Set<Goal<Any>>,
     score: Int,
     coefficient: Float,
     gameDuration: Long,
 ) {
+    val maxLifeCount = 5
     Column(
         modifier = Modifier
             .then(modifier)
             .padding(10.dp)
     ) {
-        Row {
-            Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                modifier = Modifier
+                    .width(100.dp),
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
                 Text(
                     text = stringResource(id = R.string.label_score, score),
                     style = MaterialTheme.typography.bodyLarge
@@ -270,7 +283,23 @@ fun GameInfoPanel(
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
-            GoalsLayout(goals = goals)
+            Column(modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.End) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    repeat(maxLifeCount - lifeCount) {
+                        Icon(imageVector = SaCIcons.UnselectedFavorite, contentDescription = "")
+                    }
+                    repeat(lifeCount) {
+                        Icon(imageVector = SaCIcons.Favorite, contentDescription = "")
+                    }
+                }
+
+                GoalsLayout(goals = goals)
+            }
+
         }
 
         CoefficientProgressLayout(

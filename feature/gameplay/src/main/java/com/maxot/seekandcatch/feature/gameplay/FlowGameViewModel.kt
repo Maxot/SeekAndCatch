@@ -26,6 +26,7 @@ class FlowGameViewModel
     private val appSoundManager: AppSoundManager,
     private val vibrationManager: VibrationManager
 ) : ViewModel() {
+    val lifeCount: StateFlow<Int> = gameUseCase.lifeCount
     val goals: StateFlow<Set<Goal<Any>>> = gameUseCase.goals
     val score: StateFlow<Int> = gameUseCase.score
     val figures: StateFlow<List<Figure>> = gameUseCase.figures
@@ -65,20 +66,30 @@ class FlowGameViewModel
         )
 
     init {
-        viewModelScope.launch {
-            appSoundManager.init()
+        launchGame()
 
-            coefficient.collect {
-                val musicSpeed = 1 + it / 5
-                appSoundManager.setMusicSpeed(musicSpeed.toFloat())
-            }
-        }
+        processLifeCountChanges()
         processCoefficientChanges()
+    }
+
+    private fun launchGame() {
         viewModelScope.launch {
             selectedGameDifficulty.collect {
                 it?.let {
                     initGame(it)
                     startGame()
+                }
+            }
+        }
+    }
+
+    private fun processLifeCountChanges() {
+        var lastLifeCount = lifeCount.value
+        viewModelScope.launch {
+            lifeCount.collect {
+                if (lastLifeCount > it) {
+                    vibrationManager.vibrate()
+                    lastLifeCount = it
                 }
             }
         }

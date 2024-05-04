@@ -43,6 +43,10 @@ class FlowGameUseCase
     private var coefficientStep: Float = 0.2f
     private var percentOfSuitableItem: Float = 0.5f
 
+    private var _lifeCount =
+        MutableStateFlow(0)
+    val lifeCount: StateFlow<Int> = _lifeCount
+
     private var _goals =
         MutableStateFlow(emptySet<Goal<Any>>())
     val goals: StateFlow<Set<Goal<Any>>> = _goals
@@ -82,6 +86,7 @@ class FlowGameUseCase
         rowWidth = gameParams.rowWidth
         rowDuration = gameParams.rowDuration
 
+        _lifeCount.value = 3
         _goals.value = setOf(goalsRepository.getRandomGoal())
         _figures.value = figuresRepository.getRandomFigures(
             itemsCount = itemsCount,
@@ -161,7 +166,12 @@ class FlowGameUseCase
             if (endIndex < figures.value.size) {
                 val missedItemsCount = getMissedItemsCount(startIndex, endIndex)
                 repeat(missedItemsCount) {
-                    decreaseCoefficients()
+                    if (coefficient.value > 1) {
+                        decreaseCoefficients()
+                    } else {
+                        _lifeCount.value = lifeCount.value.dec()
+                        if (_lifeCount.value < 0) finishGame()
+                    }
                 }
             } else {
 //                finishGame()
