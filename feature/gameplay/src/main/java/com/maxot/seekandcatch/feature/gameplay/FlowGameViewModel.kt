@@ -9,6 +9,7 @@ import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.settings.AppSoundManager
+import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ class FlowGameViewModel
 @Inject constructor(
     private val gameUseCase: FlowGameUseCase,
     private val settingsRepository: SettingsRepository,
-    private val appSoundManager: AppSoundManager
+    private val appSoundManager: AppSoundManager,
+    private val vibrationManager: VibrationManager
 ) : ViewModel() {
     val goals: StateFlow<Set<Goal<Any>>> = gameUseCase.goals
     val score: StateFlow<Int> = gameUseCase.score
@@ -71,12 +73,23 @@ class FlowGameViewModel
                 appSoundManager.setMusicSpeed(musicSpeed.toFloat())
             }
         }
+        processCoefficientChanges()
         viewModelScope.launch {
             selectedGameDifficulty.collect {
                 it?.let {
                     initGame(it)
                     startGame()
                 }
+            }
+        }
+    }
+
+    private fun processCoefficientChanges() {
+        var lastCoefficient = coefficient.value
+        viewModelScope.launch {
+            coefficient.collect {
+                if (it < lastCoefficient) vibrationManager.vibrate()
+                lastCoefficient = coefficient.value
             }
         }
     }
