@@ -35,7 +35,8 @@ class FlowGameUseCase
     private val figuresRepository: FiguresRepository,
     private val goalsRepository: GoalsRepository
 ) {
-    @Px private var itemHeightPx = 0
+    @Px
+    private var itemHeightPx = 0
     private var rowWidth: Int = 4
     private var rowDuration: Int = 500
     private var itemsCount: Int = 1000
@@ -282,9 +283,9 @@ class FlowGameUseCase
         val coefInt = coefficient.value.toInt()
 
         // Percentage of time that need to be subtracted from 100% of duration
-        val coefPercentage = (coefInt * coefInt / 100f).coerceAtMost(0.4f)
-        val timePercentage = (((gameDuration.value / 1000 / 30) * 5) / 100f).coerceAtMost(0.2f)
-        val actualDurationPercentage = 1f - coefPercentage - timePercentage
+        val coefPercentage = (coefInt * coefInt / 100f)
+        val timePercentage = (((gameDuration.value / 1000 / 30) * 5) / 100f)
+        val actualDurationPercentage = (1f - coefPercentage - timePercentage).coerceAtLeast(0.35f)
 
         val duration = (rowCount * rowDuration) * actualDurationPercentage
 

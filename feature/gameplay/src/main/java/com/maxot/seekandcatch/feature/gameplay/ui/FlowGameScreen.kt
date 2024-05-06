@@ -128,7 +128,14 @@ fun FlowGameScreen(
     val flowGameScreenContentDesc = stringResource(id = R.string.flow_game_screen_content_desc)
 
     val backgroundBrush =
-        Brush.linearGradient(listOf(Color.Red, Color.Transparent, Color.Green, Color.Transparent))
+        Brush.linearGradient(
+            listOf(
+                MaterialTheme.colorScheme.primary,
+                Color.Transparent,
+                MaterialTheme.colorScheme.secondary,
+                Color.Transparent
+            )
+        )
 
     val beforeAnimationDelay = 1000L
 
@@ -191,7 +198,7 @@ fun FlowGameScreen(
                 LaunchedEffect(
                     key1 = coefficient.toInt(),
                     key2 = figures.size,
-                    key3 = (gameDuration / 1000 / 30),
+                    key3 = (gameDuration / 1000 / 30), // each 30 second update
                 ) {
                     val pixelsToScrollWithSpacers =
                         getPixelsToScroll() + with(density) {
@@ -232,7 +239,7 @@ fun FlowGameScreen(
             }
 
             FlowGameUiState.Finished -> {
-                toScoreScreen()
+                toGameResultScreen()
             }
         }
     }
@@ -283,8 +290,10 @@ fun GameInfoPanel(
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
-            Column(modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.End) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.End
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
