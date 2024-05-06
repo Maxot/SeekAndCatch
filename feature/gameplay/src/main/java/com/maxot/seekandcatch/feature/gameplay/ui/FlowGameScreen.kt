@@ -60,6 +60,7 @@ import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GoalsLayout
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -89,6 +90,7 @@ fun FlowGameScreenRoute(
         coefficient = coefficient,
         gameDuration = gameDuration,
         flowGameUiState = flowGameUiState,
+        setGameReadyToStart = viewModel::setGameReadyToStart,
         onItemClick = viewModel::onItemClick,
         toGameResultScreen = toGameResultScreen,
         resumeGame = viewModel::resumeGame,
@@ -112,6 +114,7 @@ fun FlowGameScreen(
     coefficient: Float,
     gameDuration: Long,
     flowGameUiState: FlowGameUiState,
+    setGameReadyToStart: () -> Unit = {},
     onItemClick: (id: Int) -> Unit = {},
     toGameResultScreen: () -> Unit = {},
     resumeGame: () -> Unit = {},
@@ -135,8 +138,6 @@ fun FlowGameScreen(
                 Color.Transparent
             )
         )
-
-    val beforeAnimationDelay = 1000L
 
     val coroutineScope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
@@ -214,7 +215,10 @@ fun FlowGameScreen(
             }
 
             FlowGameUiState.Loading -> {
-
+                ReadyToGameLayout(
+                    goals = goals,
+                    setGameReadyToStart = setGameReadyToStart
+                )
             }
 
             FlowGameUiState.Paused -> {
@@ -256,6 +260,46 @@ fun FlowGameScreen(
     LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
         if (showPauseDialog.value)
             pauseGame() else resumeGame()
+    }
+}
+
+@Composable
+fun ReadyToGameLayout(
+    modifier: Modifier = Modifier,
+    goals: Set<Goal<Any>>,
+    setGameReadyToStart: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .then(modifier)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        var countDown by remember {
+            mutableStateOf(3)
+        }
+
+        val text = if (countDown > 0) "$countDown" else "Go!"
+        GoalsLayout(
+            modifier = Modifier,
+            goals = goals,
+            textStyle = MaterialTheme.typography.displaySmall
+        )
+        LaunchedEffect(key1 = Unit) {
+            repeat(3) {
+                delay(1_000)
+                countDown--
+            }
+            delay(500)
+            setGameReadyToStart()
+        }
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.displayLarge
+        )
+
     }
 }
 
@@ -374,35 +418,34 @@ fun GameFieldLayout(
 
 }
 
+/**
+ * Previews
+ */
+
+@Preview
 @Composable
-fun CoefficientProgressLayout(
-    modifier: Modifier = Modifier,
-    progress: Float,
-    currentCoefficient: Int
-) {
-    val coefficientProgressLayoutContentDesc =
-        stringResource(id = R.string.coefficient_progress_layout_content_desc)
+fun FlowGameScreenLoadingPreview() {
+    val figures = listOf(
+        Figure.getRandomFigure(1),
+        Figure.getRandomFigure(2),
+        Figure.getRandomFigure(3),
+        Figure.getRandomFigure(4),
+        Figure.getRandomFigure(5),
+        Figure.getRandomFigure(6),
+    )
 
-    Row(
-        modifier = Modifier
-            .then(modifier)
-            .semantics { contentDescription = coefficientProgressLayoutContentDesc }
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "x${currentCoefficient}",
-            style = MaterialTheme.typography.displaySmall
-        )
-        LinearProgressIndicator(progress = { progress.getDecimalPart() })
-        Text(
-            text = "x${(currentCoefficient + 1)}",
-            style = MaterialTheme.typography.displayMedium
-        )
-    }
+    FlowGameScreen(
+        goals = setOf(Goal.getRandomGoal()),
+        score = 11,
+        figures = figures,
+        coefficient = 1f,
+        gameDuration = 1000,
+        flowGameUiState = FlowGameUiState.Loading,
+        toGameResultScreen = { },
+        getPixelsToScroll = { 1000f },
+        onFirstVisibleItemIndexChanged = {}
+    )
 }
-
 
 @Preview
 @Composable

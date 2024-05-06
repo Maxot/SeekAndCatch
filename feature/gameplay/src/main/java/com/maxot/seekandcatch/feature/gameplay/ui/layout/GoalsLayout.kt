@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
@@ -26,7 +27,8 @@ import com.maxot.seekandcatch.feature.gameplay.R
 @Composable
 fun GoalsLayout(
     modifier: Modifier = Modifier,
-    goals: Set<Goal<Any>>
+    goals: Set<Goal<Any>>,
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium
 ) {
     val goalsLayoutContentDesc = stringResource(id = R.string.goals_layout_content_desc)
 
@@ -39,14 +41,14 @@ fun GoalsLayout(
     ) {
         Text(
             text = stringResource(id = R.string.label_goal),
-            style = MaterialTheme.typography.titleMedium
+            style = textStyle
         )
         goals.forEach { goal ->
             when (goal) {
                 is Goal.Colored -> {
                     Text(
                         text = stringResource(id = R.string.label_list_of_goal),
-                        style = MaterialTheme.typography.titleSmall
+                        style = textStyle
                     )
                     Box(
                         Modifier
@@ -54,13 +56,16 @@ fun GoalsLayout(
                             .padding(4.dp)
                             .background(goal.getGoal())
                     )
-                    Text(text = "color", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        text = "color",
+                        style = textStyle
+                    )
                 }
 
                 is Goal.Shaped -> {
                     Text(
                         text = stringResource(id = R.string.label_list_of_goal),
-                        style = MaterialTheme.typography.titleSmall
+                        style = textStyle
                     )
                     ColoredFigureLayout(
                         modifier = Modifier
@@ -69,7 +74,10 @@ fun GoalsLayout(
                         figure = Figure(type = goal.getGoal()),
                         size = 50.dp
                     )
-                    Text(text = "shape", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        text = "shape",
+                        style = textStyle
+                    )
                 }
             }
         }

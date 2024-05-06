@@ -11,6 +11,8 @@ import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.settings.MusicManager
 import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -65,9 +67,13 @@ class FlowGameViewModel
             initialValue = FlowGameUiState.Loading
         )
 
+    private val _readyToStart = MutableStateFlow(false)
+    val readyToStart: StateFlow<Boolean> = _readyToStart
+
     init {
         launchGame()
 
+        processReadyToStart()
         processLifeCountChanges()
         processCoefficientChanges()
     }
@@ -77,10 +83,25 @@ class FlowGameViewModel
             selectedGameDifficulty.collect {
                 it?.let {
                     initGame(it)
-                    startGame()
+                    this.cancel()
                 }
             }
         }
+    }
+
+    private fun processReadyToStart() {
+        viewModelScope.launch {
+            readyToStart.collect { isReady ->
+                if (isReady) {
+                    startGame()
+                    this.cancel()
+                }
+            }
+        }
+    }
+
+    fun setGameReadyToStart() {
+        _readyToStart.value = true
     }
 
     private fun processLifeCountChanges() {
@@ -115,14 +136,17 @@ class FlowGameViewModel
     }
 
     fun pauseGame() {
-        musicManager.pauseMusic()
-        gameUseCase.pauseGame()
+        if (readyToStart.value) {
+            musicManager.pauseMusic()
+            gameUseCase.pauseGame()
+        }
     }
 
     fun resumeGame() {
-        appSoundManager.startMusic()
-        gameUseCase.resumeGame()
+        if (readyToStart.value) {
             musicManager.startMusic()
+            gameUseCase.resumeGame()
+        }
     }
 
     fun finishGame() {
