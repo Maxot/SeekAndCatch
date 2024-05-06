@@ -119,7 +119,7 @@ class FlowGameUseCase
     fun finishGame() {
         gameJob?.cancel()
         timeJob?.cancel()
-        scoreRepository.setScore(score = score.value)
+        scoreRepository.setLastScore(score = score.value)
 
         _gameState.value = GameState.FINISHED
     }

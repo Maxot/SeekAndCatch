@@ -13,13 +13,14 @@ class ScoreRepositoryImpl
     private val prefs: SharedPreferences =
         context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
 
-    override fun setScore(score: Int) {
-        val lastBestScore = getBestScore()
-        if (lastBestScore < score) {
-            prefs.edit().putInt(bestScoreKey, score).apply()
-        }
+    override fun setLastScore(score: Int) {
         prefs.edit().putInt(lastScoreKey, score).apply()
     }
+
+    override fun setBestScore(score: Int) {
+        prefs.edit().putInt(bestScoreKey, score).apply()
+    }
+
 
     override fun getBestScore(): Int = prefs.getInt(bestScoreKey, 0)
     override fun getLastScore(): Int = prefs.getInt(lastScoreKey, 0)

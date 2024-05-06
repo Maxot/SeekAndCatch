@@ -70,7 +70,7 @@ const val TAG = "FlowGameScreen"
 @Composable
 fun FlowGameScreenRoute(
     viewModel: FlowGameViewModel = hiltViewModel(),
-    toScoreScreen: () -> Unit
+    toGameResultScreen: () -> Unit
 ) {
     val rowWidth = viewModel.getRowWidth()
     val lifeCount by viewModel.lifeCount.collectAsStateWithLifecycle()
@@ -91,7 +91,7 @@ fun FlowGameScreenRoute(
         gameDuration = gameDuration,
         flowGameUiState = flowGameUiState,
         onItemClick = viewModel::onItemClick,
-        toScoreScreen = toScoreScreen,
+        toGameResultScreen = toGameResultScreen,
         resumeGame = viewModel::resumeGame,
         pauseGame = viewModel::pauseGame,
         finishGame = viewModel::finishGame,
@@ -114,7 +114,7 @@ fun FlowGameScreen(
     gameDuration: Long,
     flowGameUiState: FlowGameUiState,
     onItemClick: (id: Int) -> Unit = {},
-    toScoreScreen: () -> Unit = {},
+    toGameResultScreen: () -> Unit = {},
     resumeGame: () -> Unit = {},
     pauseGame: () -> Unit = {},
     finishGame: () -> Unit = {},
@@ -275,7 +275,7 @@ fun GameInfoPanel(
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
-                    text = stringResource(id = R.string.label_score, score),
+                    text = stringResource(id = R.string.feature_gameplay_label_score, score),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
@@ -415,7 +415,7 @@ fun FlowGameScreenActivePreview() {
         coefficient = 1f,
         gameDuration = 1000,
         flowGameUiState = FlowGameUiState.Active,
-        toScoreScreen = { },
+        toGameResultScreen = { },
         getPixelsToScroll = { 1000f },
         onFirstVisibleItemIndexChanged = {}
     )

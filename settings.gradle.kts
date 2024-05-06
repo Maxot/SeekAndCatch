@@ -21,7 +21,6 @@ include(":data")
 include(":data-test")
 
 include(":feature:gameplay")
-include(":feature:score")
 include(":feature:settings")
 include(":feature:leaderboard")
 include(":feature:account")

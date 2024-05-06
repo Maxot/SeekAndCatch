@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.score
+package com.maxot.seekandcatch.feature.gameplay
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ScoreViewModel
+class GameResultViewModel
 @Inject constructor(
     private val scoreRepository: ScoreRepository,
     private val leaderboardRepository: LeaderboardRepository,
@@ -21,7 +21,9 @@ class ScoreViewModel
     fun getLastScore() = scoreRepository.getLastScore()
     fun getBestScore() = scoreRepository.getBestScore()
 
-    fun addToLeaderboard(score: Int) {
+    fun addResultToLeaderboard(score: Int) {
+        scoreRepository.setBestScore(score)
+
         viewModelScope.launch {
             val userName = accountRepository.observeUserName().first()
             leaderboardRepository.addRecord(
@@ -31,6 +33,5 @@ class ScoreViewModel
                 )
             )
         }
-
     }
 }

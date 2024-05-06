@@ -61,7 +61,6 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":feature:account"))
     implementation(project(":feature:gameplay"))
-    implementation(project(":feature:score"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:leaderboard"))
     implementation(project(":data"))

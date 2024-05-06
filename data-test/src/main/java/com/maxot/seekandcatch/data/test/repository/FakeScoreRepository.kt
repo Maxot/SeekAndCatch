@@ -7,9 +7,12 @@ class FakeScoreRepository : ScoreRepository {
     private var bestScore: Int = 0
     private var lastScore: Int = 0
 
-    override fun setScore(score: Int) {
+    override fun setLastScore(score: Int) {
         lastScore = score
-        bestScore = maxOf(bestScore, score)
+    }
+
+    override fun setBestScore(score: Int) {
+        bestScore = score
     }
 
     override fun getBestScore(): Int = bestScore

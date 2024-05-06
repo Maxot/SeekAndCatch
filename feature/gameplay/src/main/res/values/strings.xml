@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_gameplay_title">Game</string>
-    <string name="label_score">Score: %1$d</string>
+    <string name="feature_gameplay_label_score">Score: %1$d</string>
     <string name="start_game_button_text">Start Game</string>
 
     //Game Screen
@@ -27,4 +27,6 @@
     <string name="coefficient_progress_layout_content_desc">Coefficient Progress</string>
     <string name="game_field_layout_content_desc">Game Field</string>
     <string name="feature_gameplay_game_selection_screen_content_desc">Game Selection</string>
+    <string name="feature_gameplay_button_to_main_screen">To main screen</string>
+    <string name="feature_gameplay_label_your_best_score">Your best score: %1$d</string>
 </resources>
