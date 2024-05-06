@@ -3,27 +3,31 @@ package com.maxot.seekandcatch.feature.settings
 import android.content.Context
 import android.media.MediaPlayer
 import android.media.PlaybackParams
-import com.maxot.seekandcatch.data.datastore.SettingsDataStore
+import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class AppSoundManager
+class MusicManager
 @Inject constructor(
     @ApplicationContext val context: Context,
-    private val settingsDataStore: SettingsDataStore
+    private val settingsRepository: SettingsRepository
 ) {
     private var mediaPlayer: MediaPlayer? = null
-    suspend fun init() {
-        settingsDataStore.soundStateFlow.collect { isSoundEnabled ->
-            if (isSoundEnabled) {
+
+    init {
+        CoroutineScope(Job()).launch {
+            val isMusicEnabled = settingsRepository.observeMusicState().first()
+            if (isMusicEnabled) {
                 mediaPlayer = MediaPlayer.create(context, R.raw.game_sound).apply {
                     isLooping = true
                 }
-            } else {
-                mediaPlayer = null
             }
+            this.cancel()
         }
     }
 

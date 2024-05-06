@@ -8,7 +8,7 @@ import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.repository.SettingsRepository
-import com.maxot.seekandcatch.feature.settings.AppSoundManager
+import com.maxot.seekandcatch.feature.settings.MusicManager
 import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +23,7 @@ class FlowGameViewModel
 @Inject constructor(
     private val gameUseCase: FlowGameUseCase,
     private val settingsRepository: SettingsRepository,
-    private val appSoundManager: AppSoundManager,
+    private val musicManager: MusicManager,
     private val vibrationManager: VibrationManager
 ) : ViewModel() {
     val lifeCount: StateFlow<Int> = gameUseCase.lifeCount
@@ -110,27 +110,28 @@ class FlowGameViewModel
     }
 
     private fun startGame() {
-        appSoundManager.startMusic()
+        musicManager.startMusic()
         gameUseCase.startGame()
     }
 
     fun pauseGame() {
-        appSoundManager.pauseMusic()
+        musicManager.pauseMusic()
         gameUseCase.pauseGame()
     }
 
     fun resumeGame() {
         appSoundManager.startMusic()
         gameUseCase.resumeGame()
+            musicManager.startMusic()
     }
 
     fun finishGame() {
-        appSoundManager.stopMusic()
+        musicManager.stopMusic()
         gameUseCase.finishGame()
     }
 
     private fun stopMusic() {
-        appSoundManager.stopMusic()
+        musicManager.stopMusic()
     }
 
     fun onItemClick(id: Int) {
@@ -151,7 +152,7 @@ class FlowGameViewModel
 
     override fun onCleared() {
         super.onCleared()
-        appSoundManager.release()
+        musicManager.release()
     }
 }
 
