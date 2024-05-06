@@ -28,6 +28,7 @@ android {
 
 dependencies {
     implementation(project(":feature:settings"))
+    implementation(project(":feature:account"))
     implementation(project(":data"))
     implementation(project(":core:domain"))
     implementation(project(":core:designsystem"))

@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.maxot.seekandcatch.feature.account.ui.UserNameDialog
 import com.maxot.seekandcatch.feature.gameplay.GameResultViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 
@@ -32,27 +34,35 @@ fun GameResultScreen(
     viewModel: GameResultViewModel = hiltViewModel(),
     toMainScreen: () -> Unit,
 ) {
+    val userName by viewModel.userName.collectAsState()
+
     val lastScore by rememberSaveable {
         mutableStateOf(viewModel.getLastScore())
     }
     val bestScore by rememberSaveable {
         mutableStateOf(viewModel.getBestScore())
     }
+
     GameResultScreen(
+        userName = userName,
         lastScore = lastScore,
         bestScore = bestScore,
         toMainScreen = toMainScreen,
-        addResultToLeaderboard = viewModel::addResultToLeaderboard
+        processNewBestScore = viewModel::processNewBestScore
     )
 }
 
 @Composable
 fun GameResultScreen(
+    userName: String = "",
     lastScore: Int,
     bestScore: Int,
     toMainScreen: () -> Unit,
-    addResultToLeaderboard: (Int) -> Unit
+    processNewBestScore: (Int, Boolean) -> Unit
 ) {
+    val showUserNameDialog = remember {
+        mutableStateOf(false)
+    }
     val isNewBest by remember {
         derivedStateOf {
             lastScore > bestScore
@@ -68,6 +78,13 @@ fun GameResultScreen(
                 Color.Transparent
             )
         )
+
+    if (showUserNameDialog.value) {
+        UserNameDialog(
+            onConfirmation = { showUserNameDialog.value = false },
+            onDismissRequest = { showUserNameDialog.value = false }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -92,10 +109,15 @@ fun GameResultScreen(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge
                 )
+                Spacer(modifier = Modifier.height(20.dp))
                 OutlinedButton(
                     onClick = {
-                        addResultToLeaderboard(lastScore)
-                        toMainScreen()
+                        if (userName.isEmpty()) {
+                            showUserNameDialog.value = true
+                        } else {
+                            processNewBestScore(lastScore, true)
+                            toMainScreen()
+                        }
                     },
                 ) {
                     Text(
@@ -120,20 +142,22 @@ fun GameResultScreen(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
-            Spacer(modifier = Modifier.height(5.dp))
-            OutlinedButton(
-                onClick = { toMainScreen() },
-
-                ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.feature_gameplay_button_to_main_screen,
-                        lastScore
-                    ),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        OutlinedButton(
+            onClick = {
+                processNewBestScore(lastScore, false)
+                toMainScreen()
+            },
+        ) {
+            Text(
+                text = stringResource(
+                    id = R.string.feature_gameplay_button_to_main_screen,
+                    lastScore
+                ),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
         }
     }
 }
@@ -145,7 +169,7 @@ fun GameResultScreenPreview() {
         lastScore = 5,
         bestScore = 15,
         toMainScreen = {},
-        addResultToLeaderboard = {}
+        processNewBestScore = { _, _ -> }
     )
 }
 
@@ -156,6 +180,6 @@ fun GameResultScreenNewBestPreview() {
         lastScore = 20,
         bestScore = 15,
         toMainScreen = {},
-        addResultToLeaderboard = {}
+        processNewBestScore = { _, _ -> }
     )
 }
