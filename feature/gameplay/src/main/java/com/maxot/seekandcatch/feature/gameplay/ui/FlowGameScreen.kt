@@ -281,11 +281,18 @@ fun ReadyToGameLayout(
         }
 
         val text = if (countDown > 0) "$countDown" else "Go!"
-        GoalsLayout(
+
+
+        DetailedGoalsLayout(
             modifier = Modifier,
             goals = goals,
             textStyle = MaterialTheme.typography.displaySmall
         )
+        Text(
+            text = "Click on that items",
+            style = MaterialTheme.typography.displaySmall
+        )
+
         LaunchedEffect(key1 = Unit) {
             repeat(3) {
                 delay(1_000)
@@ -349,7 +356,7 @@ fun GameInfoPanel(
                     }
                 }
 
-                GoalsLayout(goals = goals)
+                DetailedGoalsLayout(goals = goals)
             }
 
         }
