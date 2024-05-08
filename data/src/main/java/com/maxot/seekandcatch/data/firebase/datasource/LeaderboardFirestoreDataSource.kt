@@ -24,16 +24,31 @@ class LeaderboardFirestoreDataSource
             querySnapshot.toObjects<LeaderboardRecord>()
         }
 
-    override fun addRecord(record: LeaderboardRecord) {
+    override fun addRecord(
+        record: LeaderboardRecord,
+        userId: String,
+        onSuccessful: (String) -> Unit
+    ) {
         val recordMap = hashMapOf(
             LEADERBOARD_DOCUMENT_USER_NAME_KEY to record.userName,
             LEADERBOARD_DOCUMENT_SCORE_KEY to record.score
         )
-
-        leaderboardCollection
-            .add(recordMap)
-            .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully written!") }
-            .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+        if (userId.isNotEmpty()) {
+            val userDocument = leaderboardCollection.document(userId)
+            userDocument.set(recordMap)
+                .addOnSuccessListener {
+                    Log.d(TAG, "DocumentSnapshot successfully written!")
+                }
+                .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+        } else {
+            leaderboardCollection
+                .add(recordMap)
+                .addOnSuccessListener { documentReference ->
+                    onSuccessful(documentReference.id)
+                    Log.d(TAG, "DocumentSnapshot successfully written!")
+                }
+                .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+        }
     }
 
     companion object {

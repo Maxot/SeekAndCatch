@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface LeaderboardRepository {
     fun observeRecords(): Flow<List<LeaderboardRecord>>
 
-    fun addRecord(record: LeaderboardRecord)
+    suspend fun addRecord(record: LeaderboardRecord)
 }

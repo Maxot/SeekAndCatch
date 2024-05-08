@@ -12,4 +12,8 @@ class AccountRepositoryImpl
     override suspend fun setUserName(name: String) = accountDataStore.setUserName(name)
 
     override fun observeUserName(): Flow<String> = accountDataStore.userNameFlow
+
+    override suspend fun setUserId(id: String) = accountDataStore.setUserId(id)
+
+    override fun observeUserId(): Flow<String> = accountDataStore.userIdFlow
 }

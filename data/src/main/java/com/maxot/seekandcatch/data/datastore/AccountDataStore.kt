@@ -20,9 +20,13 @@ class AccountDataStore
     private val dataStore = context.accountDataStore
 
     private val userNameKey = stringPreferencesKey(USER_NAME_KEY)
+    private val userIdKey = stringPreferencesKey(USER_ID_KEY)
 
     val userNameFlow: Flow<String> = dataStore.data.map { preferences ->
         preferences[userNameKey] ?: ""
+    }
+    val userIdFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[userIdKey] ?: ""
     }
 
     suspend fun setUserName(name: String) {
@@ -31,8 +35,15 @@ class AccountDataStore
         }
     }
 
+    suspend fun setUserId(name: String) {
+        dataStore.edit { settings ->
+            settings[userIdKey] = name
+        }
+    }
+
     companion object {
         const val ACCOUNT_DATA_STORE_NAME = "Account"
         const val USER_NAME_KEY = "User_name_key"
+        const val USER_ID_KEY = "User_id_key"
     }
 }

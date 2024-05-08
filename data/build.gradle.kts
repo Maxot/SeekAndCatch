@@ -28,6 +28,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.firebase.bom))
