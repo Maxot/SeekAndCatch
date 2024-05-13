@@ -6,6 +6,7 @@ androidxLifecycle = "2.7.0"
 androidxComposeBom = "2024.05.00"
 androidxEspresso = "3.5.1"
 androidxHiltNavigationCompose = "1.2.0"
+androidXGraphicsShapes = "1.0.0-beta01"
 androidxNavigation = "2.7.7"
 androidxTestExt = "1.1.5"
 firebaseBom = "33.0.0"
@@ -37,6 +38,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
+androidx-graphics-shapes = { group = "androidx.graphics", name = "graphics-shapes", version.ref = "androidXGraphicsShapes" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "androidxNavigation" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }

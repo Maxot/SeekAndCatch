@@ -26,4 +26,5 @@ android {
 
 dependencies {
     implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.graphics.shapes)
 }

@@ -2,11 +2,11 @@ package com.maxot.seekandcatch.data.model
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import com.maxot.seekandcatch.core.designsystem.RoundedTriangleShape
 
 /**
  * Represent an object(figure) that is main block of the game and used in game process.
@@ -46,14 +46,7 @@ data class Figure(
 fun Figure.getShapeForFigure(): Shape {
     return when (this.type) {
         Figure.FigureType.TRIANGLE -> {
-            GenericShape { size, _ ->
-                // 1)
-                moveTo(size.width / 2f, 0f)
-                // 2)
-                lineTo(size.width, size.height)
-                // 3)
-                lineTo(0f, size.height)
-            }
+            RoundedTriangleShape()
         }
 
         Figure.FigureType.CIRCLE -> {
