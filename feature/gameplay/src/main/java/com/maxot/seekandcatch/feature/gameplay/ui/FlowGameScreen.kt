@@ -59,7 +59,7 @@ import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.GoalsLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -73,6 +73,7 @@ fun FlowGameScreenRoute(
     toGameResultScreen: () -> Unit
 ) {
     val rowWidth = viewModel.getRowWidth()
+    val maxLifeCount = viewModel.getMaxLifeCount()
     val lifeCount by viewModel.lifeCount.collectAsStateWithLifecycle()
     val goals by viewModel.goals.collectAsStateWithLifecycle()
     val score by viewModel.score.collectAsStateWithLifecycle()
@@ -83,6 +84,7 @@ fun FlowGameScreenRoute(
 
     FlowGameScreen(
         rowWidth = rowWidth,
+        maxLifeCount = maxLifeCount,
         lifeCount = lifeCount,
         goals = goals,
         score = score,
@@ -107,6 +109,7 @@ fun FlowGameScreenRoute(
 fun FlowGameScreen(
     modifier: Modifier = Modifier,
     rowWidth: Int = 4,
+    maxLifeCount: Int = 5,
     lifeCount: Int = 3,
     goals: Set<Goal<Any>>,
     score: Int,
@@ -176,6 +179,7 @@ fun FlowGameScreen(
                             it.size.height.toDp() // Height of GameInfoPanel
                         }
                     },
+                maxLifeCount = maxLifeCount,
                 lifeCount = lifeCount,
                 goals = goals,
                 score = score,
@@ -313,13 +317,13 @@ fun ReadyToGameLayout(
 @Composable
 fun GameInfoPanel(
     modifier: Modifier = Modifier,
+    maxLifeCount: Int = 5,
     lifeCount: Int = 3,
     goals: Set<Goal<Any>>,
     score: Int,
     coefficient: Float,
     gameDuration: Long,
 ) {
-    val maxLifeCount = 5
     Column(
         modifier = Modifier
             .then(modifier)

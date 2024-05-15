@@ -11,7 +11,10 @@ enum class GameDifficulty(val gameParams: GameParams) {
             coefficientStep = 0.25f,
             scorePoint = 10,
             rowWidth = 3,
-            rowDuration = 700
+            rowDuration = 700,
+            lifeCount = 5,
+            maxLifeCount = 5,
+            itemsPassedWithoutMissToGetLife = 25
         )
     ),
     NORMAL(
@@ -20,7 +23,10 @@ enum class GameDifficulty(val gameParams: GameParams) {
             coefficientStep = 0.2f,
             scorePoint = 15,
             rowWidth = 4,
-            rowDuration = 700
+            rowDuration = 700,
+            lifeCount = 3,
+            maxLifeCount = 5,
+            itemsPassedWithoutMissToGetLife = 50
         )
     ),
     HARD(
@@ -29,7 +35,10 @@ enum class GameDifficulty(val gameParams: GameParams) {
             coefficientStep = 0.1f,
             scorePoint = 20,
             rowWidth = 5,
-            rowDuration = 700
+            rowDuration = 700,
+            lifeCount = 1,
+            maxLifeCount = 5,
+            itemsPassedWithoutMissToGetLife = 100
         )
     )
 }

@@ -24,10 +24,13 @@ enum class GameState {
 }
 
 /**
- * Represent game logic for Flow Game Mode. The game consists of grid of items with fixed width.
- * Items are auto-scrolled with some speed.
- * During this process user should click on items.
- * If clicked item is fit for the goal - add more score points else finish game.
+ * Represent game logic for Flow Game Mode.
+ * The game consists of grid of [figures] with fixed [rowWidth] and the [goals].
+ * Items are auto-scrolled with some speed(px/ms), the amount of pixel to scroll calculated by [getPixelsToScroll]
+ * and the scroll duration calculated by [getScrollDuration]. Then UI pass back [firstVisibleItemIndex]
+ * to process game updates via [processGameChanges].
+ * During this process user should click on items via [onItemClick] then it check if item if fit for the goals
+ * via [isFitForGoal], and if it is fit [onCorrectItemClicked] else [finishGame].
  */
 class FlowGameUseCase
 @Inject constructor(
@@ -36,13 +39,19 @@ class FlowGameUseCase
     private val goalsRepository: GoalsRepository
 ) {
     @Px
-    private var itemHeightPx = 0
+    private var itemHeightPx: Int = 0
     private var rowWidth: Int = 4
     private var rowDuration: Int = 500
     private var itemsCount: Int = 1000
     private var scorePoint: Int = 10
     private var coefficientStep: Float = 0.2f
     private var percentOfSuitableItem: Float = 0.5f
+    var maxLifeCount: Int = 5
+        private set
+
+    private var itemsPassedWithoutMissToGetLife = 10
+
+    private var itemsPassedWithoutMissing = 0
 
     private var _lifeCount =
         MutableStateFlow(0)
@@ -86,8 +95,10 @@ class FlowGameUseCase
         percentOfSuitableItem = gameParams.percentOfSuitableItem
         rowWidth = gameParams.rowWidth
         rowDuration = gameParams.rowDuration
+        maxLifeCount = gameParams.maxLifeCount
+        itemsPassedWithoutMissToGetLife = gameParams.itemsPassedWithoutMissToGetLife
 
-        _lifeCount.value = 3
+        _lifeCount.value = gameParams.lifeCount
         _goals.value = setOf(goalsRepository.getRandomGoal())
         _figures.value = figuresRepository.getRandomFigures(
             itemsCount = itemsCount,
@@ -167,10 +178,11 @@ class FlowGameUseCase
             if (endIndex < figures.value.size) {
                 val missedItemsCount = getMissedItemsCount(startIndex, endIndex)
                 repeat(missedItemsCount) {
+                    itemsPassedWithoutMissing = 0
                     if (coefficient.value > 1) {
                         decreaseCoefficients()
                     } else {
-                        _lifeCount.value = lifeCount.value.dec()
+                        decreaseLifeCount()
                         if (_lifeCount.value < 0) finishGame()
                     }
                 }
@@ -178,6 +190,15 @@ class FlowGameUseCase
 //                finishGame()
             }
         }
+    }
+
+    private fun increaseLifeCount() {
+        _lifeCount.value =
+            if (lifeCount.value < maxLifeCount) lifeCount.value.inc() else lifeCount.value
+    }
+
+    private fun decreaseLifeCount() {
+        _lifeCount.value = lifeCount.value.dec()
     }
 
     private fun increaseCoefficients() {
@@ -249,12 +270,22 @@ class FlowGameUseCase
         //TODO: Look for some replacement for 'find' operator. Maybe use HashMap?
         figures.value.find { figure -> figure.id == id }?.let { figure ->
             if (isItemFitForGoals(goals.value, figure)) {
-                increaseScore()
-                increaseCoefficients()
                 figure.isActive = false
+                onCorrectItemClicked()
             } else {
                 finishGame()
             }
+        }
+    }
+
+    private fun onCorrectItemClicked() {
+        increaseScore()
+        increaseCoefficients()
+
+        itemsPassedWithoutMissing++
+        if (itemsPassedWithoutMissing >= itemsPassedWithoutMissToGetLife) {
+            increaseLifeCount()
+            itemsPassedWithoutMissing = 0
         }
     }
 
@@ -274,7 +305,7 @@ class FlowGameUseCase
 
     /**
      * The duration of scrolling animation for fixed items count.
-     * Formula: scroll duration = (row count * row duration) * actual percent(<=1).
+     * Formula: scroll duration = (row count * row duration) * acceleration percent(<=1).
      *
      * @return scroll duration in millisecond.
      */

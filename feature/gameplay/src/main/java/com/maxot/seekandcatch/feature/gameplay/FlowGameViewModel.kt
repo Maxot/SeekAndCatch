@@ -162,6 +162,8 @@ class FlowGameViewModel
         gameUseCase.onItemClick(id)
     }
 
+    fun getMaxLifeCount() = gameUseCase.maxLifeCount
+
     fun getRowWidth() = gameUseCase.getRowWidth()
 
     fun getPixelsToScroll(): Float = gameUseCase.getPixelsToScroll()
