@@ -8,7 +8,7 @@ android {
     namespace = "com.maxot.seekandcatch.core.domain"
     compileSdk = 34
     defaultConfig {
-        minSdk = 30
+        minSdk = 26
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -27,6 +27,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":data"))
     implementation(platform(libs.androidx.compose.bom))
 

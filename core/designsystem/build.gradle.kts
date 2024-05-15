@@ -7,7 +7,7 @@ android {
     namespace = "com.maxot.seekandcatch.core.designsystem"
     compileSdk = 34
     defaultConfig {
-        minSdk = 30
+        minSdk = 26
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

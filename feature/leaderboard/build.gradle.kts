@@ -8,7 +8,7 @@ android {
     namespace = "com.maxot.seekandcatch.feature.leaderboard"
     compileSdk = 34
     defaultConfig {
-        minSdk = 30
+        minSdk = 26
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
