@@ -2,6 +2,7 @@ package com.maxot.seekandcatch.feature.leaderboard.ui
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,7 +54,12 @@ fun LeaderBoardScreen(
         }
 
         is LeaderboardUiState.Loading -> {
-            CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
 
         is LeaderboardUiState.Successful -> {
@@ -69,7 +75,7 @@ fun LeaderBoardScreen(
             ) {
                 itemsIndexed(
                     items = leaderboardUiState.data,
-//            key = { leaderRecord -> leaderRecord }
+                    key = { index: Int, item: LeaderboardRecord -> index }
                 ) { index: Int, item: LeaderboardRecord ->
                     LeaderLayout(
                         itemIndex = index, leaderRecord = item
@@ -89,15 +95,15 @@ fun LeaderLayout(
 ) {
     val borderColor = when (itemIndex) {
         0 -> Color.Yellow
-        1 -> Color.Gray
+        1 -> Color.LightGray
         2 -> Color.Gray
-        else -> Color.Gray
+        else -> Color.White
     }
 
     ElevatedCard(
         modifier = Modifier
             .then(modifier)
-            .padding(20.dp)
+            .padding(start = 10.dp, top = 10.dp, end = 10.dp)
             .fillMaxWidth()
             .border(width = 3.dp, color = borderColor),
         elevation = CardDefaults.cardElevation(
@@ -108,7 +114,7 @@ fun LeaderLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = ((("${itemIndex + 1}. " + leaderRecord.userName))))

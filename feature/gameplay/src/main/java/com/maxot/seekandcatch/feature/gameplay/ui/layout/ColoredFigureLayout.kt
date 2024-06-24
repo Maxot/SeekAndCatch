@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -73,12 +70,8 @@ fun ColoredFigureLayout(
     }
     var heightInPx: Float = 0f
 
-    var visible by remember {
-        mutableStateOf(figure.isActive)
-    }
-
     val alpha by animateFloatAsState(
-        if (visible) 1f else 0f, label = "AlphaAnimation"
+        if (figure.isActive) 1f else 0f, label = "AlphaAnimation"
     )
 
     Box(
@@ -97,9 +90,8 @@ fun ColoredFigureLayout(
             .onGloballyPositioned {
                 heightInPx = it.size.height.toFloat() // Maybe return from there?
             }
-            .clickable(visible) {
+            .clickable(figure.isActive) {
                 onItemClick()
-                visible = false
             }
             .then(modifier)
     )
