@@ -8,6 +8,8 @@ import com.maxot.seekandcatch.data.test.repository.FakeFiguresRepository
 import com.maxot.seekandcatch.data.test.repository.FakeGoalsRepository
 import com.maxot.seekandcatch.data.test.repository.FakeScoreRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -31,10 +33,21 @@ class FlowGameUseCaseTest {
         Figure(id = 7, type = Figure.FigureType.TRIANGLE, color = Color.Blue),
         Figure(id = 8, type = Figure.FigureType.SQUARE, color = Color.Yellow),
         Figure(id = 9, type = Figure.FigureType.CIRCLE, color = Color.Yellow),
+//        Figure(id = 10, type = Figure.FigureType.CIRCLE, color = Color.Red),
+//        Figure(id = 11, type = Figure.FigureType.TRIANGLE, color = Color.Blue),
+//        Figure(id = 12, type = Figure.FigureType.SQUARE, color = Color.Yellow),
+//        Figure(id = 13, type = Figure.FigureType.CIRCLE, color = Color.Red),
+//        Figure(id = 14, type = Figure.FigureType.TRIANGLE, color = Color.Red),
+//        Figure(id = 15, type = Figure.FigureType.SQUARE, color = Color.Blue),
+//        Figure(id = 16, type = Figure.FigureType.CIRCLE, color = Color.Red),
+//        Figure(id = 17, type = Figure.FigureType.TRIANGLE, color = Color.Blue),
+//        Figure(id = 18, type = Figure.FigureType.SQUARE, color = Color.Yellow),
+//        Figure(id = 19, type = Figure.FigureType.CIRCLE, color = Color.Yellow),
     )
     private val testGoal = Goal.Shaped(Figure.FigureType.CIRCLE)
 
     private val useCase = FlowGameUseCase(
+        coroutineScope = TestScope(),
         figuresRepository = figuresRepository,
         scoreRepository = scoreRepository,
         goalsRepository = goalsRepository
@@ -43,7 +56,10 @@ class FlowGameUseCaseTest {
         itemsCount = 10,
         percentOfSuitableItem = 0.5f,
         coefficientStep = 0.25f,
-        scorePoint = 10
+        scorePoint = 10,
+        maxLifeCount = 5,
+        lifeCount = 3,
+        itemsPassedWithoutMissToGetLife = 3
     )
 
     @Before
@@ -107,6 +123,38 @@ class FlowGameUseCaseTest {
         assertEquals(getCurrentCoefficient(), 1f)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun firstVisibleItemIndex_isNineteen_lifeDecreased() = runTest {
+        useCase.startGame()
+        assertEquals(getCurrentLifeCount(), 3)
+
+        useCase.setFirstVisibleItemIndex(9) // need simulate scroll
+        advanceUntilIdle()
+
+        assertEquals(getCurrentLifeCount(), 4)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun fiveItemClicked_withoutMissed_lifeIncreased() = runTest {
+        useCase.startGame()
+
+        assertEquals(getCurrentLifeCount(), 3)
+
+        useCase.onItemClick(id = 0)
+        useCase.onItemClick(id = 3)
+        useCase.onItemClick(id = 6)
+
+        simulateScroll(19).collect { firstVisibleItemIndex ->
+            useCase.setFirstVisibleItemIndex(firstVisibleItemIndex)
+        }
+
+        advanceUntilIdle()
+
+        assertEquals(getCurrentLifeCount(), 2)
+    }
+
     @Test
     fun getPixelsToScroll_calculatedAsExpected() {
         val pixelsToScroll = useCase.getPixelsToScroll()
@@ -138,5 +186,13 @@ class FlowGameUseCaseTest {
     private fun getCurrentGameState() = useCase.gameState.value
     private fun getCurrentCoefficient() = useCase.coefficient.value
 
+    private fun getCurrentLifeCount() = useCase.lifeCount.value
+
+    private fun simulateScroll(lastIndex: Int) = flow<Int> {
+        val itemsInRow = 4
+        for (i in 0..lastIndex step itemsInRow) {
+            emit(i)
+        }
+    }
 
 }

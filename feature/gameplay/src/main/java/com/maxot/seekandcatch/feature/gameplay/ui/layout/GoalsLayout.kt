@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -22,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
-import com.maxot.seekandcatch.data.model.getSuitableFigures
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable
@@ -105,9 +105,9 @@ fun DetailedGoalsLayout(
             style = textStyle
         )
         goals.forEach { goal ->
-            goal.getSuitableFigures().forEach { figure ->
-                ColoredFigureLayout(figure = figure, size = 50.dp)
-            }
+//            goal.getSuitableFigures().forEach { figure ->
+//                ColoredFigureLayout(figure = figure, size = 50.dp)
+//            }
 
         }
     }
@@ -117,7 +117,7 @@ fun DetailedGoalsLayout(
 @Composable
 fun GoalsLayoutPreview() {
     SeekAndCatchTheme {
-        GoalsLayout(goals = setOf(Goal.getRandomGoal()))
+        GoalsLayout(goals = setOf(Goal.Colored(Color.Red)))
     }
 }
 
@@ -125,6 +125,6 @@ fun GoalsLayoutPreview() {
 @Composable
 fun DetailedGoalsLayoutPreview() {
     SeekAndCatchTheme {
-        DetailedGoalsLayout(goals = setOf(Goal.getRandomGoal()))
+        DetailedGoalsLayout(goals = setOf(Goal.Colored(Color.Red)))
     }
 }

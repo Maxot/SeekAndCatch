@@ -109,6 +109,6 @@ fun ColoredFigureLayout(
 @Composable
 fun ColoredFigureLayoutPreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(figure = Figure.getRandomFigure())
+        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = Color.Red))
     }
 }

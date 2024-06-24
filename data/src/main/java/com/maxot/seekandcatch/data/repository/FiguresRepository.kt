@@ -4,7 +4,7 @@ import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 
 interface FiguresRepository {
-    fun getRandomFigure(): Figure
+    fun getRandomFigure(id: Int): Figure
 
     fun getRandomFigures(itemsCount: Int): List<Figure>
 

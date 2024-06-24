@@ -1,6 +1,7 @@
 package com.maxot.seekandcatch.core.domain
 
 import androidx.annotation.Px
+import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameParams
 import com.maxot.seekandcatch.data.model.Goal
@@ -34,6 +35,7 @@ enum class GameState {
  */
 class FlowGameUseCase
 @Inject constructor(
+    @ApplicationScope private val coroutineScope: CoroutineScope,
     private val scoreRepository: ScoreRepository,
     private val figuresRepository: FiguresRepository,
     private val goalsRepository: GoalsRepository
@@ -99,12 +101,15 @@ class FlowGameUseCase
         itemsPassedWithoutMissToGetLife = gameParams.itemsPassedWithoutMissToGetLife
 
         _lifeCount.value = gameParams.lifeCount
-        _goals.value = setOf(goalsRepository.getRandomGoal())
-        _figures.value = figuresRepository.getRandomFigures(
-            itemsCount = itemsCount,
-            percentageOfSuitableGoalItems = percentOfSuitableItem,
-            goal = _goals.value.first()
-        )
+
+        coroutineScope.launch {
+            _goals.value = setOf(goalsRepository.getRandomGoal())
+            _figures.value = figuresRepository.getRandomFigures(
+                itemsCount = itemsCount,
+                percentageOfSuitableGoalItems = percentOfSuitableItem,
+                goal = _goals.value.first()
+            )
+        }
 
         _gameState.value = GameState.CREATED
     }

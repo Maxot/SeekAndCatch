@@ -9,7 +9,7 @@ class FakeFiguresRepository() : FiguresRepository {
 
     private val randomFigure = Figure(type = Figure.FigureType.CIRCLE, color = Color.Red)
     private var randomFigures = listOf<Figure>()
-    override fun getRandomFigure(): Figure = randomFigure
+    override fun getRandomFigure(id: Int): Figure = randomFigure
 
     override fun getRandomFigures(itemsCount: Int): List<Figure> {
         return randomFigures

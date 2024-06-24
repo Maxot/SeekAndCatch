@@ -18,14 +18,19 @@ data class Figure(
     var isActive: Boolean = true
 ) {
     companion object {
-        val availableColors = arrayOf(Color.Red, Color.Blue, Color.Green, Color.Yellow)
-        fun getRandomFigure(id: Int = 0): Figure {
+        fun getRandomFigure(
+            id: Int = 0,
+            availableColors: Set<Color> = setOf(
+                Color.Red,
+                Color.Blue,
+                Color.Green,
+                Color.Yellow
+            )
+        ): Figure {
             val figureType = FigureType.entries.random()
             val color = availableColors.random()
             return Figure(id = id, type = figureType, color = color)
         }
-
-        fun getRandomColor() = availableColors.random()
     }
 
     enum class FigureType {

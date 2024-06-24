@@ -287,7 +287,7 @@ fun ReadyToGameLayout(
         val text = if (countDown > 0) "$countDown" else "Go!"
 
 
-        DetailedGoalsLayout(
+        GoalsLayout(
             modifier = Modifier,
             goals = goals,
             textStyle = MaterialTheme.typography.displaySmall
@@ -359,8 +359,8 @@ fun GameInfoPanel(
                         Icon(imageVector = SaCIcons.Favorite, contentDescription = "")
                     }
                 }
-
-                DetailedGoalsLayout(goals = goals)
+                
+                GoalsLayout(goals = goals)
             }
 
         }
@@ -446,7 +446,7 @@ fun FlowGameScreenLoadingPreview() {
     )
 
     FlowGameScreen(
-        goals = setOf(Goal.getRandomGoal()),
+        goals = setOf(Goal.Colored(Color.Red)),
         score = 11,
         figures = figures,
         coefficient = 1f,
@@ -471,7 +471,7 @@ fun FlowGameScreenActivePreview() {
     )
 
     FlowGameScreen(
-        goals = setOf(Goal.getRandomGoal()),
+        goals = setOf(Goal.Colored(Color.Red)),
         score = 11,
         figures = figures,
         coefficient = 1f,
@@ -496,7 +496,7 @@ fun FlowGameScreenPausedPreview() {
     )
 
     FlowGameScreen(
-        goals = setOf(Goal.getRandomGoal()),
+        goals = setOf(Goal.Colored(Color.Red)),
         score = 11,
         figures = figures,
         coefficient = 1f,
