@@ -215,8 +215,10 @@ class FlowGameUseCase
             _coefficient.value = (coefficient.value / 2).coerceAtLeast(1f)
     }
 
-    private fun increaseScore() {
-        _score.value += _coefficient.value.toInt() * scorePoint
+    private fun increaseScore(): Int {
+        val pointsAdded = _coefficient.value.toInt() * scorePoint
+        _score.value += pointsAdded
+        return pointsAdded
     }
 
     /**
@@ -270,21 +272,25 @@ class FlowGameUseCase
      * Do actions when an item clicked.
      *
      * @param id id of item that was clicked.
+     *
+     * @return the number of points added for this click.
      */
-    fun onItemClick(id: Int) {
+    fun onItemClick(id: Int): Int {
+        var pointsAdded = 0
         //TODO: Look for some replacement for 'find' operator. Maybe use HashMap?
         figures.value.find { figure -> figure.id == id }?.let { figure ->
             if (isItemFitForGoals(goals.value, figure)) {
                 figure.isActive = false
-                onCorrectItemClicked()
+                pointsAdded = onCorrectItemClicked()
             } else {
                 finishGame()
             }
         }
+        return pointsAdded
     }
 
-    private fun onCorrectItemClicked() {
-        increaseScore()
+    private fun onCorrectItemClicked(): Int {
+        val pointsAdded = increaseScore()
         increaseCoefficients()
 
         itemsPassedWithoutMissing++
@@ -292,6 +298,7 @@ class FlowGameUseCase
             increaseLifeCount()
             itemsPassedWithoutMissing = 0
         }
+        return pointsAdded
     }
 
     /**

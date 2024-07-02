@@ -1,6 +1,8 @@
 package com.maxot.seekandcatch.feature.gameplay.ui.layout
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,8 +10,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -27,6 +35,7 @@ import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -47,7 +56,7 @@ fun ColoredFigureLayout(
     modifier: Modifier = Modifier,
     size: Dp? = null,
     figure: Figure,
-    onItemClick: () -> Unit = {}
+    onItemClick: () -> Int = { 0 }
 ) {
     val coloredFigureContentDesc =
         stringResource(id = R.string.colored_figure_content_desc, figure.id)
@@ -73,7 +82,11 @@ fun ColoredFigureLayout(
     val alpha by animateFloatAsState(
         if (figure.isActive) 1f else 0f, label = "AlphaAnimation"
     )
+    val alphaScore = remember { Animatable(1f) }
 
+    val pointsAdded = remember {
+        mutableStateOf(0)
+    }
     Box(
         modifier = Modifier
             .semantics {
@@ -91,16 +104,52 @@ fun ColoredFigureLayout(
                 heightInPx = it.size.height.toFloat() // Maybe return from there?
             }
             .clickable(figure.isActive) {
-                onItemClick()
+                pointsAdded.value = onItemClick()
             }
             .then(modifier)
     )
+
+    if (!figure.isActive) {
+        LaunchedEffect(key1 = true) {
+            alphaScore.animateTo(targetValue = 0f, animationSpec = tween(1000))
+        }
+        Box(
+            modifier = Modifier
+                .run { size?.let { size(size) } ?: aspectRatio(1f) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "+${pointsAdded.value}",
+                style = MaterialTheme.typography.displaySmall,
+                modifier = Modifier
+                    .alpha(alphaScore.value),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+
+
 }
 
 @Preview
 @Composable
-fun ColoredFigureLayoutPreview() {
+fun ColoredFigureLayoutActivePreview() {
     SeekAndCatchTheme {
         ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = Color.Red))
     }
 }
+
+@Preview
+@Composable
+fun ColoredFigureLayoutNotActivePreview() {
+    SeekAndCatchTheme {
+        ColoredFigureLayout(
+            figure = Figure(
+                type = Figure.FigureType.TRIANGLE,
+                color = Color.Red,
+                isActive = false
+            )
+        )
+    }
+}
+

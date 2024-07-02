@@ -118,7 +118,7 @@ fun FlowGameScreen(
     gameDuration: Long,
     flowGameUiState: FlowGameUiState,
     setGameReadyToStart: () -> Unit = {},
-    onItemClick: (id: Int) -> Unit = {},
+    onItemClick: (id: Int) -> Int = { 0 },
     toGameResultScreen: () -> Unit = {},
     resumeGame: () -> Unit = {},
     pauseGame: () -> Unit = {},
@@ -381,7 +381,7 @@ fun GameFieldLayout(
     figures: List<Figure>,
     gridState: LazyGridState,
     onItemHeightMeasured: (height: Int) -> Unit = { },
-    onItemClick: (id: Int) -> Unit
+    onItemClick: (id: Int) -> Int
 ) {
     val gameFieldLayoutContentDesc = stringResource(id = R.string.game_field_layout_content_desc)
 

@@ -158,8 +158,8 @@ class FlowGameViewModel
         musicManager.stopMusic()
     }
 
-    fun onItemClick(id: Int) {
-        gameUseCase.onItemClick(id)
+    fun onItemClick(id: Int): Int {
+        return gameUseCase.onItemClick(id)
     }
 
     fun getMaxLifeCount() = gameUseCase.maxLifeCount
