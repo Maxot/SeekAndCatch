@@ -89,7 +89,8 @@ fun GameResultScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundBrush),
+//            .background(backgroundBrush),
+        ,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

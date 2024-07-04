@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.maxot.seekandcatch.feature.account.navigation.accountScreen
-import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_SELECTION_ROUTE
+import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_MAIN_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.gameSelectionScreen
 import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToFlowGame
 import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToGameResult
@@ -22,7 +22,7 @@ fun SeekCatchNavHost(
     NavHost(
         modifier = Modifier.then(modifier),
         navController = navController,
-        startDestination = GAME_SELECTION_ROUTE
+        startDestination = GAME_MAIN_ROUTE
     ) {
         leaderboardScreen()
         gameSelectionScreen(

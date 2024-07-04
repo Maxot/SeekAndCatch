@@ -246,7 +246,11 @@ fun FlowGameScreen(
             }
 
             FlowGameUiState.Finished -> {
-                toGameResultScreen()
+                coroutineScope.launch {
+                    delay(1)
+                    toGameResultScreen()
+                }
+
             }
         }
     }
@@ -359,7 +363,7 @@ fun GameInfoPanel(
                         Icon(imageVector = SaCIcons.Favorite, contentDescription = "")
                     }
                 }
-                
+
                 GoalsLayout(goals = goals)
             }
 
