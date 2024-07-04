@@ -8,16 +8,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -76,6 +76,7 @@ fun SettingsDialog(
             .semantics {
                 contentDescription = settingsDialogContentDesc
             },
+        containerColor = MaterialTheme.colorScheme.background,
         title = {
             Text(text = stringResource(id = R.string.feature_settings_title))
         },
@@ -109,9 +110,10 @@ fun SettingsPanel(
     onVibrationStateChanged: (vibrationState: Boolean) -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .then(modifier),
         shape = Shapes.large,
+        modifier = Modifier
+            .then(modifier)
+            .clip(Shapes.large),
     ) {
         Column(
             modifier = Modifier

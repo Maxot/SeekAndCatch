@@ -3,6 +3,7 @@ package com.maxot.seekandcatch
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
@@ -21,6 +22,7 @@ class MainActivity : ComponentActivity() {
             val appState = SeekAndCatchAppState(navController, coroutineScope)
 
             SeekAndCatchTheme {
+                enableEdgeToEdge()
                 SeekAndCatchApp(appState = appState)
             }
         }

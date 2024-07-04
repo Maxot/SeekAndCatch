@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -28,6 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
+import com.maxot.seekandcatch.core.designsystem.theme.Shapes
+import com.maxot.seekandcatch.core.designsystem.theme.bronze
+import com.maxot.seekandcatch.core.designsystem.theme.gold
+import com.maxot.seekandcatch.core.designsystem.theme.silver
 import com.maxot.seekandcatch.data.model.LeaderboardRecord
 import com.maxot.seekandcatch.feature.leaderboard.LeaderboardUiState
 import com.maxot.seekandcatch.feature.leaderboard.LeaderboardViewModel
@@ -94,18 +99,21 @@ fun LeaderLayout(
     leaderRecord: LeaderboardRecord,
 ) {
     val borderColor = when (itemIndex) {
-        0 -> Color.Yellow
-        1 -> Color.LightGray
-        2 -> Color.Gray
-        else -> Color.White
+        0 -> gold
+        1 -> silver
+        2 -> bronze
+        else -> Color.DarkGray
     }
+
+    val shape = Shapes.large
 
     ElevatedCard(
         modifier = Modifier
             .then(modifier)
             .padding(start = 10.dp, top = 10.dp, end = 10.dp)
+            .clip(shape)
             .fillMaxWidth()
-            .border(width = 3.dp, color = borderColor),
+            .border(width = 3.dp, color = borderColor, shape = shape),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         )
