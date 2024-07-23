@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
@@ -77,6 +78,10 @@ fun ColoredFigureLayout(
             )
         }
     }
+
+    val interactionSource = remember {
+        MutableInteractionSource()
+    }
     var heightInPx: Float = 0f
 
     val alpha by animateFloatAsState(
@@ -95,6 +100,13 @@ fun ColoredFigureLayout(
                 shapeKey = shape
             }
             .run { size?.let { size(size) } ?: aspectRatio(1f) }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = figure.isActive
+            ) {
+                pointsAdded.value = onItemClick()
+            }
             .alpha(alpha)
             .padding(10.dp)
             .clip(shape)
@@ -102,9 +114,6 @@ fun ColoredFigureLayout(
             .background(largeRadialGradient)
             .onGloballyPositioned {
                 heightInPx = it.size.height.toFloat() // Maybe return from there?
-            }
-            .clickable(figure.isActive) {
-                pointsAdded.value = onItemClick()
             }
             .then(modifier)
     )
