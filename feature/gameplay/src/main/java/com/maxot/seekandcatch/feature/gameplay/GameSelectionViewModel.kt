@@ -3,6 +3,7 @@ package com.maxot.seekandcatch.feature.gameplay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,9 +25,22 @@ class GameSelectionViewModel
             initialValue = null
         )
 
+    val selectedGameMode: StateFlow<GameMode?> =
+        settingsRepository.observeGameMode().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
+
     fun setSelectedDifficulty(gameDifficulty: GameDifficulty) {
         viewModelScope.launch {
             settingsRepository.setDifficulty(gameDifficulty)
+        }
+    }
+
+    fun setSelectedGameMode(gameMode: GameMode) {
+        viewModelScope.launch {
+            settingsRepository.setGameMode(gameMode)
         }
     }
 }

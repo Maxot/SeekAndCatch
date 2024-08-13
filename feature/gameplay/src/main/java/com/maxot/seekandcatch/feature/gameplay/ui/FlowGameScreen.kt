@@ -52,6 +52,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
+import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.FlowGameUiState
@@ -59,7 +60,7 @@ import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.GoalsLayout
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -72,6 +73,7 @@ fun FlowGameScreenRoute(
     viewModel: FlowGameViewModel = hiltViewModel(),
     toGameResultScreen: () -> Unit
 ) {
+    val gameMode = viewModel.selectedGameMode.collectAsStateWithLifecycle()
     val rowWidth = viewModel.getRowWidth()
     val maxLifeCount = viewModel.getMaxLifeCount()
     val lifeCount by viewModel.lifeCount.collectAsStateWithLifecycle()
@@ -84,6 +86,7 @@ fun FlowGameScreenRoute(
 
     FlowGameScreen(
         rowWidth = rowWidth,
+        gameMode = gameMode.value,
         maxLifeCount = maxLifeCount,
         lifeCount = lifeCount,
         goals = goals,
@@ -108,6 +111,7 @@ fun FlowGameScreenRoute(
 @Composable
 fun FlowGameScreen(
     modifier: Modifier = Modifier,
+    gameMode: GameMode = GameMode.FLOW,
     rowWidth: Int = 4,
     maxLifeCount: Int = 5,
     lifeCount: Int = 3,
@@ -193,7 +197,8 @@ fun FlowGameScreen(
                 figures = figures,
                 gridState = gridState,
                 onItemHeightMeasured = onItemHeightMeasured,
-                onItemClick = onItemClick
+                onItemClick = onItemClick,
+                reverseLayout = gameMode != GameMode.FLOW
             )
         }
 
@@ -385,7 +390,8 @@ fun GameFieldLayout(
     figures: List<Figure>,
     gridState: LazyGridState,
     onItemHeightMeasured: (height: Int) -> Unit = { },
-    onItemClick: (id: Int) -> Int
+    onItemClick: (id: Int) -> Int,
+    reverseLayout: Boolean = false
 ) {
     val gameFieldLayoutContentDesc = stringResource(id = R.string.game_field_layout_content_desc)
 
@@ -396,6 +402,7 @@ fun GameFieldLayout(
         userScrollEnabled = false,
         state = gridState,
         columns = GridCells.Fixed(gridWidth),
+        reverseLayout = reverseLayout
     ) {
         // Add spacer for one row to reach scrolling from empty space
         repeat(gridWidth) {

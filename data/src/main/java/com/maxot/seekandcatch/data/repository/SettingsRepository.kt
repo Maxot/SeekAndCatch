@@ -1,6 +1,7 @@
 package com.maxot.seekandcatch.data.repository
 
 import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.data.model.GameMode
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
@@ -20,5 +21,9 @@ interface SettingsRepository {
     suspend fun setDifficulty(newDifficulty: GameDifficulty)
 
     fun observeDifficulty(): Flow<GameDifficulty>
+
+    suspend fun setGameMode(gameMode: GameMode)
+
+    fun observeGameMode(): Flow<GameMode>
 
 }

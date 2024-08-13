@@ -76,6 +76,11 @@ fun <T> SingleSelectionLazyRow(
         }
     }
 
+    LaunchedEffect(key1 = selectedItemIndex) {
+        currentSelectedItemIndex = selectedItemIndex
+        centralizeSelectedItem()
+    }
+
     LazyRow(
         modifier = Modifier
             .then(modifier)

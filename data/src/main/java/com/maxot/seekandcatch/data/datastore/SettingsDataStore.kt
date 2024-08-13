@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.data.model.GameMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -26,6 +27,7 @@ class SettingsDataStore
     private val musicStateKey = booleanPreferencesKey(SETTINGS_MUSIC_KEY)
     private val vibrationStateKey = booleanPreferencesKey(SETTINGS_VIBRATION_KEY)
     private val difficultyKey = stringPreferencesKey(SETTINGS_DIFFICULTY_KEY)
+    private val gameModeKey = stringPreferencesKey(SETTINGS_GAME_MODE_KEY)
 
     val soundStateFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[soundStateKey] ?: true
@@ -41,6 +43,12 @@ class SettingsDataStore
         enumName?.let {
             GameDifficulty.valueOf(it)
         } ?: GameDifficulty.NORMAL
+    }
+    val gameModeFlow: Flow<GameMode> = dataStore.data.map { preferences ->
+        val enumName = preferences[gameModeKey]
+        enumName?.let {
+            GameMode.valueOf(it)
+        } ?: GameMode.FLOW
     }
 
     suspend fun setSoundState(newState: Boolean) {
@@ -67,6 +75,12 @@ class SettingsDataStore
         }
     }
 
+    suspend fun setGameMode(gameMode: GameMode) {
+        dataStore.edit { settings ->
+            settings[gameModeKey] = gameMode.name
+        }
+    }
+
 
     companion object {
         const val SETTINGS_DATA_STORE_NAME = "Settings"
@@ -74,5 +88,6 @@ class SettingsDataStore
         const val SETTINGS_MUSIC_KEY = "Sound_music"
         const val SETTINGS_VIBRATION_KEY = "Sound_vibration"
         const val SETTINGS_DIFFICULTY_KEY = "Difficulty_key"
+        const val SETTINGS_GAME_MODE_KEY = "Game_mode_key"
     }
 }

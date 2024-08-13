@@ -3,6 +3,7 @@ package com.maxot.seekandcatch.feature.gameplay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.domain.FlowGameUseCase
+import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.core.domain.GameState
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
@@ -34,12 +35,18 @@ class FlowGameViewModel
     val figures: StateFlow<List<Figure>> = gameUseCase.figures
     val coefficient: StateFlow<Float> = gameUseCase.coefficient
     val gameDuration: StateFlow<Long> = gameUseCase.gameDuration
-    val selectedGameDifficulty: StateFlow<GameDifficulty?> =
+    private val selectedGameDifficulty: StateFlow<GameDifficulty?> =
         settingsRepository.observeDifficulty().stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = null
         )
+ val selectedGameMode: StateFlow<GameMode> =
+    settingsRepository.observeGameMode().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = GameMode.FLOW
+    )
 
     val flowGameUiState: StateFlow<FlowGameUiState> =
         gameUseCase.gameState.map {

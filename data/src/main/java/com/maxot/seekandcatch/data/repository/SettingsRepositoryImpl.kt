@@ -2,6 +2,7 @@ package com.maxot.seekandcatch.data.repository
 
 import com.maxot.seekandcatch.data.datastore.SettingsDataStore
 import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.data.model.GameMode
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -29,5 +30,11 @@ class SettingsRepositoryImpl
     }
 
     override fun observeDifficulty(): Flow<GameDifficulty> = settingsDataStore.difficultyFlow
+
+    override suspend fun setGameMode(gameMode: GameMode) {
+        settingsDataStore.setGameMode(gameMode)
+    }
+
+    override fun observeGameMode(): Flow<GameMode> = settingsDataStore.gameModeFlow
 
 }
