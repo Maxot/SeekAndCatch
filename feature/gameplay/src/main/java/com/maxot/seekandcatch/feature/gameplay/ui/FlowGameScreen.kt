@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.stopScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -52,16 +51,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
-import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.FlowGameUiState
 import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiCallback
+import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GoalsLayout
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -74,37 +76,15 @@ fun FlowGameScreenRoute(
     toGameResultScreen: () -> Unit
 ) {
     val gameMode = viewModel.selectedGameMode.collectAsStateWithLifecycle()
-    val rowWidth = viewModel.getRowWidth()
-    val maxLifeCount = viewModel.getMaxLifeCount()
-    val lifeCount by viewModel.lifeCount.collectAsStateWithLifecycle()
-    val goals by viewModel.goals.collectAsStateWithLifecycle()
-    val score by viewModel.score.collectAsStateWithLifecycle()
-    val figures by viewModel.figures.collectAsStateWithLifecycle()
-    val coefficient by viewModel.coefficient.collectAsStateWithLifecycle()
-    val gameDuration by viewModel.gameDuration.collectAsStateWithLifecycle()
     val flowGameUiState by viewModel.flowGameUiState.collectAsStateWithLifecycle()
+    val uiCallback by viewModel.uiCallback.collectAsStateWithLifecycle(initialValue = null)
 
     FlowGameScreen(
-        rowWidth = rowWidth,
         gameMode = gameMode.value,
-        maxLifeCount = maxLifeCount,
-        lifeCount = lifeCount,
-        goals = goals,
-        score = score,
-        figures = figures,
-        coefficient = coefficient,
-        gameDuration = gameDuration,
         flowGameUiState = flowGameUiState,
-        setGameReadyToStart = viewModel::setGameReadyToStart,
-        onItemClick = viewModel::onItemClick,
+        sendEvent = { flowGameUiEvent -> viewModel.onEvent(flowGameUiEvent) },
         toGameResultScreen = toGameResultScreen,
-        resumeGame = viewModel::resumeGame,
-        pauseGame = viewModel::pauseGame,
-        finishGame = viewModel::finishGame,
-        onItemHeightMeasured = viewModel::setItemHeight,
-        getScrollDuration = viewModel::getScrollDuration,
-        getPixelsToScroll = viewModel::getPixelsToScroll,
-        onFirstVisibleItemIndexChanged = viewModel::onFirstVisibleItemIndexChanged
+        uiCallback = uiCallback
     )
 }
 
@@ -112,25 +92,10 @@ fun FlowGameScreenRoute(
 fun FlowGameScreen(
     modifier: Modifier = Modifier,
     gameMode: GameMode = GameMode.FLOW,
-    rowWidth: Int = 4,
-    maxLifeCount: Int = 5,
-    lifeCount: Int = 3,
-    goals: Set<Goal<Any>>,
-    score: Int,
-    figures: List<Figure>,
-    coefficient: Float,
-    gameDuration: Long,
     flowGameUiState: FlowGameUiState,
-    setGameReadyToStart: () -> Unit = {},
-    onItemClick: (id: Int) -> Int = { 0 },
+    sendEvent: (FlowGameUiEvent) -> Unit,
     toGameResultScreen: () -> Unit = {},
-    resumeGame: () -> Unit = {},
-    pauseGame: () -> Unit = {},
-    finishGame: () -> Unit = {},
-    onItemHeightMeasured: (height: Int) -> Unit = { },
-    getScrollDuration: () -> Int = { 10000 },
-    getPixelsToScroll: () -> Float,
-    onFirstVisibleItemIndexChanged: (index: Int) -> Unit = {}
+    uiCallback: FlowGameUiCallback?
 ) {
     val density = LocalDensity.current
 
@@ -164,17 +129,17 @@ fun FlowGameScreen(
         snapshotFlow { gridState.firstVisibleItemIndex }
             .collect {
                 Log.d(TAG, "firstVisibleItemIndex: ${gridState.firstVisibleItemIndex}")
-                onFirstVisibleItemIndexChanged(gridState.firstVisibleItemIndex)
+                sendEvent(FlowGameUiEvent.FirstVisibleItemIndexChanged(gridState.firstVisibleItemIndex))
             }
     }
 
     Box(
         modifier = Modifier
-            .background(backgroundBrush)
-            .then(modifier)
             .semantics { contentDescription = flowGameScreenContentDesc }
             .fillMaxSize()
+            .then(modifier)
     ) {
+
         Column {
             GameInfoPanel(
                 modifier = Modifier
@@ -183,96 +148,115 @@ fun FlowGameScreen(
                             it.size.height.toDp() // Height of GameInfoPanel
                         }
                     },
-                maxLifeCount = maxLifeCount,
-                lifeCount = lifeCount,
-                goals = goals,
-                score = score,
-                coefficient = coefficient,
-                gameDuration = gameDuration
+                maxLifeCount = flowGameUiState.maxLifeCount,
+                lifeCount = flowGameUiState.lifeCount,
+                goals = flowGameUiState.goals,
+                score = flowGameUiState.score,
+                coefficient = flowGameUiState.coefficient,
+                gameDuration = flowGameUiState.gameDuration
             )
 
             GameFieldLayout(
-                gridWidth = rowWidth,
+                gridWidth = flowGameUiState.rowWidth,
                 spacerHeight = spacerHeight,
-                figures = figures,
+                figures = flowGameUiState.figures,
                 gridState = gridState,
-                onItemHeightMeasured = onItemHeightMeasured,
-                onItemClick = onItemClick,
+                onItemHeightMeasured = { height -> sendEvent(FlowGameUiEvent.ItemHeightMeasured(height))  },
+                onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
+                uiCallback = uiCallback,
                 reverseLayout = gameMode != GameMode.FLOW
             )
         }
 
-        when (flowGameUiState) {
-            FlowGameUiState.Active -> {
-                LaunchedEffect(
-                    key1 = coefficient.toInt(),
-                    key2 = figures.size,
-                    key3 = (gameDuration / 1000 / 30), // each 30 second update
-                ) {
+
+//        if (flowGameUiState.isActive) {
+            LaunchedEffect(
+                key1 = flowGameUiState.coefficient.toInt(),
+                key2 = flowGameUiState.figures.size,
+                key3 = (flowGameUiState.gameDuration / 1000 / 30), // each 30 second update
+//                key3 = flowGameUiState.isActive
+            ) {
+                sendEvent(FlowGameUiEvent.UpdateScrollDuration)
+                sendEvent(FlowGameUiEvent.UpdatePixelsToScroll)
+            }
+            LaunchedEffect(
+                key1 = flowGameUiState.scrollDuration,
+                key2 = flowGameUiState.pixelsToScroll,
+                key3 = flowGameUiState.isActive
+            ) {
+                if (flowGameUiState.isActive && flowGameUiState.scrollDuration > 0 && flowGameUiState.pixelsToScroll > 0) {
                     val pixelsToScrollWithSpacers =
-                        getPixelsToScroll() + with(density) {
+                        flowGameUiState.pixelsToScroll + with(density) {
                             spacerHeight.toPx()
                         }
                     gridState.animateScrollBy(
                         value = pixelsToScrollWithSpacers,
                         animationSpec = tween(
-                            durationMillis = getScrollDuration(),
+                            durationMillis = flowGameUiState.scrollDuration,
                             easing = LinearEasing
                         )
                     )
                 }
             }
+//        }
 
-            FlowGameUiState.Loading -> {
-                ReadyToGameLayout(
-                    goals = goals,
-                    setGameReadyToStart = setGameReadyToStart
-                )
+        if (flowGameUiState.isLoading) {
+            ReadyToGameLayout(
+                goals = flowGameUiState.goals,
+                setGameReadyToStart = { sendEvent(FlowGameUiEvent.SetGameReadyToStart) }
+            )
+        }
+
+        if (flowGameUiState.isPaused) {
+            showPauseDialog.value = true
+            LaunchedEffect(key1 = Unit) {
+                gridState.stopScroll()
             }
 
-            FlowGameUiState.Paused -> {
-                showPauseDialog.value = true
-                LaunchedEffect(key1 = Unit) {
-                    gridState.stopScroll()
-                }
+            PauseDialog(
+                onDismissRequest = {
+                    showPauseDialog.value = false
+//                    resumeGame()
+                    sendEvent(FlowGameUiEvent.ResumeGame)
+                },
+                onConfirmation = {
+                    showPauseDialog.value = false
+//                    finishGame()
+                    sendEvent(FlowGameUiEvent.FinishGame)
+                },
+                dialogTitle = stringResource(id = R.string.title_pause_dialog),
+                dialogText = stringResource(id = R.string.text_pause_dialog)
+            )
+        }
 
-                PauseDialog(
-                    onDismissRequest = {
-                        showPauseDialog.value = false
-                        resumeGame()
-                    },
-                    onConfirmation = {
-                        showPauseDialog.value = false
-                        finishGame()
-                    },
-                    dialogTitle = stringResource(id = R.string.title_pause_dialog),
-                    dialogText = stringResource(id = R.string.text_pause_dialog)
-                )
-            }
-
-            FlowGameUiState.Finished -> {
+        if (flowGameUiState.isFinished) {
+            LaunchedEffect(key1 = true) {
                 coroutineScope.launch {
                     delay(1)
                     toGameResultScreen()
                 }
-
             }
         }
+
     }
 
     BackHandler {
-        pauseGame()
+//        pauseGame()
+        sendEvent(FlowGameUiEvent.PauseGame)
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
-        if (flowGameUiState != FlowGameUiState.Finished)
-            pauseGame()
+        if (!flowGameUiState.isFinished)
+//            pauseGame()
+        sendEvent(FlowGameUiEvent.PauseGame)
 
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
-        if (showPauseDialog.value)
-            pauseGame() else resumeGame()
+        val event = if (showPauseDialog.value) FlowGameUiEvent.PauseGame else FlowGameUiEvent.ResumeGame
+        sendEvent(event)
+//        if (showPauseDialog.value)
+//            pauseGame() else resumeGame()
     }
 }
 
@@ -390,7 +374,8 @@ fun GameFieldLayout(
     figures: List<Figure>,
     gridState: LazyGridState,
     onItemHeightMeasured: (height: Int) -> Unit = { },
-    onItemClick: (id: Int) -> Int,
+    onItemClick: (id: Int) -> Unit,
+    uiCallback: FlowGameUiCallback? = null,
     reverseLayout: Boolean = false
 ) {
     val gameFieldLayoutContentDesc = stringResource(id = R.string.game_field_layout_content_desc)
@@ -422,10 +407,10 @@ fun GameFieldLayout(
                     .onGloballyPositioned {
                         onItemHeightMeasured(it.size.height)
                     },
-                figure = figure
-            ) {
-                onItemClick(figure.id)
-            }
+                figure = figure,
+                onItemClick = { onItemClick(figure.id) },
+                pointsAddedCallback = if (uiCallback is FlowGameUiCallback.PointsAdded && uiCallback.itemId == figure.id) uiCallback else null
+            )
         }
         // Add spacer for one row to reach scrolling to empty space
         repeat(gridWidth) {
@@ -457,15 +442,17 @@ fun FlowGameScreenLoadingPreview() {
     )
 
     FlowGameScreen(
-        goals = setOf(Goal.Colored(Color.Red)),
-        score = 11,
-        figures = figures,
-        coefficient = 1f,
-        gameDuration = 1000,
-        flowGameUiState = FlowGameUiState.Loading,
+//        goals = setOf(Goal.Colored(Color.Red)),
+//        score = 11,
+//        figures = figures,
+//        coefficient = 1f,
+//        gameDuration = 1000,
+        flowGameUiState = FlowGameUiState(isLoading = true),
+        sendEvent = { },
         toGameResultScreen = { },
-        getPixelsToScroll = { 1000f },
-        onFirstVisibleItemIndexChanged = {}
+//        getPixelsToScroll = { 1000f },
+//        onFirstVisibleItemIndexChanged = {},
+        uiCallback = null
     )
 }
 
@@ -482,15 +469,17 @@ fun FlowGameScreenActivePreview() {
     )
 
     FlowGameScreen(
-        goals = setOf(Goal.Colored(Color.Red)),
-        score = 11,
-        figures = figures,
-        coefficient = 1f,
-        gameDuration = 1000,
-        flowGameUiState = FlowGameUiState.Active,
+//        goals = setOf(Goal.Colored(Color.Red)),
+//        score = 11,
+//        figures = figures,
+//        coefficient = 1f,
+//        gameDuration = 1000,
+        flowGameUiState = FlowGameUiState(),
+        sendEvent = { },
         toGameResultScreen = { },
-        getPixelsToScroll = { 1000f },
-        onFirstVisibleItemIndexChanged = {}
+//        getPixelsToScroll = { 1000f },
+//        onFirstVisibleItemIndexChanged = {},
+        uiCallback = null
     )
 }
 
@@ -507,14 +496,16 @@ fun FlowGameScreenPausedPreview() {
     )
 
     FlowGameScreen(
-        goals = setOf(Goal.Colored(Color.Red)),
-        score = 11,
-        figures = figures,
-        coefficient = 1f,
-        gameDuration = 1000,
-        flowGameUiState = FlowGameUiState.Paused,
-        getPixelsToScroll = { 1000f },
-        onFirstVisibleItemIndexChanged = {}
+//        goals = setOf(Goal.Colored(Color.Red)),
+//        score = 11,
+//        figures = figures,
+//        coefficient = 1f,
+//        gameDuration = 1000,
+        flowGameUiState = FlowGameUiState(isPaused = true),
+        sendEvent = { },
+//        getPixelsToScroll = { 1000f },
+//        onFirstVisibleItemIndexChanged = {},
+        uiCallback = null
     )
 }
 
