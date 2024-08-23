@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +43,7 @@ import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.getShapeForFigure
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiCallback
 
 // Used for test
 val AlphaKey = SemanticsPropertyKey<Float>("Alpha")
@@ -57,7 +57,8 @@ fun ColoredFigureLayout(
     modifier: Modifier = Modifier,
     size: Dp? = null,
     figure: Figure,
-    onItemClick: () -> Int = { 0 }
+    onItemClick: () -> Unit = {},
+    pointsAddedCallback: FlowGameUiCallback.PointsAdded? = null
 ) {
     val coloredFigureContentDesc =
         stringResource(id = R.string.colored_figure_content_desc, figure.id)
@@ -89,9 +90,6 @@ fun ColoredFigureLayout(
     )
     val alphaScore = remember { Animatable(1f) }
 
-    val pointsAdded = remember {
-        mutableStateOf(0)
-    }
     Box(
         modifier = Modifier
             .semantics {
@@ -105,7 +103,7 @@ fun ColoredFigureLayout(
                 indication = null,
                 enabled = figure.isActive
             ) {
-                pointsAdded.value = onItemClick()
+                onItemClick()
             }
             .alpha(alpha)
             .padding(10.dp)
@@ -118,7 +116,7 @@ fun ColoredFigureLayout(
             .then(modifier)
     )
 
-    if (!figure.isActive) {
+    if (pointsAddedCallback != null) {
         LaunchedEffect(key1 = true) {
             alphaScore.animateTo(targetValue = 0f, animationSpec = tween(1000))
         }
@@ -128,7 +126,7 @@ fun ColoredFigureLayout(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "+${pointsAdded.value}",
+                text = "+${pointsAddedCallback.number}",
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier
                     .alpha(alphaScore.value),

@@ -2,6 +2,9 @@ package com.maxot.seekandcatch.core.domain
 
 import androidx.annotation.Px
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
+import com.maxot.seekandcatch.core.domain.model.FlowGameData
+import com.maxot.seekandcatch.core.domain.model.FlowGameEvent
+import com.maxot.seekandcatch.core.domain.model.FlowGameState
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameParams
 import com.maxot.seekandcatch.data.model.Goal
@@ -15,18 +18,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 const val TAG = "FlowGameUseCase"
 
-enum class GameState {
-    IDLE, CREATED, STARTED, RESUMED, PAUSED, FINISHED
-}
 
 /**
  * Represent game logic for Flow Game Mode.
- * The game consists of grid of [figures] with fixed [rowWidth] and the [goals].
+ * The game consists of grid of [FlowGameData.figures] with fixed [rowWidth] and the [goals].
  * Items are auto-scrolled with some speed(px/ms), the amount of pixel to scroll calculated by [getPixelsToScroll]
  * and the scroll duration calculated by [getScrollDuration]. Then UI pass back [firstVisibleItemIndex]
  * to process game updates via [processGameChanges].
@@ -48,8 +49,8 @@ class FlowGameUseCase
     private var scorePoint: Int = 10
     private var coefficientStep: Float = 0.2f
     private var percentOfSuitableItem: Float = 0.5f
-    var maxLifeCount: Int = 5
-        private set
+    private var scrollDuration = 1000
+    private var maxLifeCount: Int = 5
 
     private var itemsPassedWithoutMissToGetLife = 10
 
@@ -57,38 +58,38 @@ class FlowGameUseCase
 
     private var _lifeCount =
         MutableStateFlow(0)
-    val lifeCount: StateFlow<Int> = _lifeCount
+//    val lifeCount: StateFlow<Int> = _lifeCount
 
     private var _goals =
         MutableStateFlow(emptySet<Goal<Any>>())
-    val goals: StateFlow<Set<Goal<Any>>> = _goals
+//    val goals: StateFlow<Set<Goal<Any>>> = _goals
 
     private var _score = MutableStateFlow(0)
-    val score: StateFlow<Int> = _score
+//    val score: StateFlow<Int> = _score
 
     private var _figures = MutableStateFlow(listOf<Figure>())
-    val figures: StateFlow<List<Figure>> = _figures
+//    val figures: StateFlow<List<Figure>> = _figures
 
     private var _firstVisibleItemIndex = MutableStateFlow(0)
-    val firstVisibleItemIndex: StateFlow<Int> = _firstVisibleItemIndex
+//    val firstVisibleItemIndex: StateFlow<Int> = _firstVisibleItemIndex
 
     private var _coefficient = MutableStateFlow(1f)
-    val coefficient: StateFlow<Float> = _coefficient
+//    val coefficient: StateFlow<Float> = _coefficient
 
     private var _gameDuration = MutableStateFlow(0L)
-    val gameDuration: StateFlow<Long> = _gameDuration
+//    val gameDuration: StateFlow<Long> = _gameDuration
+
+
+    private val gameData = MutableStateFlow(FlowGameData())
 
     private val _gameState =
-        MutableStateFlow(GameState.IDLE)
-    val gameState: StateFlow<GameState>
+        MutableStateFlow<FlowGameState>(FlowGameState.Idle)
+    val gameState: StateFlow<FlowGameState>
         get() = _gameState
 
     private var gameJob: Job? = null
+    private var gameDataJob: Job? = null
     private var timeJob: Job? = null
-
-    fun setFirstVisibleItemIndex(index: Int) {
-        _firstVisibleItemIndex.value = index
-    }
 
     fun initGame(gameParams: GameParams) {
         scorePoint = gameParams.scorePoint
@@ -109,36 +110,86 @@ class FlowGameUseCase
                 percentageOfSuitableGoalItems = percentOfSuitableItem,
                 goal = _goals.value.first()
             )
+            val currentGameData = FlowGameData(
+                maxLifeCount = maxLifeCount,
+                lifeCount = gameParams.lifeCount,
+                goals = _goals.value,
+                figures = _figures.value,
+                score = _score.value,
+                coefficient = _coefficient.value,
+                gameDuration = _gameDuration.value,
+                scrollDuration = getScrollDuration(),
+                pixelsToScroll = getPixelsToScroll(rowWidth.toFloat()),
+                rowWidth = rowWidth
+            )
+            gameData.value = currentGameData
+//            _gameState.value = FlowGameState.Resumed(gameData.value)
         }
 
-        _gameState.value = GameState.CREATED
+        _gameState.value = FlowGameState.Created
     }
 
-    fun startGame() {
-        processGameChanges()
 
-        _gameState.value = GameState.STARTED
+    fun onEvent(event: FlowGameEvent) {
+        when (event) {
+            is FlowGameEvent.OnItemClick -> onItemClick(event.itemId)
+            FlowGameEvent.UpdateScrollDuration -> updateScrollDuration()
+            FlowGameEvent.UpdatePixelsToScroll -> updatePixelsToScroll()
+            FlowGameEvent.FinishGame -> finishGame()
+            FlowGameEvent.PauseGame -> pauseGame()
+            FlowGameEvent.ResumeGame -> resumeGame()
+            FlowGameEvent.StartGame -> startGame()
+            is FlowGameEvent.FirstVisibleItemIndexChanged -> setFirstVisibleItemIndex(event.firstVisibleItemIndex)
+            is FlowGameEvent.ItemHeightMeasured -> setItemHeight(event.height)
+        }
+
     }
 
-    fun pauseGame() {
+    private fun observeGameData() {
+        gameDataJob?.cancel()
+        gameDataJob = CoroutineScope(Dispatchers.IO).launch {
+            gameData.collect { data ->
+                _gameState.update {
+                    if (it is FlowGameState.Resumed) it.copy(data) else it
+                }
+            }
+        }
+    }
+
+    private fun setFirstVisibleItemIndex(index: Int) {
+        _firstVisibleItemIndex.value = index
+    }
+
+    private fun startGame() {
+//        processGameChanges()
+
+        _gameState.value = FlowGameState.Started
+        resumeGame()
+    }
+
+    private fun pauseGame() {
         gameJob?.cancel()
         timeJob?.cancel()
+        gameDataJob?.cancel()
 
-        _gameState.value = GameState.PAUSED
+        _gameState.value = FlowGameState.Paused
     }
 
-    fun resumeGame() {
+    private fun resumeGame() {
         processGameChanges()
 
-        _gameState.value = GameState.RESUMED
+        _gameState.value = FlowGameState.Resumed(gameData.value)
+        observeGameData()
     }
 
-    fun finishGame() {
+    private fun finishGame() {
         gameJob?.cancel()
+        gameDataJob?.cancel()
         timeJob?.cancel()
-        scoreRepository.setLastScore(score = score.value)
 
-        _gameState.value = GameState.FINISHED
+        scoreRepository.setLastScore(score = _score.value)
+
+        _gameState.value = FlowGameState.Finished(_score.value)
     }
 
     private fun processGameChanges() {
@@ -146,7 +197,7 @@ class FlowGameUseCase
         timeJob?.cancel()
 
         gameJob = CoroutineScope(Dispatchers.IO).launch {
-            firstVisibleItemIndex.collect { firstVisibleItemIndex ->
+            _firstVisibleItemIndex.collect { firstVisibleItemIndex ->
 //                Log.d(TAG, "first item index: $firstVisibleItemIndex")
                 processPassedItems(firstPassedItemIndex = firstVisibleItemIndex - rowWidth * 2)
 
@@ -164,13 +215,14 @@ class FlowGameUseCase
 
     private suspend fun measureGameDuration() {
         gameState.collect {
-            while (gameState.value == GameState.STARTED || gameState.value == GameState.RESUMED) {
+            while (gameState.value is FlowGameState.Started || gameState.value is FlowGameState.Resumed) {
 //                startTime = System.currentTimeMillis()
                 delay(1000)
 //                val currentTime = System.currentTimeMillis()
 //                val duration = currentTime - startTime
 //                _gameDuration.value += duration
                 _gameDuration.value += 1000
+                gameData.update { it.copy(gameDuration = _gameDuration.value) }
             }
         }
     }
@@ -180,11 +232,11 @@ class FlowGameUseCase
             val startIndex = firstPassedItemIndex
             val endIndex = firstPassedItemIndex + rowWidth - 1
 
-            if (endIndex < figures.value.size) {
+            if (endIndex < _figures.value.size) {
                 val missedItemsCount = getMissedItemsCount(startIndex, endIndex)
                 repeat(missedItemsCount) {
                     itemsPassedWithoutMissing = 0
-                    if (coefficient.value > 1) {
+                    if (_coefficient.value > 1) {
                         decreaseCoefficients()
                     } else {
                         decreaseLifeCount()
@@ -199,25 +251,38 @@ class FlowGameUseCase
 
     private fun increaseLifeCount() {
         _lifeCount.value =
-            if (lifeCount.value < maxLifeCount) lifeCount.value.inc() else lifeCount.value
+            _lifeCount.value.inc().coerceAtLeast(maxLifeCount)
+//            if (_lifeCount.value < maxLifeCount) _lifeCount.value.inc() else _lifeCount.value
+
+        gameData.update { it.copy(lifeCount = _lifeCount.value) }
     }
 
     private fun decreaseLifeCount() {
-        _lifeCount.value = lifeCount.value.dec()
+        _lifeCount.value = _lifeCount.value.dec()
+
+        gameData.update { it.copy(lifeCount = _lifeCount.value) }
     }
 
     private fun increaseCoefficients() {
         _coefficient.value += coefficientStep
+
+        gameData.update { it.copy(coefficient = _coefficient.value) }
     }
 
     private fun decreaseCoefficients() {
         if (_coefficient.value > 1)
-            _coefficient.value = (coefficient.value / 2).coerceAtLeast(1f)
+            _coefficient.value = (_coefficient.value / 2).coerceAtLeast(1f)
+
+        gameData.update { it.copy(coefficient = _coefficient.value) }
     }
 
     private fun increaseScore(): Int {
         val pointsAdded = _coefficient.value.toInt() * scorePoint
         _score.value += pointsAdded
+
+        gameData.update {
+            it.copy(score = _score.value)
+        }
         return pointsAdded
     }
 
@@ -230,9 +295,9 @@ class FlowGameUseCase
     private fun getMissedItemsCount(startIndex: Int, endIndex: Int): Int {
         var count = 0
         for (i in startIndex..endIndex) {
-            val item = figures.value[i]
+            val item = _figures.value[i]
             if (isItemFitForGoals(
-                    goals.value,
+                    _goals.value,
                     item
                 ) && item.isActive
             ) count++
@@ -266,6 +331,7 @@ class FlowGameUseCase
 
         _figures.value += newList
         itemsCount = _figures.value.size
+        gameData.update { it.copy(figures = _figures.value) }
     }
 
     /**
@@ -275,17 +341,18 @@ class FlowGameUseCase
      *
      * @return the number of points added for this click.
      */
-    fun onItemClick(id: Int): Int {
+    private fun onItemClick(id: Int): Int {
         var pointsAdded = 0
         //TODO: Look for some replacement for 'find' operator. Maybe use HashMap?
-        figures.value.find { figure -> figure.id == id }?.let { figure ->
-            if (isItemFitForGoals(goals.value, figure)) {
+        _figures.value.find { figure -> figure.id == id }?.let { figure ->
+            if (isItemFitForGoals(_goals.value, figure)) {
                 figure.isActive = false
                 pointsAdded = onCorrectItemClicked()
             } else {
                 finishGame()
             }
         }
+        gameData.update { it.copy(figures = _figures.value) }
         return pointsAdded
     }
 
@@ -304,16 +371,21 @@ class FlowGameUseCase
     /**
      * @return the items count in one row.
      */
-    fun getRowWidth(): Int = rowWidth
+    private fun getRowWidth(): Int = rowWidth
 
     /**
      * Set the real height of an item. Used in calculations.
      */
-    fun setItemHeight(@Px height: Int) {
+    private fun setItemHeight(@Px height: Int) {
         itemHeightPx = height
+        updateScrollDuration()
+        updatePixelsToScroll()
     }
 
-    fun getItemHeight(): Int = itemHeightPx
+    private fun updateScrollDuration() {
+        scrollDuration = getScrollDuration()
+        gameData.update { it.copy(scrollDuration = scrollDuration) }
+    }
 
     /**
      * The duration of scrolling animation for fixed items count.
@@ -321,13 +393,13 @@ class FlowGameUseCase
      *
      * @return scroll duration in millisecond.
      */
-    fun getScrollDuration(): Int {
-        val rowCount = figures.value.size / rowWidth
-        val coefInt = coefficient.value.toInt()
+    private fun getScrollDuration(): Int {
+        val rowCount = _figures.value.size / rowWidth
+        val coefInt = _coefficient.value.toInt()
 
         // Percentage of time that need to be subtracted from 100% of duration
         val coefPercentage = (coefInt * coefInt / 100f)
-        val timePercentage = (((gameDuration.value / 1000 / 30) * 5) / 100f)
+        val timePercentage = (((_gameDuration.value / 1000 / 30) * 5) / 100f)
         val actualDurationPercentage = (1f - coefPercentage - timePercentage).coerceAtLeast(0.35f)
 
         val duration = (rowCount * rowDuration) * actualDurationPercentage
@@ -335,8 +407,9 @@ class FlowGameUseCase
         return duration.toInt()
     }
 
-    fun getPixelsToScroll(): Float =
-        getPixelsToScroll(itemHeightPx.toFloat())
+    private fun updatePixelsToScroll() {
+        gameData.update { it.copy(pixelsToScroll = getPixelsToScroll(itemHeightPx.toFloat())) }
+    }
 
     /**
      * Return the amount of pixels needed to scroll to pass through all items.
@@ -347,7 +420,7 @@ class FlowGameUseCase
      * @return amount of pixel needed to scroll to reach the end.
      */
     private fun getPixelsToScroll(@Px rowHeight: Float): Float {
-        val rowCount = figures.value.size / rowWidth
+        val rowCount = _figures.value.size / rowWidth
 //        Log.d(
 //            TAG,
 //            "current speed: ${
@@ -365,6 +438,6 @@ class FlowGameUseCase
      *
      * @return speed in px/sec.
      */
-    fun getScrollSpeed(pixelsToScroll: Float, scrollDuration: Int): Float =
+    private fun getScrollSpeed(pixelsToScroll: Float, scrollDuration: Int): Float =
         pixelsToScroll / (scrollDuration / 1000)
 }
