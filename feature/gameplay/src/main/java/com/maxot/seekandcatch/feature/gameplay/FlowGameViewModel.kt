@@ -34,6 +34,9 @@ class FlowGameViewModel
     private val musicManager: MusicManager,
     private val vibrationManager: VibrationManager
 ) : ViewModel() {
+    private var lastLifeCount: Int = 0
+    private var lastCoefficient: Float = 0f
+
     private val selectedGameDifficulty: StateFlow<GameDifficulty?> =
         settingsRepository.observeDifficulty().stateIn(
             scope = viewModelScope,
@@ -52,7 +55,7 @@ class FlowGameViewModel
         get() = _flowGameUiState
 
     private val _readyToStart = MutableStateFlow(false)
-    val readyToStart: StateFlow<Boolean> = _readyToStart
+    private val readyToStart: StateFlow<Boolean> = _readyToStart
 
     private val _uiCallback = Channel<FlowGameUiCallback>()
     val uiCallback = _uiCallback.receiveAsFlow()
@@ -62,13 +65,11 @@ class FlowGameViewModel
         launchGame()
 
         processReadyToStart()
-        processLifeCountChanges()
-        processCoefficientChanges()
     }
 
     fun onEvent(event: FlowGameUiEvent) {
         when (event) {
-            is FlowGameUiEvent.OnItemClick -> viewModelScope.launch { onItemClick(event.itemId) }
+            is FlowGameUiEvent.OnItemClick -> onItemClick(event.itemId)
             FlowGameUiEvent.UpdateScrollDuration -> gameUseCase.onEvent(FlowGameEvent.UpdateScrollDuration)
             FlowGameUiEvent.UpdatePixelsToScroll -> gameUseCase.onEvent(FlowGameEvent.UpdatePixelsToScroll)
             FlowGameUiEvent.FinishGame -> finishGame()
@@ -102,7 +103,6 @@ class FlowGameViewModel
 
                     }
 
-
                     FlowGameState.Paused -> {
                         _flowGameUiState.update {
                             it.copy(
@@ -124,16 +124,21 @@ class FlowGameViewModel
                                 gameDuration = gameState.data.gameDuration,
                                 scrollDuration = gameState.data.scrollDuration,
                                 pixelsToScroll = gameState.data.pixelsToScroll,
+                                rowWidth = gameState.data.rowWidth,
                                 isActive = true,
                                 isLoading = false,
                                 isPaused = false,
-                                )
+                            )
                         }
+                        processLifeCountChanges(gameState.data.lifeCount)
+                        processCoefficientChanges(gameState.data.coefficient)
                     }
 
                     is FlowGameState.Finished -> {
+                        musicManager.stopMusic()
                         _flowGameUiState.update {
                             it.copy(
+                                isPaused = false,
                                 isFinished = true
                             )
                         }
@@ -170,26 +175,16 @@ class FlowGameViewModel
         _readyToStart.value = true
     }
 
-    private fun processLifeCountChanges() {
-//        var lastLifeCount = lifeCount.value
-//        viewModelScope.launch {
-//            lifeCount.collect {
-//                if (lastLifeCount > it) {
-//                    vibrationManager.vibrate()
-//                    lastLifeCount = it
-//                }
-//            }
-//        }
+    private fun processLifeCountChanges(lifeCount: Int) {
+        if (lastLifeCount > lifeCount)
+            viewModelScope.launch { vibrationManager.vibrate() }
+        lastLifeCount = lifeCount
     }
 
-    private fun processCoefficientChanges() {
-//        var lastCoefficient = coefficient.value
-//        viewModelScope.launch {
-//            coefficient.collect {
-//                if (it < lastCoefficient) vibrationManager.vibrate()
-//                lastCoefficient = coefficient.value
-//            }
-//        }
+    private fun processCoefficientChanges(coefficient: Float) {
+        if (lastCoefficient > coefficient)
+            viewModelScope.launch { vibrationManager.vibrate() }
+        lastCoefficient = coefficient
     }
 
     private fun initGame(gameDifficulty: GameDifficulty) {
@@ -198,14 +193,12 @@ class FlowGameViewModel
 
     private fun startGame() {
         musicManager.startMusic()
-//        gameUseCase.startGame()
         gameUseCase.onEvent(FlowGameEvent.StartGame)
     }
 
     private fun pauseGame() {
         if (readyToStart.value) {
             musicManager.pauseMusic()
-//            gameUseCase.pauseGame()
             gameUseCase.onEvent(FlowGameEvent.PauseGame)
         }
     }
@@ -213,30 +206,24 @@ class FlowGameViewModel
     private fun resumeGame() {
         if (readyToStart.value) {
             musicManager.startMusic()
-//            gameUseCase.resumeGame()
             gameUseCase.onEvent(FlowGameEvent.ResumeGame)
         }
     }
 
     private fun finishGame() {
-        musicManager.stopMusic()
-//        gameUseCase.finishGame()
         gameUseCase.onEvent(FlowGameEvent.FinishGame)
     }
 
-    private suspend fun onItemClick(id: Int) {
+    private fun onItemClick(id: Int) {
         gameUseCase.onEvent(FlowGameEvent.OnItemClick(id))
-//        val pointsAdded = gameUseCase.onItemClick(id)
-//        _uiCallback.send(FlowGameUiCallback.PointsAdded(id, pointsAdded))
     }
 
     private fun onFirstVisibleItemIndexChanged(index: Int) {
-//        gameUseCase.setFirstVisibleItemIndex(index)
         gameUseCase.onEvent(FlowGameEvent.FirstVisibleItemIndexChanged(index))
     }
 
-//    private fun setItemHeight(height: Int) = gameUseCase.setItemHeight(height)
-    private fun setItemHeight(height: Int) = gameUseCase.onEvent(FlowGameEvent.ItemHeightMeasured(height))
+    private fun setItemHeight(height: Int) =
+        gameUseCase.onEvent(FlowGameEvent.ItemHeightMeasured(height))
 
     override fun onCleared() {
         super.onCleared()
