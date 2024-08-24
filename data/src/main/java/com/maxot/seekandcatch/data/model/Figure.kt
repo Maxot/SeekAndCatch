@@ -15,7 +15,8 @@ data class Figure(
     val id: Int = 0,
     val type: FigureType,
     val color: Color? = null,
-    var isActive: Boolean = true
+    var isActive: Boolean = true,
+    var pointsReceived: Int? = null
 ) {
     companion object {
         fun getRandomFigure(

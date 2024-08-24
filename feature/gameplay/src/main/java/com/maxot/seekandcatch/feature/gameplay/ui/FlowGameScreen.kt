@@ -161,7 +161,13 @@ fun FlowGameScreen(
                 spacerHeight = spacerHeight,
                 figures = flowGameUiState.figures,
                 gridState = gridState,
-                onItemHeightMeasured = { height -> sendEvent(FlowGameUiEvent.ItemHeightMeasured(height))  },
+                onItemHeightMeasured = { height ->
+                    sendEvent(
+                        FlowGameUiEvent.ItemHeightMeasured(
+                            height
+                        )
+                    )
+                },
                 onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
                 uiCallback = uiCallback,
                 reverseLayout = gameMode != GameMode.FLOW
@@ -169,36 +175,33 @@ fun FlowGameScreen(
         }
 
 
-//        if (flowGameUiState.isActive) {
-            LaunchedEffect(
-                key1 = flowGameUiState.coefficient.toInt(),
-                key2 = flowGameUiState.figures.size,
-                key3 = (flowGameUiState.gameDuration / 1000 / 30), // each 30 second update
-//                key3 = flowGameUiState.isActive
-            ) {
-                sendEvent(FlowGameUiEvent.UpdateScrollDuration)
-                sendEvent(FlowGameUiEvent.UpdatePixelsToScroll)
-            }
-            LaunchedEffect(
-                key1 = flowGameUiState.scrollDuration,
-                key2 = flowGameUiState.pixelsToScroll,
-                key3 = flowGameUiState.isActive
-            ) {
-                if (flowGameUiState.isActive && flowGameUiState.scrollDuration > 0 && flowGameUiState.pixelsToScroll > 0) {
-                    val pixelsToScrollWithSpacers =
-                        flowGameUiState.pixelsToScroll + with(density) {
-                            spacerHeight.toPx()
-                        }
-                    gridState.animateScrollBy(
-                        value = pixelsToScrollWithSpacers,
-                        animationSpec = tween(
-                            durationMillis = flowGameUiState.scrollDuration,
-                            easing = LinearEasing
-                        )
+        LaunchedEffect(
+            key1 = flowGameUiState.coefficient.toInt(),
+            key2 = flowGameUiState.figures.size,
+            key3 = (flowGameUiState.gameDuration / 1000 / 30), // each 30 second update
+        ) {
+            sendEvent(FlowGameUiEvent.UpdateScrollDuration)
+            sendEvent(FlowGameUiEvent.UpdatePixelsToScroll)
+        }
+        LaunchedEffect(
+            key1 = flowGameUiState.scrollDuration,
+            key2 = flowGameUiState.pixelsToScroll,
+            key3 = flowGameUiState.isActive
+        ) {
+            if (flowGameUiState.isActive && flowGameUiState.scrollDuration > 0 && flowGameUiState.pixelsToScroll > 0) {
+                val pixelsToScrollWithSpacers =
+                    flowGameUiState.pixelsToScroll + with(density) {
+                        spacerHeight.toPx()
+                    }
+                gridState.animateScrollBy(
+                    value = pixelsToScrollWithSpacers,
+                    animationSpec = tween(
+                        durationMillis = flowGameUiState.scrollDuration,
+                        easing = LinearEasing
                     )
-                }
+                )
             }
-//        }
+        }
 
         if (flowGameUiState.isLoading) {
             ReadyToGameLayout(
@@ -216,12 +219,10 @@ fun FlowGameScreen(
             PauseDialog(
                 onDismissRequest = {
                     showPauseDialog.value = false
-//                    resumeGame()
                     sendEvent(FlowGameUiEvent.ResumeGame)
                 },
                 onConfirmation = {
                     showPauseDialog.value = false
-//                    finishGame()
                     sendEvent(FlowGameUiEvent.FinishGame)
                 },
                 dialogTitle = stringResource(id = R.string.title_pause_dialog),
@@ -241,22 +242,19 @@ fun FlowGameScreen(
     }
 
     BackHandler {
-//        pauseGame()
         sendEvent(FlowGameUiEvent.PauseGame)
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
         if (!flowGameUiState.isFinished)
-//            pauseGame()
-        sendEvent(FlowGameUiEvent.PauseGame)
+            sendEvent(FlowGameUiEvent.PauseGame)
 
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
-        val event = if (showPauseDialog.value) FlowGameUiEvent.PauseGame else FlowGameUiEvent.ResumeGame
+        val event =
+            if (showPauseDialog.value) FlowGameUiEvent.PauseGame else FlowGameUiEvent.ResumeGame
         sendEvent(event)
-//        if (showPauseDialog.value)
-//            pauseGame() else resumeGame()
     }
 }
 
@@ -409,7 +407,6 @@ fun GameFieldLayout(
                     },
                 figure = figure,
                 onItemClick = { onItemClick(figure.id) },
-                pointsAddedCallback = if (uiCallback is FlowGameUiCallback.PointsAdded && uiCallback.itemId == figure.id) uiCallback else null
             )
         }
         // Add spacer for one row to reach scrolling to empty space
@@ -442,16 +439,9 @@ fun FlowGameScreenLoadingPreview() {
     )
 
     FlowGameScreen(
-//        goals = setOf(Goal.Colored(Color.Red)),
-//        score = 11,
-//        figures = figures,
-//        coefficient = 1f,
-//        gameDuration = 1000,
         flowGameUiState = FlowGameUiState(isLoading = true),
         sendEvent = { },
         toGameResultScreen = { },
-//        getPixelsToScroll = { 1000f },
-//        onFirstVisibleItemIndexChanged = {},
         uiCallback = null
     )
 }
@@ -469,16 +459,9 @@ fun FlowGameScreenActivePreview() {
     )
 
     FlowGameScreen(
-//        goals = setOf(Goal.Colored(Color.Red)),
-//        score = 11,
-//        figures = figures,
-//        coefficient = 1f,
-//        gameDuration = 1000,
         flowGameUiState = FlowGameUiState(),
         sendEvent = { },
         toGameResultScreen = { },
-//        getPixelsToScroll = { 1000f },
-//        onFirstVisibleItemIndexChanged = {},
         uiCallback = null
     )
 }
@@ -496,15 +479,8 @@ fun FlowGameScreenPausedPreview() {
     )
 
     FlowGameScreen(
-//        goals = setOf(Goal.Colored(Color.Red)),
-//        score = 11,
-//        figures = figures,
-//        coefficient = 1f,
-//        gameDuration = 1000,
         flowGameUiState = FlowGameUiState(isPaused = true),
         sendEvent = { },
-//        getPixelsToScroll = { 1000f },
-//        onFirstVisibleItemIndexChanged = {},
         uiCallback = null
     )
 }

@@ -27,7 +27,7 @@ const val TAG = "FlowGameUseCase"
 
 /**
  * Represent game logic for Flow Game Mode.
- * The game consists of grid of [FlowGameData.figures] with fixed [rowWidth] and the [goals].
+ * The game consists of grid of [FlowGameData.figures] with fixed [FlowGameData.rowWidth] and the [FlowGameData.goals].
  * Items are auto-scrolled with some speed(px/ms), the amount of pixel to scroll calculated by [getPixelsToScroll]
  * and the scroll duration calculated by [getScrollDuration]. Then UI pass back [firstVisibleItemIndex]
  * to process game updates via [processGameChanges].
@@ -51,34 +51,11 @@ class FlowGameUseCase
     private var percentOfSuitableItem: Float = 0.5f
     private var scrollDuration = 1000
     private var maxLifeCount: Int = 5
-
     private var itemsPassedWithoutMissToGetLife = 10
-
     private var itemsPassedWithoutMissing = 0
 
-    private var _lifeCount =
-        MutableStateFlow(0)
-//    val lifeCount: StateFlow<Int> = _lifeCount
 
-    private var _goals =
-        MutableStateFlow(emptySet<Goal<Any>>())
-//    val goals: StateFlow<Set<Goal<Any>>> = _goals
-
-    private var _score = MutableStateFlow(0)
-//    val score: StateFlow<Int> = _score
-
-    private var _figures = MutableStateFlow(listOf<Figure>())
-//    val figures: StateFlow<List<Figure>> = _figures
-
-    private var _firstVisibleItemIndex = MutableStateFlow(0)
-//    val firstVisibleItemIndex: StateFlow<Int> = _firstVisibleItemIndex
-
-    private var _coefficient = MutableStateFlow(1f)
-//    val coefficient: StateFlow<Float> = _coefficient
-
-    private var _gameDuration = MutableStateFlow(0L)
-//    val gameDuration: StateFlow<Long> = _gameDuration
-
+    private var firstVisibleItemIndex = MutableStateFlow(0)
 
     private val gameData = MutableStateFlow(FlowGameData())
 
@@ -101,29 +78,26 @@ class FlowGameUseCase
         maxLifeCount = gameParams.maxLifeCount
         itemsPassedWithoutMissToGetLife = gameParams.itemsPassedWithoutMissToGetLife
 
-        _lifeCount.value = gameParams.lifeCount
-
         coroutineScope.launch {
-            _goals.value = setOf(goalsRepository.getRandomGoal())
-            _figures.value = figuresRepository.getRandomFigures(
+            val goals = setOf(goalsRepository.getRandomGoal())
+            val figures = figuresRepository.getRandomFigures(
                 itemsCount = itemsCount,
                 percentageOfSuitableGoalItems = percentOfSuitableItem,
-                goal = _goals.value.first()
+                goal = goals.first()
             )
             val currentGameData = FlowGameData(
                 maxLifeCount = maxLifeCount,
                 lifeCount = gameParams.lifeCount,
-                goals = _goals.value,
-                figures = _figures.value,
-                score = _score.value,
-                coefficient = _coefficient.value,
-                gameDuration = _gameDuration.value,
+                goals = goals,
+                figures = figures,
+                score = 0,
+                coefficient = 1f,
+                gameDuration = 0,
                 scrollDuration = getScrollDuration(),
                 pixelsToScroll = getPixelsToScroll(rowWidth.toFloat()),
                 rowWidth = rowWidth
             )
             gameData.value = currentGameData
-//            _gameState.value = FlowGameState.Resumed(gameData.value)
         }
 
         _gameState.value = FlowGameState.Created
@@ -157,7 +131,7 @@ class FlowGameUseCase
     }
 
     private fun setFirstVisibleItemIndex(index: Int) {
-        _firstVisibleItemIndex.value = index
+        firstVisibleItemIndex.value = index
     }
 
     private fun startGame() {
@@ -187,9 +161,9 @@ class FlowGameUseCase
         gameDataJob?.cancel()
         timeJob?.cancel()
 
-        scoreRepository.setLastScore(score = _score.value)
+//        scoreRepository.setLastScore(score = _score.value)
 
-        _gameState.value = FlowGameState.Finished(_score.value)
+        _gameState.value = FlowGameState.Finished(gameData.value.score)
     }
 
     private fun processGameChanges() {
@@ -197,7 +171,7 @@ class FlowGameUseCase
         timeJob?.cancel()
 
         gameJob = CoroutineScope(Dispatchers.IO).launch {
-            _firstVisibleItemIndex.collect { firstVisibleItemIndex ->
+            firstVisibleItemIndex.collect { firstVisibleItemIndex ->
 //                Log.d(TAG, "first item index: $firstVisibleItemIndex")
                 processPassedItems(firstPassedItemIndex = firstVisibleItemIndex - rowWidth * 2)
 
@@ -220,27 +194,32 @@ class FlowGameUseCase
                 delay(1000)
 //                val currentTime = System.currentTimeMillis()
 //                val duration = currentTime - startTime
-//                _gameDuration.value += duration
-                _gameDuration.value += 1000
-                gameData.update { it.copy(gameDuration = _gameDuration.value) }
+
+
+                val gameDuration = gameData.value.gameDuration + 1000
+                gameData.update { it.copy(gameDuration = gameDuration) }
             }
         }
     }
 
     private fun processPassedItems(firstPassedItemIndex: Int) {
+        val figures = gameData.value.figures
+        val coefficient = gameData.value.coefficient
+        val lifeCount = gameData.value.lifeCount
+
         if (firstPassedItemIndex >= 0) {
             val startIndex = firstPassedItemIndex
             val endIndex = firstPassedItemIndex + rowWidth - 1
 
-            if (endIndex < _figures.value.size) {
+            if (endIndex < figures.size) {
                 val missedItemsCount = getMissedItemsCount(startIndex, endIndex)
                 repeat(missedItemsCount) {
                     itemsPassedWithoutMissing = 0
-                    if (_coefficient.value > 1) {
+                    if (coefficient > 1) {
                         decreaseCoefficients()
                     } else {
                         decreaseLifeCount()
-                        if (_lifeCount.value < 0) finishGame()
+                        if (lifeCount < 0) finishGame()
                     }
                 }
             } else {
@@ -250,38 +229,37 @@ class FlowGameUseCase
     }
 
     private fun increaseLifeCount() {
-        _lifeCount.value =
-            _lifeCount.value.inc().coerceAtLeast(maxLifeCount)
-//            if (_lifeCount.value < maxLifeCount) _lifeCount.value.inc() else _lifeCount.value
+        val lifeCount = gameData.value.lifeCount.inc().coerceAtMost(maxLifeCount)
 
-        gameData.update { it.copy(lifeCount = _lifeCount.value) }
+        gameData.update { it.copy(lifeCount = lifeCount) }
     }
 
     private fun decreaseLifeCount() {
-        _lifeCount.value = _lifeCount.value.dec()
+        val lifeCount = gameData.value.lifeCount.dec()
 
-        gameData.update { it.copy(lifeCount = _lifeCount.value) }
+        gameData.update { it.copy(lifeCount = lifeCount) }
     }
 
     private fun increaseCoefficients() {
-        _coefficient.value += coefficientStep
+        val coefficient = gameData.value.coefficient + coefficientStep
 
-        gameData.update { it.copy(coefficient = _coefficient.value) }
+        gameData.update { it.copy(coefficient = coefficient) }
     }
 
     private fun decreaseCoefficients() {
-        if (_coefficient.value > 1)
-            _coefficient.value = (_coefficient.value / 2).coerceAtLeast(1f)
-
-        gameData.update { it.copy(coefficient = _coefficient.value) }
+        gameData.update { currentData ->
+            val newCoefficient =
+                if (currentData.coefficient > 1) (currentData.coefficient / 2).coerceAtLeast(1f) else
+                    currentData.coefficient
+            currentData.copy(coefficient = newCoefficient.coerceAtLeast(1f))
+        }
     }
 
     private fun increaseScore(): Int {
-        val pointsAdded = _coefficient.value.toInt() * scorePoint
-        _score.value += pointsAdded
-
-        gameData.update {
-            it.copy(score = _score.value)
+        val pointsAdded = gameData.value.coefficient.toInt() * scorePoint
+        gameData.update { currentData ->
+            val newScore = currentData.score + pointsAdded
+            currentData.copy(score = newScore)
         }
         return pointsAdded
     }
@@ -293,11 +271,13 @@ class FlowGameUseCase
      * @return count of missed items.
      */
     private fun getMissedItemsCount(startIndex: Int, endIndex: Int): Int {
+        val figures = gameData.value.figures
+        val goals = gameData.value.goals
         var count = 0
         for (i in startIndex..endIndex) {
-            val item = _figures.value[i]
+            val item = figures[i]
             if (isItemFitForGoals(
-                    _goals.value,
+                    goals,
                     item
                 ) && item.isActive
             ) count++
@@ -322,16 +302,19 @@ class FlowGameUseCase
     }
 
     private fun addMoreItems() {
-        val newList = figuresRepository.getRandomFigures(
-            itemsCount = itemsCount,
-            startId = itemsCount,
-            percentageOfSuitableGoalItems = percentOfSuitableItem,
-            goal = _goals.value.first()
-        )
+        gameData.update { currentData ->
+            val newList = figuresRepository.getRandomFigures(
+                itemsCount = itemsCount,
+                startId = itemsCount,
+                percentageOfSuitableGoalItems = percentOfSuitableItem,
+                goal = currentData.goals.first()
+            )
 
-        _figures.value += newList
-        itemsCount = _figures.value.size
-        gameData.update { it.copy(figures = _figures.value) }
+            val newFiguresList = currentData.figures + newList
+            itemsCount = newFiguresList.size
+
+            currentData.copy(figures = newFiguresList)
+        }
     }
 
     /**
@@ -341,19 +324,20 @@ class FlowGameUseCase
      *
      * @return the number of points added for this click.
      */
-    private fun onItemClick(id: Int): Int {
-        var pointsAdded = 0
+    private fun onItemClick(id: Int) {
         //TODO: Look for some replacement for 'find' operator. Maybe use HashMap?
-        _figures.value.find { figure -> figure.id == id }?.let { figure ->
-            if (isItemFitForGoals(_goals.value, figure)) {
+        val figures = gameData.value.figures
+        val goals = gameData.value.goals
+
+        figures.find { figure -> figure.id == id }?.let { figure ->
+            if (isItemFitForGoals(goals, figure)) {
                 figure.isActive = false
-                pointsAdded = onCorrectItemClicked()
+                figure.pointsReceived = onCorrectItemClicked()
             } else {
                 finishGame()
             }
         }
-        gameData.update { it.copy(figures = _figures.value) }
-        return pointsAdded
+        gameData.update { it.copy(figures = figures) }
     }
 
     private fun onCorrectItemClicked(): Int {
@@ -367,11 +351,6 @@ class FlowGameUseCase
         }
         return pointsAdded
     }
-
-    /**
-     * @return the items count in one row.
-     */
-    private fun getRowWidth(): Int = rowWidth
 
     /**
      * Set the real height of an item. Used in calculations.
@@ -394,12 +373,16 @@ class FlowGameUseCase
      * @return scroll duration in millisecond.
      */
     private fun getScrollDuration(): Int {
-        val rowCount = _figures.value.size / rowWidth
-        val coefInt = _coefficient.value.toInt()
+        val figures = gameData.value.figures
+        val coefficient = gameData.value.coefficient
+        val gameDuration = gameData.value.gameDuration
+
+        val rowCount = figures.size / rowWidth
+        val coefInt = coefficient.toInt()
 
         // Percentage of time that need to be subtracted from 100% of duration
         val coefPercentage = (coefInt * coefInt / 100f)
-        val timePercentage = (((_gameDuration.value / 1000 / 30) * 5) / 100f)
+        val timePercentage = (((gameDuration / 1000 / 30) * 5) / 100f)
         val actualDurationPercentage = (1f - coefPercentage - timePercentage).coerceAtLeast(0.35f)
 
         val duration = (rowCount * rowDuration) * actualDurationPercentage
@@ -420,7 +403,8 @@ class FlowGameUseCase
      * @return amount of pixel needed to scroll to reach the end.
      */
     private fun getPixelsToScroll(@Px rowHeight: Float): Float {
-        val rowCount = _figures.value.size / rowWidth
+        val figures = gameData.value.figures
+        val rowCount = figures.size / rowWidth
 //        Log.d(
 //            TAG,
 //            "current speed: ${

@@ -58,7 +58,6 @@ fun ColoredFigureLayout(
     size: Dp? = null,
     figure: Figure,
     onItemClick: () -> Unit = {},
-    pointsAddedCallback: FlowGameUiCallback.PointsAdded? = null
 ) {
     val coloredFigureContentDesc =
         stringResource(id = R.string.colored_figure_content_desc, figure.id)
@@ -116,7 +115,7 @@ fun ColoredFigureLayout(
             .then(modifier)
     )
 
-    if (pointsAddedCallback != null) {
+    if (figure.pointsReceived != null) {
         LaunchedEffect(key1 = true) {
             alphaScore.animateTo(targetValue = 0f, animationSpec = tween(1000))
         }
@@ -126,7 +125,7 @@ fun ColoredFigureLayout(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "+${pointsAddedCallback.number}",
+                text = "+${figure.pointsReceived}",
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier
                     .alpha(alphaScore.value),
