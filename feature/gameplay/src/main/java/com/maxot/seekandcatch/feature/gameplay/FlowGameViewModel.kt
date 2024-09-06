@@ -10,17 +10,16 @@ import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.repository.SettingsRepository
-import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiCallback
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.settings.MusicManager
 import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -57,8 +56,7 @@ class FlowGameViewModel
     private val _readyToStart = MutableStateFlow(false)
     private val readyToStart: StateFlow<Boolean> = _readyToStart
 
-    private val _uiCallback = Channel<FlowGameUiCallback>()
-    val uiCallback = _uiCallback.receiveAsFlow()
+    private var lifeWastedJob: Job? = null
 
     init {
         observeFlowGameState()
@@ -177,15 +175,29 @@ class FlowGameViewModel
 
     private fun processLifeCountChanges(lifeCount: Int) {
         if (lastLifeCount > lifeCount)
-            viewModelScope.launch { vibrationManager.vibrate() }
+            updateLifeWastedValue()
         lastLifeCount = lifeCount
     }
 
     private fun processCoefficientChanges(coefficient: Float) {
         if (lastCoefficient > coefficient)
-            viewModelScope.launch { vibrationManager.vibrate() }
+            updateLifeWastedValue()
         lastCoefficient = coefficient
     }
+
+
+    private fun updateLifeWastedValue() {
+        _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = false)
+        lifeWastedJob?.cancel()
+        lifeWastedJob = viewModelScope.launch {
+            vibrationManager.vibrate()
+            delay(100)
+            _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = true)
+            delay(1000)
+            _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = false)
+        }
+    }
+
 
     private fun initGame(gameDifficulty: GameDifficulty) {
         gameUseCase.initGame(gameDifficulty.gameParams)
@@ -246,4 +258,5 @@ data class FlowGameUiState(
     val isLoading: Boolean = false,
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,
+    val isLifeWasted: Boolean = false
 )

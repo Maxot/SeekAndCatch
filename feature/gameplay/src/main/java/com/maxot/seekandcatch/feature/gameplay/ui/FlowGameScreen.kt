@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.stopScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -35,8 +36,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RadialGradientShader
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -57,7 +63,6 @@ import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.FlowGameUiState
 import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
-import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiCallback
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
@@ -77,15 +82,32 @@ fun FlowGameScreenRoute(
 ) {
     val gameMode = viewModel.selectedGameMode.collectAsStateWithLifecycle()
     val flowGameUiState by viewModel.flowGameUiState.collectAsStateWithLifecycle()
-    val uiCallback by viewModel.uiCallback.collectAsStateWithLifecycle(initialValue = null)
+
+    val showPauseDialog = remember { mutableStateOf(false) }
 
     FlowGameScreen(
         gameMode = gameMode.value,
         flowGameUiState = flowGameUiState,
         sendEvent = { flowGameUiEvent -> viewModel.onEvent(flowGameUiEvent) },
         toGameResultScreen = toGameResultScreen,
-        uiCallback = uiCallback
+        showPauseDialog = showPauseDialog.value,
+        updatePauseDialogVisibility = { showPauseDialog.value = it }
     )
+
+    BackHandler {
+        viewModel.onEvent(FlowGameUiEvent.PauseGame)
+    }
+
+    LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
+        if (!flowGameUiState.isFinished)
+            viewModel.onEvent(FlowGameUiEvent.PauseGame)
+    }
+
+    LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
+        val event =
+            if (showPauseDialog.value) FlowGameUiEvent.PauseGame else FlowGameUiEvent.ResumeGame
+        viewModel.onEvent(event)
+    }
 }
 
 @Composable
@@ -95,25 +117,26 @@ fun FlowGameScreen(
     flowGameUiState: FlowGameUiState,
     sendEvent: (FlowGameUiEvent) -> Unit,
     toGameResultScreen: () -> Unit = {},
-    uiCallback: FlowGameUiCallback?
+    showPauseDialog: Boolean = false,
+    updatePauseDialogVisibility: (Boolean) -> Unit = {}
 ) {
     val density = LocalDensity.current
-
     val flowGameScreenContentDesc = stringResource(id = R.string.flow_game_screen_content_desc)
 
-    val backgroundBrush =
-        Brush.linearGradient(
-            listOf(
-                MaterialTheme.colorScheme.primary,
-                Color.Transparent,
-                MaterialTheme.colorScheme.secondary,
-                Color.Transparent
+    val largeRadialGradient = object : ShaderBrush() {
+        override fun createShader(size: Size): Shader {
+            val biggerDimension = maxOf(size.height, size.width)
+            return RadialGradientShader(
+                colors = listOf(Color.Transparent, Color.Red.copy(alpha = 0.4f)),
+                center = size.center,
+                radius = biggerDimension / 2f,
+                colorStops = listOf(0f, 0.95f)
             )
-        )
+        }
+    }
 
     val coroutineScope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
-    val showPauseDialog = remember { mutableStateOf(false) }
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     var gameInfoPanelSize by remember {
@@ -169,20 +192,10 @@ fun FlowGameScreen(
                     )
                 },
                 onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
-                uiCallback = uiCallback,
                 reverseLayout = gameMode != GameMode.FLOW
             )
         }
 
-
-        LaunchedEffect(
-            key1 = flowGameUiState.coefficient.toInt(),
-            key2 = flowGameUiState.figures.size,
-            key3 = (flowGameUiState.gameDuration / 1000 / 30), // each 30 second update
-        ) {
-            sendEvent(FlowGameUiEvent.UpdateScrollDuration)
-            sendEvent(FlowGameUiEvent.UpdatePixelsToScroll)
-        }
         LaunchedEffect(
             key1 = flowGameUiState.scrollDuration,
             key2 = flowGameUiState.pixelsToScroll,
@@ -211,18 +224,18 @@ fun FlowGameScreen(
         }
 
         if (flowGameUiState.isPaused) {
-            showPauseDialog.value = true
+            updatePauseDialogVisibility(true)
             LaunchedEffect(key1 = Unit) {
                 gridState.stopScroll()
             }
 
             PauseDialog(
                 onDismissRequest = {
-                    showPauseDialog.value = false
+                    updatePauseDialogVisibility(false)
                     sendEvent(FlowGameUiEvent.ResumeGame)
                 },
                 onConfirmation = {
-                    showPauseDialog.value = false
+                    updatePauseDialogVisibility(false)
                     sendEvent(FlowGameUiEvent.FinishGame)
                 },
                 dialogTitle = stringResource(id = R.string.title_pause_dialog),
@@ -240,22 +253,18 @@ fun FlowGameScreen(
         }
 
     }
-
-    BackHandler {
-        sendEvent(FlowGameUiEvent.PauseGame)
-    }
-
-    LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
-        if (!flowGameUiState.isFinished)
-            sendEvent(FlowGameUiEvent.PauseGame)
-
-    }
-
-    LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
-        val event =
-            if (showPauseDialog.value) FlowGameUiEvent.PauseGame else FlowGameUiEvent.ResumeGame
-        sendEvent(event)
-    }
+    val wastedBackground = if (flowGameUiState.isLifeWasted)
+        largeRadialGradient else Brush.linearGradient(
+        colors = listOf(
+            Color.Transparent,
+            Color.Transparent
+        )
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(wastedBackground)
+    )
 }
 
 @Composable
@@ -276,7 +285,6 @@ fun ReadyToGameLayout(
         }
 
         val text = if (countDown > 0) "$countDown" else "Go!"
-
 
         GoalsLayout(
             modifier = Modifier,
@@ -373,7 +381,6 @@ fun GameFieldLayout(
     gridState: LazyGridState,
     onItemHeightMeasured: (height: Int) -> Unit = { },
     onItemClick: (id: Int) -> Unit,
-    uiCallback: FlowGameUiCallback? = null,
     reverseLayout: Boolean = false
 ) {
     val gameFieldLayoutContentDesc = stringResource(id = R.string.game_field_layout_content_desc)
@@ -442,7 +449,6 @@ fun FlowGameScreenLoadingPreview() {
         flowGameUiState = FlowGameUiState(isLoading = true),
         sendEvent = { },
         toGameResultScreen = { },
-        uiCallback = null
     )
 }
 
@@ -459,10 +465,9 @@ fun FlowGameScreenActivePreview() {
     )
 
     FlowGameScreen(
-        flowGameUiState = FlowGameUiState(),
+        flowGameUiState = FlowGameUiState(figures = figures, isActive = true),
         sendEvent = { },
         toGameResultScreen = { },
-        uiCallback = null
     )
 }
 
@@ -479,9 +484,8 @@ fun FlowGameScreenPausedPreview() {
     )
 
     FlowGameScreen(
-        flowGameUiState = FlowGameUiState(isPaused = true),
+        flowGameUiState = FlowGameUiState(isPaused = true, figures = figures),
         sendEvent = { },
-        uiCallback = null
     )
 }
 

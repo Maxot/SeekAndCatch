@@ -43,7 +43,6 @@ import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.getShapeForFigure
 import com.maxot.seekandcatch.feature.gameplay.R
-import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiCallback
 
 // Used for test
 val AlphaKey = SemanticsPropertyKey<Float>("Alpha")

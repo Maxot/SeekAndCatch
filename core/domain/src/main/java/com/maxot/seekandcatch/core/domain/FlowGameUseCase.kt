@@ -49,7 +49,6 @@ class FlowGameUseCase
     private var scorePoint: Int = 10
     private var coefficientStep: Float = 0.2f
     private var percentOfSuitableItem: Float = 0.5f
-    private var scrollDuration = 1000
     private var maxLifeCount: Int = 5
     private var itemsPassedWithoutMissToGetLife = 10
     private var itemsPassedWithoutMissing = 0
@@ -132,11 +131,14 @@ class FlowGameUseCase
 
     private fun setFirstVisibleItemIndex(index: Int) {
         firstVisibleItemIndex.value = index
+
+        //TODO: Need better place?
+        updateScrollDuration()
+        updatePixelsToScroll()
+
     }
 
     private fun startGame() {
-//        processGameChanges()
-
         _gameState.value = FlowGameState.Started
         resumeGame()
     }
@@ -161,7 +163,7 @@ class FlowGameUseCase
         gameDataJob?.cancel()
         timeJob?.cancel()
 
-//        scoreRepository.setLastScore(score = _score.value)
+        scoreRepository.setLastScore(score = gameData.value.score)
 
         _gameState.value = FlowGameState.Finished(gameData.value.score)
     }
@@ -362,7 +364,7 @@ class FlowGameUseCase
     }
 
     private fun updateScrollDuration() {
-        scrollDuration = getScrollDuration()
+        val scrollDuration = getScrollDuration()
         gameData.update { it.copy(scrollDuration = scrollDuration) }
     }
 
