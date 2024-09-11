@@ -3,7 +3,7 @@ package com.maxot.seekandcatch.feature.gameplay.ui.layout
 import android.view.MotionEvent
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
@@ -61,7 +61,7 @@ fun <T> SingleSelectionLazyRow(
     }
 
     var currentSelectedItemIndex by remember {
-        mutableIntStateOf(selectedItemIndex)
+        mutableIntStateOf(selectedItemIndex.coerceIn(items.indices))
     }
 
     fun centralizeSelectedItem() {
@@ -93,7 +93,7 @@ fun <T> SingleSelectionLazyRow(
             itemWidth.toDp()
         }
         item {
-            Box(
+            Spacer(
                 modifier = Modifier
                     .width(itemWidthDp)
             )
@@ -123,6 +123,7 @@ fun <T> SingleSelectionLazyRow(
                             currentX =
                                 layoutCoordinates.positionInParent().x
                         }
+
                         val offset = abs(currentX - selectedItemX).coerceIn(0f, 300f)
                         scale = calculateScale(offset = offset)
                     }
@@ -130,7 +131,7 @@ fun <T> SingleSelectionLazyRow(
 
         }
         item {
-            Box(
+            Spacer(
                 modifier = Modifier
                     .width(itemWidthDp)
             )
@@ -148,8 +149,8 @@ fun <T> SingleSelectionLazyRow(
                 val index =
                     if (currentItem.offset > selectedItemOffset) currentItem.index - 1 else currentItem.index + 1
 
-                currentSelectedItemIndex = index - 1
-                onSelectedItemChanged(index - 1)
+                currentSelectedItemIndex = (index - 1).coerceIn(items.indices)
+                onSelectedItemChanged(currentSelectedItemIndex)
 
                 centralizeSelectedItem()
             }
