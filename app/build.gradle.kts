@@ -6,6 +6,11 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+val versionMajor = 1
+val versionMinor = 0
+val versionPatch = 0
+val versionBuild = 0
+
 android {
     namespace = "com.maxot.seekandcatch"
     compileSdk = 34
@@ -14,8 +19,8 @@ android {
         applicationId = "com.maxot.seekandcatch"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName = "$versionMajor.$versionMinor.$versionPatch.$versionBuild"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -50,6 +55,17 @@ android {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
+    }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val outputFileName =
+                    "SeekAndCatch - ${variant.baseName} - ${variant.versionName}.apk"
+                output.outputFileName = outputFileName
+            }
     }
 }
 
