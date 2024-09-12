@@ -80,6 +80,9 @@ fun FlowGameScreenRoute(
     viewModel: FlowGameViewModel = hiltViewModel(),
     toGameResultScreen: () -> Unit
 ) {
+    val gridState: LazyGridState = rememberLazyGridState()
+    val coroutineScope = rememberCoroutineScope()
+
     val gameMode = viewModel.selectedGameMode.collectAsStateWithLifecycle()
     val flowGameUiState by viewModel.flowGameUiState.collectAsStateWithLifecycle()
 
@@ -87,12 +90,58 @@ fun FlowGameScreenRoute(
 
     FlowGameScreen(
         gameMode = gameMode.value,
+        gridState = gridState,
         flowGameUiState = flowGameUiState,
         sendEvent = { flowGameUiEvent -> viewModel.onEvent(flowGameUiEvent) },
         toGameResultScreen = toGameResultScreen,
         showPauseDialog = showPauseDialog.value,
         updatePauseDialogVisibility = { showPauseDialog.value = it }
     )
+
+    LaunchedEffect(key1 = true) {
+        snapshotFlow { gridState.firstVisibleItemIndex }
+            .collect {
+                Log.d(TAG, "firstVisibleItemIndex: ${gridState.firstVisibleItemIndex}")
+                viewModel.onEvent(FlowGameUiEvent.FirstVisibleItemIndexChanged(gridState.firstVisibleItemIndex))
+            }
+    }
+
+    if (flowGameUiState.isReady && !flowGameUiState.isActive) {
+        ReadyToGameLayout(
+            goals = flowGameUiState.goals,
+            goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
+            setGameReadyToStart = { viewModel.onEvent(FlowGameUiEvent.SetGameReadyToStart) }
+        )
+    }
+
+    if (flowGameUiState.isPaused) {
+        showPauseDialog.value = true
+        LaunchedEffect(key1 = Unit) {
+            gridState.stopScroll()
+        }
+
+        PauseDialog(
+            onDismissRequest = {
+                viewModel.onEvent(FlowGameUiEvent.ResumeGame)
+                showPauseDialog.value = false
+            },
+            onConfirmation = {
+                showPauseDialog.value = false
+                viewModel.onEvent(FlowGameUiEvent.FinishGame)
+            },
+            dialogTitle = stringResource(id = R.string.title_pause_dialog),
+            dialogText = stringResource(id = R.string.text_pause_dialog)
+        )
+    }
+
+    if (flowGameUiState.isFinished) {
+        LaunchedEffect(key1 = true) {
+            coroutineScope.launch {
+                delay(1)
+                toGameResultScreen()
+            }
+        }
+    }
 
     BackHandler {
         viewModel.onEvent(FlowGameUiEvent.PauseGame)
@@ -113,6 +162,7 @@ fun FlowGameScreenRoute(
 @Composable
 fun FlowGameScreen(
     modifier: Modifier = Modifier,
+    gridState: LazyGridState = rememberLazyGridState(),
     gameMode: GameMode = GameMode.FLOW,
     flowGameUiState: FlowGameUiState,
     sendEvent: (FlowGameUiEvent) -> Unit,
@@ -135,9 +185,6 @@ fun FlowGameScreen(
         }
     }
 
-    val coroutineScope = rememberCoroutineScope()
-    val gridState = rememberLazyGridState()
-
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     var gameInfoPanelSize by remember {
         mutableStateOf(0.dp)
@@ -146,14 +193,6 @@ fun FlowGameScreen(
         derivedStateOf {
             screenHeight - gameInfoPanelSize
         }
-    }
-
-    LaunchedEffect(key1 = true) {
-        snapshotFlow { gridState.firstVisibleItemIndex }
-            .collect {
-                Log.d(TAG, "firstVisibleItemIndex: ${gridState.firstVisibleItemIndex}")
-                sendEvent(FlowGameUiEvent.FirstVisibleItemIndexChanged(gridState.firstVisibleItemIndex))
-            }
     }
 
     Box(
@@ -197,6 +236,9 @@ fun FlowGameScreen(
             )
         }
 
+        /**
+         * Action responsible for scrolling list of items.
+         */
         LaunchedEffect(
             key1 = flowGameUiState.scrollDuration,
             key2 = flowGameUiState.pixelsToScroll,
@@ -216,45 +258,8 @@ fun FlowGameScreen(
                 )
             }
         }
-
-        if (flowGameUiState.isReady && !flowGameUiState.isActive) {
-            ReadyToGameLayout(
-                goals = flowGameUiState.goals,
-                goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
-                setGameReadyToStart = { sendEvent(FlowGameUiEvent.SetGameReadyToStart) }
-            )
-        }
-
-        if (flowGameUiState.isPaused) {
-            updatePauseDialogVisibility(true)
-            LaunchedEffect(key1 = Unit) {
-                gridState.stopScroll()
-            }
-
-            PauseDialog(
-                onDismissRequest = {
-                    updatePauseDialogVisibility(false)
-                    sendEvent(FlowGameUiEvent.ResumeGame)
-                },
-                onConfirmation = {
-                    updatePauseDialogVisibility(false)
-                    sendEvent(FlowGameUiEvent.FinishGame)
-                },
-                dialogTitle = stringResource(id = R.string.title_pause_dialog),
-                dialogText = stringResource(id = R.string.text_pause_dialog)
-            )
-        }
-
-        if (flowGameUiState.isFinished) {
-            LaunchedEffect(key1 = true) {
-                coroutineScope.launch {
-                    delay(1)
-                    toGameResultScreen()
-                }
-            }
-        }
-
     }
+
     val wastedBackground = if (flowGameUiState.isLifeWasted)
         largeRadialGradient else Brush.linearGradient(
         colors = listOf(
