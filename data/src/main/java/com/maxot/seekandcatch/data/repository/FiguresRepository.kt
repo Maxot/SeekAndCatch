@@ -23,4 +23,15 @@ interface FiguresRepository {
         percentageOfSuitableGoalItems: Float,
         goal: Goal<Any>
     ): List<Figure>
+
+    /**
+     * Return all possible [Figure] that are fit for the current [Goal]
+     */
+    fun getFigureSuitableForGoal(goal: Goal<Any>): Set<Figure>
+
+    /**
+     * Return all possible [Figure] that are not fit for the current [Goal]
+     */
+    fun getFigureUnsuitableForGoal(goal: Goal<Any>): Set<Figure>
+
 }

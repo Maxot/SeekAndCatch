@@ -87,11 +87,7 @@ class FiguresRepositoryImpl
         return result.shuffled()
     }
 
-
-    /**
-     * Return all possible [Figure] that are fit for the current [Goal]
-     */
-    private fun getFigureSuitableForGoal(goal: Goal<Any>): Set<Figure> {
+    override fun getFigureSuitableForGoal(goal: Goal<Any>): Set<Figure> {
         val figures = mutableSetOf<Figure>()
         when (goal) {
             is Goal.Colored -> {
@@ -113,10 +109,7 @@ class FiguresRepositoryImpl
         return figures
     }
 
-    /**
-     * Return all possible [Figure] that are not fit for the current [Goal]
-     */
-    private fun getFigureUnsuitableForGoal(goal: Goal<Any>): Set<Figure> {
+    override fun getFigureUnsuitableForGoal(goal: Goal<Any>): Set<Figure> {
         val figures = mutableSetOf<Figure>()
         when (goal) {
             is Goal.Colored -> {

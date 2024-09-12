@@ -85,10 +85,11 @@ class FlowGameUseCase
                 goal = goals.first()
             )
             val currentGameData = FlowGameData(
-                maxLifeCount = maxLifeCount,
-                lifeCount = gameParams.lifeCount,
                 goals = goals,
                 figures = figures,
+                goalSuitableFigures = figuresRepository.getFigureSuitableForGoal(goals.first()),
+                maxLifeCount = maxLifeCount,
+                lifeCount = gameParams.lifeCount,
                 score = 0,
                 coefficient = 1f,
                 gameDuration = 0,
@@ -97,9 +98,9 @@ class FlowGameUseCase
                 rowWidth = rowWidth
             )
             gameData.value = currentGameData
-        }
 
-        _gameState.value = FlowGameState.Created
+            _gameState.value = FlowGameState.Created(gameData.value.goalSuitableFigures)
+        }
     }
 
 

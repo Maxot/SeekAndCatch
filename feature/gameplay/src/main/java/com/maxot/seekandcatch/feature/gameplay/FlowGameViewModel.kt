@@ -85,14 +85,23 @@ class FlowGameViewModel
             gameUseCase.gameState.collect { gameState ->
                 when (gameState) {
                     FlowGameState.Idle -> {
-
-                    }
-
-                    FlowGameState.Created -> {
                         _flowGameUiState.update {
                             it.copy(
                                 isLoading = true,
-                                isActive = false
+                                isReady = false,
+                                isActive = false,
+                                isPaused = false
+                            )
+                        }
+                    }
+
+                    is FlowGameState.Created -> {
+                        _flowGameUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isReady = true,
+                                isActive = false,
+                                goalSuitableFigures = gameState.figuresSuitableForGoal
                             )
                         }
                     }
@@ -116,6 +125,7 @@ class FlowGameViewModel
                             it.copy(
                                 lifeCount = gameState.data.lifeCount,
                                 goals = gameState.data.goals,
+                                goalSuitableFigures = gameState.data.goalSuitableFigures,
                                 figures = gameState.data.figures,
                                 score = gameState.data.score,
                                 coefficient = gameState.data.coefficient,
@@ -136,6 +146,8 @@ class FlowGameViewModel
                         musicManager.stopMusic()
                         _flowGameUiState.update {
                             it.copy(
+                                isReady = false,
+                                isActive = false,
                                 isPaused = false,
                                 isFinished = true
                             )
@@ -244,18 +256,20 @@ class FlowGameViewModel
 }
 
 data class FlowGameUiState(
-    val maxLifeCount: Int = 5,
-    val lifeCount: Int = 0,
     val goals: Set<Goal<Any>> = emptySet(),
     val figures: List<Figure> = emptyList(),
+    val goalSuitableFigures: Set<Figure> = emptySet(),
+    val maxLifeCount: Int = 5,
+    val lifeCount: Int = 0,
     val score: Int = 0,
     val coefficient: Float = 0f,
     val gameDuration: Long = 0,
     val scrollDuration: Int = 0,
     val pixelsToScroll: Float = 0f,
     val rowWidth: Int = 4,
-    val isActive: Boolean = true,
     val isLoading: Boolean = false,
+    val isReady:Boolean = false,
+    val isActive: Boolean = false,
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,
     val isLifeWasted: Boolean = false

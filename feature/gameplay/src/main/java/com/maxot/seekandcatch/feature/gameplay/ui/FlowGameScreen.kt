@@ -66,7 +66,7 @@ import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.GoalsLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -174,6 +174,7 @@ fun FlowGameScreen(
                 maxLifeCount = flowGameUiState.maxLifeCount,
                 lifeCount = flowGameUiState.lifeCount,
                 goals = flowGameUiState.goals,
+                goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
                 score = flowGameUiState.score,
                 coefficient = flowGameUiState.coefficient,
                 gameDuration = flowGameUiState.gameDuration
@@ -216,9 +217,10 @@ fun FlowGameScreen(
             }
         }
 
-        if (flowGameUiState.isLoading) {
+        if (flowGameUiState.isReady && !flowGameUiState.isActive) {
             ReadyToGameLayout(
                 goals = flowGameUiState.goals,
+                goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
                 setGameReadyToStart = { sendEvent(FlowGameUiEvent.SetGameReadyToStart) }
             )
         }
@@ -271,6 +273,7 @@ fun FlowGameScreen(
 fun ReadyToGameLayout(
     modifier: Modifier = Modifier,
     goals: Set<Goal<Any>>,
+    goalsSuitableFigures: Set<Figure>,
     setGameReadyToStart: () -> Unit
 ) {
     Column(
@@ -286,11 +289,12 @@ fun ReadyToGameLayout(
 
         val text = if (countDown > 0) "$countDown" else "Go!"
 
-        GoalsLayout(
-            modifier = Modifier,
-            goals = goals,
-            textStyle = MaterialTheme.typography.displaySmall
-        )
+//        GoalsLayout(
+//            modifier = Modifier,
+//            goals = goals,
+//            textStyle = MaterialTheme.typography.displaySmall
+//        )
+        DetailedGoalsLayout(goalsSuitableFigures = goalsSuitableFigures)
         Text(
             text = "Click on that items",
             style = MaterialTheme.typography.displaySmall
@@ -319,6 +323,7 @@ fun GameInfoPanel(
     maxLifeCount: Int = 5,
     lifeCount: Int = 3,
     goals: Set<Goal<Any>>,
+    goalsSuitableFigures: Set<Figure>,
     score: Int,
     coefficient: Float,
     gameDuration: Long,
@@ -359,7 +364,8 @@ fun GameInfoPanel(
                     }
                 }
 
-                GoalsLayout(goals = goals)
+//                GoalsLayout(goals = goals)
+                DetailedGoalsLayout(goalsSuitableFigures = goalsSuitableFigures)
             }
 
         }
@@ -446,7 +452,7 @@ fun FlowGameScreenLoadingPreview() {
     )
 
     FlowGameScreen(
-        flowGameUiState = FlowGameUiState(isLoading = true),
+        flowGameUiState = FlowGameUiState(figures = figures, isLoading = true),
         sendEvent = { },
         toGameResultScreen = { },
     )

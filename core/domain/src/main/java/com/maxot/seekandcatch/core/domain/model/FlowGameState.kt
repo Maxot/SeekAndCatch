@@ -5,7 +5,7 @@ import com.maxot.seekandcatch.data.model.Goal
 
 sealed class FlowGameState {
     data object Idle:  FlowGameState()
-    data object Created : FlowGameState()
+    data class Created(val figuresSuitableForGoal: Set<Figure>) : FlowGameState()
     data object Started:  FlowGameState()
     data class Resumed(val data: FlowGameData):  FlowGameState()
     data object Paused:  FlowGameState()
@@ -15,6 +15,7 @@ sealed class FlowGameState {
 data class FlowGameData(
     val goals: Set<Goal<Any>> = emptySet(),
     val figures: List<Figure> = emptyList(),
+    val goalSuitableFigures: Set<Figure> = emptySet(),
     val maxLifeCount: Int = 5,
     val lifeCount: Int = 0,
     val score: Int = 0,

@@ -88,7 +88,7 @@ fun GoalsLayout(
 @Composable
 fun DetailedGoalsLayout(
     modifier: Modifier = Modifier,
-    goals: Set<Goal<Any>>,
+    goalsSuitableFigures: Set<Figure>,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium
 ) {
     val goalsLayoutContentDesc = stringResource(id = R.string.goals_layout_content_desc)
@@ -104,11 +104,8 @@ fun DetailedGoalsLayout(
             text = stringResource(id = R.string.label_goal),
             style = textStyle
         )
-        goals.forEach { goal ->
-//            goal.getSuitableFigures().forEach { figure ->
-//                ColoredFigureLayout(figure = figure, size = 50.dp)
-//            }
-
+        goalsSuitableFigures.forEach { figure ->
+            ColoredFigureLayout(figure = figure, size = 50.dp)
         }
     }
 }
@@ -125,6 +122,6 @@ fun GoalsLayoutPreview() {
 @Composable
 fun DetailedGoalsLayoutPreview() {
     SeekAndCatchTheme {
-        DetailedGoalsLayout(goals = setOf(Goal.Colored(Color.Red)))
+        DetailedGoalsLayout(goalsSuitableFigures = setOf(Figure.getRandomFigure()))
     }
 }
