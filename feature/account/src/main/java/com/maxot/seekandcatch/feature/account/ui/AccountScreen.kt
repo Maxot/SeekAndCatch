@@ -109,7 +109,7 @@ fun UserNameDialog(
     AlertDialog(
         modifier = Modifier.then(modifier),
         title = {
-            Text(text = "Enter user name")
+            Text(text = stringResource(R.string.feature_account_enter_user_name))
         },
         text = {
             UserNameField(
@@ -149,7 +149,7 @@ fun UserNameField(
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
-                text = "Your info:",
+                text = stringResource(R.string.feature_account_your_info),
                 modifier = Modifier
                     .padding(5.dp)
             )
@@ -202,7 +202,7 @@ fun ColorsField(
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
-                text = "Selected colors:",
+                text = stringResource(R.string.feature_account_selected_colors),
                 modifier = Modifier
                     .padding(5.dp)
             )

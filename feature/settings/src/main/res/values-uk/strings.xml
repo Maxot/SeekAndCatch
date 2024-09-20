@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_settings_title">Settings</string>
-    <string name="feature_settings_sound_title">Sound</string>
-    <string name="feature_settings_music_title">Music</string>
-    <string name="feature_settings_vibration_title">Vibration</string>
+    <string name="feature_settings_title">Налаштування</string>
+    <string name="feature_settings_sound_title">Звук</string>
+    <string name="feature_settings_music_title">Музика</string>
+    <string name="feature_settings_vibration_title">Вібрація</string>
     <string name="feature_settings_ok">OK</string>
     <string name="feature_settings_dialog_content_description">Settings Dialog</string>
     <string name="feature_settings_top_app_bar_action_icon_content_desc">Settings</string>

@@ -28,6 +28,7 @@ android {
 dependencies {
     implementation(project(":data"))
     implementation(project(":core:designsystem"))
+    implementation(project(":singleselectionlazyrow"))
 
     implementation(platform(libs.androidx.compose.bom))
 
@@ -37,6 +38,7 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.appcompat)
 
     ksp(libs.hilt.compiler)
 

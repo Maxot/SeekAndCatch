@@ -56,6 +56,9 @@ android {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
+    androidResources {
+        generateLocaleConfig = true
+    }
 
     applicationVariants.all {
         val variant = this
@@ -89,6 +92,7 @@ dependencies {
 
     implementation(libs.firebase.analytics)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.appcompat)
 
     ksp(libs.hilt.compiler)
 

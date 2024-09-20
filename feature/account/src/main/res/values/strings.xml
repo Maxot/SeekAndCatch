@@ -2,6 +2,10 @@
 <resources>
     <string name="feature_account_title">Account</string>
     <string name="feature_account_user_name_title">User name</string>
+    <string name="feature_account_enter_user_name">Enter user name</string>
+    <string name="feature_account_your_info">Your info:</string>
+    <string name="feature_account_selected_colors">Selected colors:</string>
+
     <string name="feature_account_screen_content_desc">Account Screen</string>
 
 </resources>
