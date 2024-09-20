@@ -36,7 +36,7 @@ import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.feature.gameplay.GameSelectionViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.SingleSelectionLazyRow
+import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.StartGameLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
