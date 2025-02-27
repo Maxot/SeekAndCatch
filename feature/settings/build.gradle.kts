@@ -28,6 +28,7 @@ android {
 dependencies {
     implementation(project(":data"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:model"))
     implementation(project(":singleselectionlazyrow"))
 
     implementation(platform(libs.androidx.compose.bom))

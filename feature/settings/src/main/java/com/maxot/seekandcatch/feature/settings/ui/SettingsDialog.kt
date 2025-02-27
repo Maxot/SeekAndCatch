@@ -51,6 +51,7 @@ fun SettingsDialog(
     val isVibrationEnabled by viewModel.vibrationState.collectAsState(true)
     val allSupportedLocales by remember { mutableStateOf(viewModel.allSupportedLocales) }
     val selectedLocale by remember { mutableStateOf(viewModel.selectedLocale) }
+    val darkTheme by viewModel.darkTheme.collectAsState()
 
     SettingsDialog(
         modifier = modifier,
@@ -64,7 +65,12 @@ fun SettingsDialog(
         onSoundStateChanged = viewModel::setSoundState,
         onMusicStateChanged = viewModel::setMusicState,
         onVibrationStateChanged = viewModel::setVibrationState,
-        onLocaleChanged = viewModel::updateSelectedLocale
+        onLocaleChanged = viewModel::updateSelectedLocale,
+        darkTheme = darkTheme,
+        onDarkThemeChanged = {
+            viewModel.setDarkTheme(it)
+        }
+
     )
 }
 
@@ -81,7 +87,9 @@ fun SettingsDialog(
     onSoundStateChanged: (soundEnabled: Boolean) -> Unit,
     onMusicStateChanged: (soundEnabled: Boolean) -> Unit,
     onVibrationStateChanged: (soundEnabled: Boolean) -> Unit,
-    onLocaleChanged: (String) -> Unit
+    onLocaleChanged: (String) -> Unit,
+    darkTheme: Boolean,
+    onDarkThemeChanged: (Boolean) -> Unit
 ) {
     val settingsDialogContentDesc =
         stringResource(id = R.string.feature_settings_dialog_content_description)
@@ -104,10 +112,12 @@ fun SettingsDialog(
                     isSoundEnabled = isSoundEnabled,
                     isMusicEnabled = isMusicEnabled,
                     isVibrationEnabled = isVibrationEnabled,
+                    darkTheme = darkTheme,
                     onSoundStateChanged = onSoundStateChanged,
                     onMusicStateChanged = onMusicStateChanged,
                     onVibrationStateChanged = onVibrationStateChanged,
-                    onLocaleChanged = onLocaleChanged
+                    onLocaleChanged = onLocaleChanged,
+                    onDarkThemeChanged = onDarkThemeChanged
                 )
             }
         },
@@ -126,11 +136,13 @@ fun SettingsPanel(
     isSoundEnabled: Boolean,
     isMusicEnabled: Boolean,
     isVibrationEnabled: Boolean,
+    darkTheme: Boolean,
     allSupportedLocales: List<String>,
     selectedLocale: String,
     onSoundStateChanged: (soundEnabled: Boolean) -> Unit,
     onMusicStateChanged: (musicEnabled: Boolean) -> Unit,
     onVibrationStateChanged: (vibrationState: Boolean) -> Unit,
+    onDarkThemeChanged: (Boolean) -> Unit,
     onLocaleChanged: (String) -> Unit
 ) {
     Card(
@@ -150,7 +162,25 @@ fun SettingsPanel(
                     onLocaleChanged(locale)
                 }
             )
-
+            // Theme
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row {
+                    Icon(
+                        modifier = Modifier.padding(end = 10.dp),
+                        imageVector = ImageVector.vectorResource(SaCIcons.SoundsRes),
+                        contentDescription = ""
+                    )
+                    Text("DarkTheme")
+                }
+                Switch(checked = darkTheme, onCheckedChange = {
+                    onDarkThemeChanged(it)
+                })
+            }
+            // Sound
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -168,6 +198,7 @@ fun SettingsPanel(
                     onSoundStateChanged(it)
                 })
             }
+            // Music
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -185,6 +216,7 @@ fun SettingsPanel(
                     onMusicStateChanged(it)
                 })
             }
+            // Vibration
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -262,7 +294,9 @@ fun SettingsDialogPreview() {
             onSoundStateChanged = { },
             onMusicStateChanged = { },
             onVibrationStateChanged = { },
-            onLocaleChanged = { }
+            onLocaleChanged = { },
+            darkTheme = true,
+            onDarkThemeChanged = { }
         )
     }
 }

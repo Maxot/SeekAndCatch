@@ -1,10 +1,16 @@
 package com.maxot.seekandcatch.data.repository
 
+import com.maxot.seekandcatch.core.model.UserConfig
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
+
+    /**
+     * Stream of [UserConfig]
+     */
+    val userConfig: Flow<UserConfig>
 
     suspend fun setSoundState(newState: Boolean)
 
@@ -25,5 +31,7 @@ interface SettingsRepository {
     suspend fun setGameMode(gameMode: GameMode)
 
     fun observeGameMode(): Flow<GameMode>
+
+    suspend fun setDarkTheme(darkTheme: Boolean)
 
 }

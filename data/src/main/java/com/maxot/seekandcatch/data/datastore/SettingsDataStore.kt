@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.maxot.seekandcatch.core.model.DarkThemeConfig
+import com.maxot.seekandcatch.core.model.UserConfig
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +30,16 @@ class SettingsDataStore
     private val vibrationStateKey = booleanPreferencesKey(SETTINGS_VIBRATION_KEY)
     private val difficultyKey = stringPreferencesKey(SETTINGS_DIFFICULTY_KEY)
     private val gameModeKey = stringPreferencesKey(SETTINGS_GAME_MODE_KEY)
+    private val darkThemeKey = booleanPreferencesKey(SETTINGS_DARK_THEME_KEY)
+
+    val userConfig: Flow<UserConfig> = dataStore.data.map { preferences ->
+        val isDarkTheme = preferences[darkThemeKey] ?: true
+        val darkThemeConfig = when (isDarkTheme) {
+            true -> DarkThemeConfig.DARK
+            false -> DarkThemeConfig.LIGHT
+        }
+        UserConfig(darkThemeConfig = darkThemeConfig)
+    }
 
     val soundStateFlow: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[soundStateKey] ?: true
@@ -81,6 +93,12 @@ class SettingsDataStore
         }
     }
 
+    suspend fun setDarkTheme(darkTheme: Boolean?) {
+        dataStore.edit { settings ->
+            settings[darkThemeKey] = darkTheme!!
+        }
+    }
+
 
     companion object {
         const val SETTINGS_DATA_STORE_NAME = "Settings"
@@ -89,5 +107,6 @@ class SettingsDataStore
         const val SETTINGS_VIBRATION_KEY = "Sound_vibration"
         const val SETTINGS_DIFFICULTY_KEY = "Difficulty_key"
         const val SETTINGS_GAME_MODE_KEY = "Game_mode_key"
+        const val SETTINGS_DARK_THEME_KEY = "Dark_theme_key"
     }
 }

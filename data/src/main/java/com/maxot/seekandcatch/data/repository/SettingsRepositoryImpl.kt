@@ -1,5 +1,6 @@
 package com.maxot.seekandcatch.data.repository
 
+import com.maxot.seekandcatch.core.model.UserConfig
 import com.maxot.seekandcatch.data.datastore.SettingsDataStore
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
@@ -10,6 +11,8 @@ class SettingsRepositoryImpl
 @Inject constructor(
     private val settingsDataStore: SettingsDataStore
 ) : SettingsRepository {
+    override val userConfig: Flow<UserConfig> = settingsDataStore.userConfig
+
     override suspend fun setSoundState(newState: Boolean) =
         settingsDataStore.setSoundState(newState = newState)
 
@@ -36,5 +39,9 @@ class SettingsRepositoryImpl
     }
 
     override fun observeGameMode(): Flow<GameMode> = settingsDataStore.gameModeFlow
+
+    override suspend fun setDarkTheme(darkTheme: Boolean) {
+        settingsDataStore.setDarkTheme(darkTheme)
+    }
 
 }

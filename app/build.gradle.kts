@@ -9,16 +9,16 @@ plugins {
 val versionMajor = 1
 val versionMinor = 0
 val versionPatch = 0
-val versionBuild = 0
+val versionBuild = 2
 
 android {
     namespace = "com.maxot.seekandcatch"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.maxot.seekandcatch"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName = "$versionMajor.$versionMinor.$versionPatch.$versionBuild"
 
@@ -78,6 +78,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
 
     implementation(project(":core:designsystem"))
+    implementation(project(":core:model"))
     implementation(project(":feature:account"))
     implementation(project(":feature:gameplay"))
     implementation(project(":feature:settings"))
