@@ -1,21 +1,22 @@
 package com.maxot.seekandcatch.feature.settings.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,7 +24,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,10 +37,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.designsystem.theme.Shapes
+import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
+import com.maxot.seekandcatch.core.designsystem.ui.PixelButton
 import com.maxot.seekandcatch.feature.settings.R
 import com.maxot.singleselectionlazyrow.ScaleParams
 import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
@@ -95,38 +102,52 @@ fun SettingsDialog(
         stringResource(id = R.string.feature_settings_dialog_content_description)
 
     AlertDialog(
-        modifier = Modifier
-            .then(modifier)
-            .semantics {
-                contentDescription = settingsDialogContentDesc
-            },
-        containerColor = MaterialTheme.colorScheme.background,
-        title = {
-            Text(text = stringResource(id = R.string.feature_settings_title))
+        modifier = modifier.semantics {
+            contentDescription = settingsDialogContentDesc
         },
+        containerColor = Color.Transparent,
+        title = null,
         text = {
-            Column {
-                SettingsPanel(
-                    allSupportedLocales = allSupportedLocales,
-                    selectedLocale = selectedLocale,
-                    isSoundEnabled = isSoundEnabled,
-                    isMusicEnabled = isMusicEnabled,
-                    isVibrationEnabled = isVibrationEnabled,
-                    darkTheme = darkTheme,
-                    onSoundStateChanged = onSoundStateChanged,
-                    onMusicStateChanged = onMusicStateChanged,
-                    onVibrationStateChanged = onVibrationStateChanged,
-                    onLocaleChanged = onLocaleChanged,
-                    onDarkThemeChanged = onDarkThemeChanged
-                )
+            PixelBorderBox {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.feature_settings_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color(0xFFD6D68D)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    SettingsPanel(
+                        allSupportedLocales = allSupportedLocales,
+                        selectedLocale = selectedLocale,
+                        isSoundEnabled = isSoundEnabled,
+                        isMusicEnabled = isMusicEnabled,
+                        isVibrationEnabled = isVibrationEnabled,
+                        darkTheme = darkTheme,
+                        onSoundStateChanged = onSoundStateChanged,
+                        onMusicStateChanged = onMusicStateChanged,
+                        onVibrationStateChanged = onVibrationStateChanged,
+                        onLocaleChanged = onLocaleChanged,
+                        onDarkThemeChanged = onDarkThemeChanged
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    PixelButton(onClick = onConfirmation) {
+                        Text(
+                            text = stringResource(id = R.string.feature_settings_ok),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF1A3B20)
+                        )
+                    }
+                }
             }
         },
         onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = { onConfirmation() }) {
-                Text(text = stringResource(id = R.string.feature_settings_ok))
-            }
-        }
+        confirmButton = {} // ми замінили на свою кнопку всередині `text`
     )
 }
 
@@ -139,102 +160,168 @@ fun SettingsPanel(
     darkTheme: Boolean,
     allSupportedLocales: List<String>,
     selectedLocale: String,
-    onSoundStateChanged: (soundEnabled: Boolean) -> Unit,
-    onMusicStateChanged: (musicEnabled: Boolean) -> Unit,
-    onVibrationStateChanged: (vibrationState: Boolean) -> Unit,
+    onSoundStateChanged: (Boolean) -> Unit,
+    onMusicStateChanged: (Boolean) -> Unit,
+    onVibrationStateChanged: (Boolean) -> Unit,
     onDarkThemeChanged: (Boolean) -> Unit,
     onLocaleChanged: (String) -> Unit
 ) {
-    Card(
-        shape = Shapes.large,
-        modifier = Modifier
-            .then(modifier)
-            .clip(Shapes.large),
-    ) {
+    Box(
+        modifier = modifier
+            .drawBehind {
+                val px = 4.dp.toPx()
+                val w = size.width
+                val h = size.height
+
+                val borderColor = Color(0xFFD6D68D)
+                val panelBackground = Color(0xFF2E5B3D)
+
+                drawRect(borderColor)
+                drawRect(
+                    color = panelBackground,
+                    topLeft = Offset(px, px),
+                    size = Size(w - 2 * px, h - 2 * px)
+                )
+            }
+            .background(Color(0xFF2E5B3D))
+            .padding(12.dp)
+    ){
         Column(
-            modifier = Modifier
-                .padding(10.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             LanguagesPanel(
                 allSupportedLocales = allSupportedLocales,
                 selectedLocale = selectedLocale,
-                onLocaleChanged = { locale ->
-                    onLocaleChanged(locale)
-                }
+                onLocaleChanged = onLocaleChanged
             )
-            // Theme
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row {
-                    Icon(
-                        modifier = Modifier.padding(end = 10.dp),
-                        imageVector = ImageVector.vectorResource(SaCIcons.SoundsRes),
-                        contentDescription = ""
-                    )
-                    Text("DarkTheme")
-                }
-                Switch(checked = darkTheme, onCheckedChange = {
-                    onDarkThemeChanged(it)
-                })
-            }
-            // Sound
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row {
-                    Icon(
-                        modifier = Modifier.padding(end = 10.dp),
-                        imageVector = ImageVector.vectorResource(SaCIcons.SoundsRes),
-                        contentDescription = ""
-                    )
-                    Text(stringResource(id = R.string.feature_settings_sound_title))
-                }
-                Switch(checked = isSoundEnabled, onCheckedChange = {
-                    onSoundStateChanged(it)
-                })
-            }
-            // Music
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row {
-                    Icon(
-                        modifier = Modifier.padding(end = 10.dp),
-                        imageVector = ImageVector.vectorResource(SaCIcons.MusicRes),
-                        contentDescription = ""
-                    )
-                    Text(stringResource(id = R.string.feature_settings_music_title))
-                }
-                Switch(checked = isMusicEnabled, onCheckedChange = {
-                    onMusicStateChanged(it)
-                })
-            }
-            // Vibration
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row {
-                    Icon(
-                        modifier = Modifier.padding(end = 10.dp),
-                        imageVector = ImageVector.vectorResource(SaCIcons.VibrationRes),
-                        contentDescription = ""
-                    )
-                    Text(stringResource(id = R.string.feature_settings_vibration_title))
-                }
-                Switch(checked = isVibrationEnabled, onCheckedChange = {
-                    onVibrationStateChanged(it)
-                })
-            }
+
+            PixelSettingRow(
+                icon = ImageVector.vectorResource(SaCIcons.SoundsRes),
+                label = "Dark Theme",
+                checked = darkTheme,
+                onCheckedChange = onDarkThemeChanged
+            )
+
+            PixelSettingRow(
+                icon = ImageVector.vectorResource(SaCIcons.SoundsRes),
+                label = stringResource(id = R.string.feature_settings_sound_title),
+                checked = isSoundEnabled,
+                onCheckedChange = onSoundStateChanged
+            )
+
+            PixelSettingRow(
+                icon = ImageVector.vectorResource(SaCIcons.MusicRes),
+                label = stringResource(id = R.string.feature_settings_music_title),
+                checked = isMusicEnabled,
+                onCheckedChange = onMusicStateChanged
+            )
+
+            PixelSettingRow(
+                icon = ImageVector.vectorResource(SaCIcons.VibrationRes),
+                label = stringResource(id = R.string.feature_settings_vibration_title),
+                checked = isVibrationEnabled,
+                onCheckedChange = onVibrationStateChanged
+            )
         }
+    }
+}
+
+@Composable
+fun PixelSettingRow(
+    icon: ImageVector,
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier.padding(end = 10.dp),
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color(0xFFD6D68D)
+            )
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                color = Color(0xFFD6D68D),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        PixelToggle(
+            isOn = checked,
+            onToggle = { onCheckedChange(!checked) }
+        )
+    }
+}
+
+@Composable
+fun PixelToggle(
+    isOn: Boolean,
+    onToggle: () -> Unit
+) {
+    val toggleWidth = 56.dp
+    val toggleHeight = 28.dp
+    val borderColor = Color(0xFFD6D68D)
+    val fillColor = Color(0xFF2E5B3D)
+    val knobColor = Color(0xFFD6D68D)
+    val shadowColor = Color.Black
+    val step = 4.dp
+
+    Box(
+        modifier = Modifier
+            .size(toggleWidth, toggleHeight)
+            .drawBehind {
+                val px = step.toPx()
+                val w = size.width
+                val h = size.height
+
+                val path = Path().apply {
+                    moveTo(px * 2, 0f)
+                    lineTo(w - px * 2, 0f)
+                    lineTo(w, px * 2)
+                    lineTo(w, h - px * 2)
+                    lineTo(w - px * 2, h)
+                    lineTo(px * 2, h)
+                    lineTo(0f, h - px * 2)
+                    lineTo(0f, px * 2)
+                    close()
+                }
+
+                // Outer rounded pixel border
+                drawPath(path, borderColor)
+
+                // Inner fill
+                drawRect(
+                    color = fillColor,
+                    topLeft = Offset(px, px),
+                    size = Size(w - 2 * px, h - 2 * px)
+                )
+            }
+            .clickable { onToggle() },
+        contentAlignment = if (isOn) Alignment.CenterEnd else Alignment.CenterStart
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .size(14.dp)
+                .drawBehind {
+                    drawRect(shadowColor)
+                    drawRect(
+                        color = knobColor,
+                        topLeft = Offset(1f, 1f),
+                        size = size.copy(width = size.width - 2f, height = size.height - 2f)
+                    )
+                }
+        )
     }
 }
 
@@ -283,20 +370,22 @@ fun LanguageLayout(modifier: Modifier, language: String) {
 @Composable
 fun SettingsDialogPreview() {
     SeekAndCatchTheme {
-        SettingsDialog(
-            allSupportedLocales = listOf("", ""),
-            selectedLocale = "",
-            isSoundEnabled = true,
-            isMusicEnabled = true,
-            isVibrationEnabled = true,
-            onDismiss = { },
-            onConfirmation = { },
-            onSoundStateChanged = { },
-            onMusicStateChanged = { },
-            onVibrationStateChanged = { },
-            onLocaleChanged = { },
-            darkTheme = true,
-            onDarkThemeChanged = { }
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            SettingsDialog(
+                allSupportedLocales = listOf("en", "uk"),
+                selectedLocale = "en",
+                isSoundEnabled = true,
+                isMusicEnabled = false,
+                isVibrationEnabled = true,
+                darkTheme = false,
+                onDismiss = {},
+                onConfirmation = {},
+                onSoundStateChanged = {},
+                onMusicStateChanged = {},
+                onVibrationStateChanged = {},
+                onLocaleChanged = {},
+                onDarkThemeChanged = {}
+            )
+        }
     }
 }

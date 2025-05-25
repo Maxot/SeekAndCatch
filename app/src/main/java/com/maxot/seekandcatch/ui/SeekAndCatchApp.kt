@@ -14,9 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.maxot.seekandcatch.core.designsystem.R
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.feature.settings.ui.SettingsDialog
 import com.maxot.seekandcatch.navigation.SeekCatchNavHost
@@ -80,7 +82,7 @@ fun SaCTopBar(
                 onClick = onActionClick
             ) {
                 Icon(
-                    imageVector = SaCIcons.Settings,
+                    painter = painterResource(R.drawable.ic_settings),
                     contentDescription = stringResource(id = SettingsR.string.feature_settings_top_app_bar_action_icon_content_desc)
                 )
             }

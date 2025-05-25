@@ -27,4 +27,10 @@ android {
 dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.graphics.shapes)
+
+    implementation(platform(libs.androidx.compose.bom))
+
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }

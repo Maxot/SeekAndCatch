@@ -42,7 +42,7 @@ class FlowGameUseCase
     private val goalsRepository: GoalsRepository
 ) {
     @Px
-    private var itemHeightPx: Int = 0
+    private var itemHeightPx: Int = 100
     private var rowWidth: Int = 4
     private var rowDuration: Int = 500
     private var itemsCount: Int = 1000
@@ -157,6 +157,9 @@ class FlowGameUseCase
 
         _gameState.value = FlowGameState.Resumed(gameData.value)
         observeGameData()
+
+        updateScrollDuration()
+        updatePixelsToScroll()
     }
 
     private fun finishGame() {

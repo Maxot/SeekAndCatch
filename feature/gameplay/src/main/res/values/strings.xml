@@ -26,4 +26,6 @@
     <string name="feature_gameplay_button_to_main_screen">To main screen</string>
     <string name="feature_gameplay_label_your_best_score">Your best score: %1$d</string>
     <string name="feature_gameplay_click_on_items">Click on that items</string>
+    <string name="feature_gameplay_goals_title">Goals</string>
+    <string name="feature_gameplay_coefficient_title">Coefficient</string>
 </resources>

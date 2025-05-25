@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.stopScroll
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -43,9 +43,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -58,6 +60,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
+import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
+import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Goal
@@ -161,7 +165,7 @@ fun FlowGameScreenRoute(
 }
 
 @Composable
-fun FlowGameScreen(
+private fun FlowGameScreen(
     modifier: Modifier = Modifier,
     gridState: LazyGridState = rememberLazyGridState(),
     gameMode: GameMode = GameMode.FLOW,
@@ -196,45 +200,53 @@ fun FlowGameScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .semantics { contentDescription = flowGameScreenContentDesc }
-            .fillMaxSize()
-            .then(modifier)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = com.maxot.seekandcatch.core.designsystem.R.drawable.background),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        Box(
+            modifier = Modifier
+                .semantics { contentDescription = flowGameScreenContentDesc }
+                .fillMaxSize()
+                .then(modifier)
+        ) {
 
-        Column {
-            GameInfoPanel(
-                modifier = Modifier
-                    .onGloballyPositioned {
-                        gameInfoPanelSize = with(density) {
-                            it.size.height.toDp() // Height of GameInfoPanel
-                        }
-                    },
-                maxLifeCount = flowGameUiState.maxLifeCount,
-                lifeCount = flowGameUiState.lifeCount,
-                goals = flowGameUiState.goals,
-                goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
-                score = flowGameUiState.score,
-                coefficient = flowGameUiState.coefficient,
-                gameDuration = flowGameUiState.gameDuration
-            )
+            Column {
+                GameInfoPanel(
+                    modifier = Modifier
+                        .onGloballyPositioned {
+                            gameInfoPanelSize = with(density) {
+                                it.size.height.toDp() // Height of GameInfoPanel
+                            }
+                        },
+                    maxLifeCount = flowGameUiState.maxLifeCount,
+                    lifeCount = flowGameUiState.lifeCount,
+                    goals = flowGameUiState.goals,
+                    goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
+                    score = flowGameUiState.score,
+                    coefficient = flowGameUiState.coefficient,
+                    gameDuration = flowGameUiState.gameDuration
+                )
 
-            GameFieldLayout(
-                gridWidth = flowGameUiState.rowWidth,
-                spacerHeight = spacerHeight,
-                figures = flowGameUiState.figures,
-                gridState = gridState,
-                onItemHeightMeasured = { height ->
-                    sendEvent(
-                        FlowGameUiEvent.ItemHeightMeasured(
-                            height
+                GameFieldLayout(
+                    gridWidth = flowGameUiState.rowWidth,
+                    spacerHeight = spacerHeight,
+                    figures = flowGameUiState.figures,
+                    gridState = gridState,
+                    onItemHeightMeasured = { height ->
+                        sendEvent(
+                            FlowGameUiEvent.ItemHeightMeasured(
+                                height
+                            )
                         )
-                    )
-                },
-                onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
-                reverseLayout = gameMode != GameMode.FLOW
-            )
+                    },
+                    onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
+                    reverseLayout = gameMode != GameMode.FLOW
+                )
+            }
         }
 
         /**
@@ -302,8 +314,9 @@ fun ReadyToGameLayout(
 //        )
         DetailedGoalsLayout(goalsSuitableFigures = goalsSuitableFigures)
         Text(
+            modifier = Modifier.padding(top = 20.dp),
             text = stringResource(R.string.feature_gameplay_click_on_items),
-            style = MaterialTheme.typography.displaySmall,
+            style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center
         )
 
@@ -318,6 +331,7 @@ fun ReadyToGameLayout(
 
         Text(
             text = text,
+            modifier = Modifier.padding(top = 20.dp),
             style = MaterialTheme.typography.displayLarge
         )
 
@@ -335,52 +349,64 @@ fun GameInfoPanel(
     coefficient: Float,
     gameDuration: Long,
 ) {
-    Column(
-        modifier = Modifier
-            .then(modifier)
-            .padding(10.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(
-                modifier = Modifier
-                    .width(100.dp),
-                verticalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Text(
-                    text = stringResource(id = R.string.feature_gameplay_label_score, score),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = "Time: ${formatMilliseconds(gameDuration)}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-            Column(
+    PixelBorderBox(modifier = modifier.padding(6.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.End
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    repeat(maxLifeCount - lifeCount) {
-                        Icon(imageVector = SaCIcons.UnselectedFavorite, contentDescription = "")
-                    }
-                    repeat(lifeCount) {
-                        Icon(imageVector = SaCIcons.Favorite, contentDescription = "")
-                    }
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = stringResource(id = R.string.feature_gameplay_label_score, score),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "Time: ${formatMilliseconds(gameDuration)}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
 
-//                GoalsLayout(goals = goals)
-                DetailedGoalsLayout(goalsSuitableFigures = goalsSuitableFigures)
+                Column(horizontalAlignment = Alignment.End) {
+                    Row(
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        repeat(maxLifeCount - lifeCount) {
+                            Icon(
+                                imageVector = SaCIcons.UnselectedFavorite,
+                                contentDescription = null
+                            )
+                        }
+                        repeat(lifeCount) {
+                            Icon(
+                                imageVector = SaCIcons.Favorite,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
             }
 
-        }
+            Spacer(modifier = Modifier.height(6.dp))
 
-        CoefficientProgressLayout(
-            progress = coefficient,
-            currentCoefficient = coefficient.toInt()
-        )
+            DetailedGoalsLayout(
+                modifier = Modifier.fillMaxWidth(),
+                goalsSuitableFigures = goalsSuitableFigures
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(id = R.string.feature_gameplay_coefficient_title).uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            CoefficientProgressLayout(
+                progress = coefficient,
+                currentCoefficient = coefficient.toInt(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -446,7 +472,19 @@ fun GameFieldLayout(
  * Previews
  */
 
-@Preview
+@Preview(showBackground = true)
+@Composable
+fun ReadyToGameLayoutPreview() {
+    SeekAndCatchTheme {
+        ReadyToGameLayout(
+            goals = setOf(),
+            goalsSuitableFigures = setOf(),
+            setGameReadyToStart = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
 @Composable
 fun FlowGameScreenLoadingPreview() {
     val figures = listOf(
@@ -458,14 +496,16 @@ fun FlowGameScreenLoadingPreview() {
         Figure.getRandomFigure(6),
     )
 
-    FlowGameScreen(
-        flowGameUiState = FlowGameUiState(figures = figures, isLoading = true),
-        sendEvent = { },
-        toGameResultScreen = { },
-    )
+    SeekAndCatchTheme {
+        FlowGameScreen(
+            flowGameUiState = FlowGameUiState(figures = figures, isLoading = true),
+            sendEvent = { },
+            toGameResultScreen = { },
+        )
+    }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun FlowGameScreenActivePreview() {
     val figures = listOf(
@@ -477,14 +517,16 @@ fun FlowGameScreenActivePreview() {
         Figure.getRandomFigure(6),
     )
 
-    FlowGameScreen(
-        flowGameUiState = FlowGameUiState(figures = figures, isActive = true),
-        sendEvent = { },
-        toGameResultScreen = { },
-    )
+    SeekAndCatchTheme {
+        FlowGameScreen(
+            flowGameUiState = FlowGameUiState(figures = figures, isActive = true),
+            sendEvent = { },
+            toGameResultScreen = { },
+        )
+    }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun FlowGameScreenPausedPreview() {
     val figures = listOf(
@@ -496,10 +538,12 @@ fun FlowGameScreenPausedPreview() {
         Figure.getRandomFigure(6),
     )
 
-    FlowGameScreen(
-        flowGameUiState = FlowGameUiState(isPaused = true, figures = figures),
-        sendEvent = { },
-    )
+    SeekAndCatchTheme {
+        FlowGameScreen(
+            flowGameUiState = FlowGameUiState(isPaused = true, figures = figures),
+            sendEvent = { },
+        )
+    }
 }
 
 fun formatMilliseconds(milliseconds: Long): String {

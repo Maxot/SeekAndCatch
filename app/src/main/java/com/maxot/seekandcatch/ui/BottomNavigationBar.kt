@@ -8,6 +8,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination
@@ -29,24 +30,27 @@ fun BottomNavigationBar(
     ) {
         destinations.forEach { destination ->
             val selected = currentDestination.isTopLevelDestinationInHierarchy(destination)
-            val icon = if (selected) destination.selectedIcon else destination.unselectedIcon
+            val icon: Int = if (selected) destination.selectedIcon else destination.unselectedIcon
 
             NavigationBarItem(
                 label = {
-                    Text(stringResource(id = destination.iconTextId))
+                    Text(
+                        text = stringResource(id = destination.iconTextId),
+                        style = MaterialTheme.typography.displayMedium
+                    )
                 },
                 selected = selected,
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     unselectedIconColor = MaterialTheme.colorScheme.secondary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.secondary,
                     unselectedTextColor = MaterialTheme.colorScheme.secondary,
                     indicatorColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 onClick = { onNavigateToDestination(destination) },
                 icon = {
                     Icon(
-                        imageVector = icon,
+                        painter = painterResource(icon),
                         contentDescription = null,
                     )
                 },

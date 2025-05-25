@@ -1,6 +1,8 @@
 package com.maxot.seekandcatch.navigation
 
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.maxot.seekandcatch.core.designsystem.R
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.feature.account.navigation.ACCOUNT_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_SELECTION_ROUTE
@@ -15,29 +17,29 @@ import com.maxot.seekandcatch.feature.account.R as accountR
  * next within a single destination will be handled directly in composables.
  */
 enum class TopLevelDestination(
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
+    @DrawableRes val selectedIcon: Int,
+    @DrawableRes val unselectedIcon: Int,
     val iconTextId: Int,
     val titleTextId: Int,
     val route: String
 ) {
     LEADERBOARD(
-        selectedIcon = SaCIcons.Leaderboard,
-        unselectedIcon = SaCIcons.UnselectedLeaderboard,
+        selectedIcon = R.drawable.ic_leaderboard,
+        unselectedIcon =  R.drawable.ic_leaderboard,
         iconTextId = leaderboardR.string.feature_leaderboard_title,
         titleTextId = leaderboardR.string.feature_leaderboard_title,
         route = LEADERBOARD_ROUTE
     ),
     GAME(
-        selectedIcon = SaCIcons.Play,
-        unselectedIcon = SaCIcons.UnselectedPlay,
+        selectedIcon = R.drawable.ic_game,
+        unselectedIcon = R.drawable.ic_game,
         iconTextId = gameplayR.string.feature_gameplay_title,
         titleTextId = gameplayR.string.feature_gameplay_title,
         route = GAME_SELECTION_ROUTE
     ),
     ACCOUNT(
-        selectedIcon = SaCIcons.Account,
-        unselectedIcon = SaCIcons.UnselectedAccount,
+        selectedIcon = R.drawable.ic_account,
+        unselectedIcon = R.drawable.ic_account,
         iconTextId = accountR.string.feature_account_title,
         titleTextId = accountR.string.feature_account_title,
         route = ACCOUNT_ROUTE

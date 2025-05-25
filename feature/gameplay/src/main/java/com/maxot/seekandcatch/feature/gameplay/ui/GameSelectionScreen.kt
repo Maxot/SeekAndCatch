@@ -2,8 +2,10 @@ package com.maxot.seekandcatch.feature.gameplay.ui
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +23,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -31,13 +38,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.feature.gameplay.GameSelectionViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
-import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.StartGameLayout
+import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -74,41 +81,52 @@ fun GameSelectionScreen(
     val gameSelectionScreenContentDesc =
         stringResource(id = R.string.feature_gameplay_game_selection_screen_content_desc)
 
-    Column(
-        modifier = Modifier
-            .then(modifier)
-            .fillMaxSize()
-            .semantics { contentDescription = gameSelectionScreenContentDesc },
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        ModeSelectionLayout(
-            selectedMode = selectedMode,
-            onSelectedModeChanged = onSelectedModeChanged
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = com.maxot.seekandcatch.core.designsystem.R.drawable.background),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
-        Spacer(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        )
+                .then(modifier)
+                .fillMaxSize()
+                .semantics { contentDescription = gameSelectionScreenContentDesc },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            ModeSelectionLayout(
+                selectedMode = selectedMode,
+                selectedDifficulty = selectedDifficulty,
+                onSelectedModeChanged = onSelectedModeChanged
+            )
 
-        StartGameLayout(
-            modifier = Modifier
-                .fillMaxWidth(),
-            selectedDifficulty = selectedDifficulty,
-            onDifficultyChanged = {
-                onDifficultChanged(it)
-            },
-            onStartButtonClick = {
-                navigateToFlowGame()
-            })
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            )
+
+            StartGameLayout(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                selectedDifficulty = selectedDifficulty,
+                onDifficultyChanged = {
+                    onDifficultChanged(it)
+                },
+                onStartButtonClick = {
+                    navigateToFlowGame()
+                })
+        }
     }
 }
 
 @Composable
 fun ModeSelectionLayout(
     selectedMode: GameMode,
+    selectedDifficulty: GameDifficulty,
     onSelectedModeChanged: (GameMode) -> Unit
 ) {
     val gameModes = GameMode.entries.toTypedArray()
@@ -119,7 +137,12 @@ fun ModeSelectionLayout(
         onSelectedItemChanged = { index ->
             onSelectedModeChanged(gameModes[index])
         }) { modifier, gameMode ->
-        FlowGamePreviewCard(id = gameMode.ordinal, gameMode = gameMode, modifier = modifier)
+        FlowGamePreviewCard(
+            id = gameMode.ordinal,
+            gameMode = gameMode,
+            selectedDifficulty = selectedDifficulty,
+            modifier = modifier
+        )
     }
 }
 
@@ -127,6 +150,7 @@ fun ModeSelectionLayout(
 fun FlowGamePreviewCard(
     id: Int,
     gameMode: GameMode,
+    selectedDifficulty: GameDifficulty,
     modifier: Modifier = Modifier,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     gridState: LazyGridState = rememberLazyGridState()
@@ -139,15 +163,48 @@ fun FlowGamePreviewCard(
         list
     }
 
-    ElevatedCard(
+    val gridWidth = when (selectedDifficulty) {
+        GameDifficulty.EASY -> 3
+        GameDifficulty.NORMAL -> 4
+        GameDifficulty.HARD -> 5
+    }
+
+    Column(
         modifier = Modifier
             .then(modifier)
             .height(350.dp)
             .width(250.dp)
+            .drawBehind {
+                val px = 6.dp.toPx()
+                val w = size.width
+                val h = size.height
+
+                val borderColor = Color(0xFFD6D68D) // світла рамка
+
+                // Піксельна рамка з кутами
+                val path = Path().apply {
+                    moveTo(0f, px)
+                    lineTo(0f, h - px)
+                    lineTo(px, h)
+                    lineTo(w - px, h)
+                    lineTo(w, h - px)
+                    lineTo(w, px)
+                    lineTo(w - px, 0f)
+                    lineTo(px, 0f)
+                    close()
+                }
+
+                // Світла рамка
+                drawPath(path, color = borderColor)
+
+                // Темний зелений фон
+                drawRect(
+                    color = Color(0xFF254D30),
+                    topLeft = Offset(px, px),
+                    size = Size(w - 2 * px, h - 2 * px)
+                )
+            }
             .padding(20.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
     ) {
         Text(
             text = gameMode.name,
@@ -155,6 +212,7 @@ fun FlowGamePreviewCard(
             textAlign = TextAlign.Center
         )
         GameFieldLayout(
+            gridWidth = gridWidth,
             spacerHeight = 300.dp,
             figures = figures.toList(),
             gridState = gridState,
@@ -181,7 +239,7 @@ fun FlowGamePreviewCard(
 }
 
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun GameSelectionScreenPreview() {
     SeekAndCatchTheme {

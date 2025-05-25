@@ -33,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
+import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
 import com.maxot.seekandcatch.feature.account.AccountViewModel
 import com.maxot.seekandcatch.feature.account.R
 import com.maxot.seekandcatch.feature.colorpicker.ColorPicker
@@ -141,7 +142,7 @@ fun UserNameField(
         text = userName
     }
 
-    ElevatedCard(
+    PixelBorderBox(
         modifier = Modifier
             .then(modifier)
             .fillMaxWidth()
@@ -194,7 +195,7 @@ fun ColorsField(
     selectedColors: Set<Color>,
     onSelectedColorsChanged: (Set<Color>) -> Unit
 ) {
-    ElevatedCard(
+    PixelBorderBox(
         modifier = Modifier
             .then(modifier)
             .fillMaxWidth()
