@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
@@ -15,14 +16,12 @@ import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.ui.SeekAndCatchApp
 import com.maxot.seekandcatch.ui.SeekAndCatchAppState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlin.system.measureTimeMillis
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
@@ -50,4 +49,3 @@ private fun isDarkTheme(uiState: MainActivityUiState): Boolean =
             DarkThemeConfig.DARK -> true
         }
     }
-

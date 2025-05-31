@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.feature.leaderboard.ui
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,9 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +30,7 @@ import com.maxot.seekandcatch.core.designsystem.theme.Shapes
 import com.maxot.seekandcatch.core.designsystem.theme.bronze
 import com.maxot.seekandcatch.core.designsystem.theme.gold
 import com.maxot.seekandcatch.core.designsystem.theme.silver
+import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
 import com.maxot.seekandcatch.data.model.LeaderboardRecord
 import com.maxot.seekandcatch.feature.leaderboard.LeaderboardUiState
 import com.maxot.seekandcatch.feature.leaderboard.LeaderboardViewModel
@@ -74,9 +72,10 @@ fun LeaderBoardScreen(
                     .semantics {
                         contentDescription = contentDesc
                     }
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 itemsIndexed(
                     items = leaderboardUiState.data,
@@ -107,16 +106,13 @@ fun LeaderLayout(
 
     val shape = Shapes.large
 
-    ElevatedCard(
+    PixelBorderBox(
         modifier = Modifier
             .then(modifier)
-            .padding(start = 10.dp, top = 10.dp, end = 10.dp)
+            .padding(start = 10.dp, end = 10.dp)
             .clip(shape)
-            .fillMaxWidth()
-            .border(width = 3.dp, color = borderColor, shape = shape),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        )
+            .fillMaxWidth(),
+        middleBorderColor = borderColor
     ) {
         Row(
             modifier = Modifier
@@ -134,7 +130,7 @@ fun LeaderLayout(
 
 @Preview
 @Composable
-fun LeaderboardScreenSuccessfulPreview() {
+private fun LeaderboardScreenSuccessfulPreview() {
     val leaderRecords = listOf(
         LeaderboardRecord(userName = "Max", score = 555),
         LeaderboardRecord(userName = "John", score = 435),
@@ -148,7 +144,7 @@ fun LeaderboardScreenSuccessfulPreview() {
 
 @Preview
 @Composable
-fun LeaderboardScreenLoadingPreview() {
+private fun LeaderboardScreenLoadingPreview() {
     SeekAndCatchTheme {
         LeaderBoardScreen(leaderboardUiState = LeaderboardUiState.Loading)
     }

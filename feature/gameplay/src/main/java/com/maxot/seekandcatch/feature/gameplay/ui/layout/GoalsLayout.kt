@@ -122,6 +122,12 @@ fun GoalsLayoutPreview() {
 @Composable
 fun DetailedGoalsLayoutPreview() {
     SeekAndCatchTheme {
-        DetailedGoalsLayout(goalsSuitableFigures = setOf(Figure.getRandomFigure()))
+        DetailedGoalsLayout(
+            goalsSuitableFigures = setOf(
+                Figure.getRandomFigure(),
+                Figure.getRandomFigure(),
+                Figure.getRandomFigure()
+            )
+        )
     }
 }

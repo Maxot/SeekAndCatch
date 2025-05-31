@@ -1,11 +1,11 @@
 package com.maxot.seekandcatch.feature.settings.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -82,7 +82,7 @@ fun SettingsDialog(
 }
 
 @Composable
-fun SettingsDialog(
+private fun SettingsDialog(
     modifier: Modifier = Modifier,
     allSupportedLocales: List<String>,
     selectedLocale: String,
@@ -136,8 +136,12 @@ fun SettingsDialog(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    PixelButton(onClick = onConfirmation) {
+                    PixelButton(
+                        paddingValues = PaddingValues(10.dp),
+                        onClick = onConfirmation
+                    ) {
                         Text(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 15.dp),
                             text = stringResource(id = R.string.feature_settings_ok),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF1A3B20)
@@ -152,7 +156,7 @@ fun SettingsDialog(
 }
 
 @Composable
-fun SettingsPanel(
+private fun SettingsPanel(
     modifier: Modifier = Modifier,
     isSoundEnabled: Boolean,
     isMusicEnabled: Boolean,
@@ -168,24 +172,7 @@ fun SettingsPanel(
 ) {
     Box(
         modifier = modifier
-            .drawBehind {
-                val px = 4.dp.toPx()
-                val w = size.width
-                val h = size.height
-
-                val borderColor = Color(0xFFD6D68D)
-                val panelBackground = Color(0xFF2E5B3D)
-
-                drawRect(borderColor)
-                drawRect(
-                    color = panelBackground,
-                    topLeft = Offset(px, px),
-                    size = Size(w - 2 * px, h - 2 * px)
-                )
-            }
-            .background(Color(0xFF2E5B3D))
-            .padding(12.dp)
-    ){
+    ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -228,14 +215,16 @@ fun SettingsPanel(
 }
 
 @Composable
-fun PixelSettingRow(
+private fun PixelSettingRow(
     icon: ImageVector,
     label: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -264,7 +253,7 @@ fun PixelSettingRow(
 }
 
 @Composable
-fun PixelToggle(
+private fun PixelToggle(
     isOn: Boolean,
     onToggle: () -> Unit
 ) {
@@ -326,7 +315,7 @@ fun PixelToggle(
 }
 
 @Composable
-fun LanguagesPanel(
+private fun LanguagesPanel(
     modifier: Modifier = Modifier,
     allSupportedLocales: List<String> = listOf("en-US", "uk"),
     selectedLocale: String,
@@ -345,7 +334,7 @@ fun LanguagesPanel(
 }
 
 @Composable
-fun LanguageLayout(modifier: Modifier, language: String) {
+private fun LanguageLayout(modifier: Modifier, language: String) {
     Box(
         modifier = Modifier
             .then(modifier)
@@ -368,7 +357,7 @@ fun LanguageLayout(modifier: Modifier, language: String) {
 
 @Preview
 @Composable
-fun SettingsDialogPreview() {
+private fun SettingsDialogPreview() {
     SeekAndCatchTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             SettingsDialog(

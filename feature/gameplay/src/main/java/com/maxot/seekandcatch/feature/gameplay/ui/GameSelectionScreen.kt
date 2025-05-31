@@ -24,10 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
+import com.maxot.seekandcatch.core.designsystem.ui.drawPixelBorders
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
@@ -175,34 +172,7 @@ fun FlowGamePreviewCard(
             .height(350.dp)
             .width(250.dp)
             .drawBehind {
-                val px = 6.dp.toPx()
-                val w = size.width
-                val h = size.height
-
-                val borderColor = Color(0xFFD6D68D) // світла рамка
-
-                // Піксельна рамка з кутами
-                val path = Path().apply {
-                    moveTo(0f, px)
-                    lineTo(0f, h - px)
-                    lineTo(px, h)
-                    lineTo(w - px, h)
-                    lineTo(w, h - px)
-                    lineTo(w, px)
-                    lineTo(w - px, 0f)
-                    lineTo(px, 0f)
-                    close()
-                }
-
-                // Світла рамка
-                drawPath(path, color = borderColor)
-
-                // Темний зелений фон
-                drawRect(
-                    color = Color(0xFF254D30),
-                    topLeft = Offset(px, px),
-                    size = Size(w - 2 * px, h - 2 * px)
-                )
+                drawPixelBorders(this)
             }
             .padding(20.dp),
     ) {

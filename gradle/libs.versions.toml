@@ -25,6 +25,7 @@ appcompat = "1.6.1"
 material = "1.12.0"
 jetbrainsKotlinJvm = "1.9.22"
 material3Android = "1.2.1"
+androidxSplashscreen = "1.0.1"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
@@ -47,6 +48,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "androidxSplashscreen" }
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }

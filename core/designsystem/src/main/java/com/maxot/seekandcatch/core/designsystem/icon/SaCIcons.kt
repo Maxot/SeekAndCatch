@@ -1,32 +1,22 @@
 package com.maxot.seekandcatch.core.designsystem.icon
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Settings
 import com.maxot.seekandcatch.core.designsystem.R
 
 object SaCIcons {
-    val Leaderboard = Icons.AutoMirrored.Outlined.List
-    val Play = Icons.Outlined.PlayArrow
-    val Settings = Icons.Outlined.Settings
-    val Account = Icons.Outlined.AccountCircle
-    val Favorite = Icons.Filled.Favorite
+    val LeaderboardRes = R.drawable.ic_leaderboard
+    val PlayRes = R.drawable.ic_game
+    val SettingsRes = R.drawable.ic_settings
+    val AccountRes = R.drawable.ic_account
+    val FavoriteRes = R.drawable.ic_heart_full
 
-    val UnselectedLeaderboard = Icons.AutoMirrored.Rounded.List
-    val UnselectedPlay = Icons.Rounded.PlayArrow
-    val UnselectedSettings = Icons.Rounded.Settings
-    val UnselectedAccount = Icons.Rounded.AccountCircle
-    val UnselectedFavorite = Icons.Outlined.FavoriteBorder
+    val UnselectedLeaderboardRes = R.drawable.ic_leaderboard
+    val UnselectedPlayRes = R.drawable.ic_game
+    val UnselectedSettingsRes = R.drawable.ic_settings
+    val UnselectedAccountRes = R.drawable.ic_account
+    val UnselectedFavoriteRes = R.drawable.ic_heart_empty
 
     val Edit = Icons.Rounded.Edit
     val Done = Icons.Rounded.Done

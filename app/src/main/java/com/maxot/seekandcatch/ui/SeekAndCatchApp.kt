@@ -1,6 +1,9 @@
 package com.maxot.seekandcatch.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,12 +17,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.maxot.seekandcatch.core.designsystem.R
-import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.feature.settings.ui.SettingsDialog
 import com.maxot.seekandcatch.navigation.SeekCatchNavHost
 import com.maxot.seekandcatch.navigation.TopLevelDestination
@@ -56,10 +59,18 @@ fun SeekAndCatchApp(
             }
         }
     ) { padding ->
-        SeekCatchNavHost(
-            appState = appState,
-            modifier = Modifier.padding(padding)
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.background),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            SeekCatchNavHost(
+                appState = appState,
+                modifier = Modifier.padding(padding)
+            )
+        }
     }
 }
 

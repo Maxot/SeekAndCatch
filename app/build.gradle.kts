@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.splashscreen)
 
     implementation(libs.firebase.analytics)
     implementation(libs.hilt.android)

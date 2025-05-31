@@ -34,12 +34,12 @@ fun CoefficientProgressLayout(
     ) {
         Text(
             text = "x${currentCoefficient}",
-            style = MaterialTheme.typography.displaySmall
+            style = MaterialTheme.typography.displayLarge
         )
         LinearProgressIndicator(progress = { progress.getDecimalPart() })
         Text(
             text = "x${(currentCoefficient + 1)}",
-            style = MaterialTheme.typography.displayMedium
+            style = MaterialTheme.typography.displayLarge
         )
     }
 }

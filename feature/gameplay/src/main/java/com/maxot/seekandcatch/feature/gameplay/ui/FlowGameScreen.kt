@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -338,6 +339,7 @@ fun ReadyToGameLayout(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameInfoPanel(
     modifier: Modifier = Modifier,
@@ -373,14 +375,16 @@ fun GameInfoPanel(
                     ) {
                         repeat(maxLifeCount - lifeCount) {
                             Icon(
-                                imageVector = SaCIcons.UnselectedFavorite,
-                                contentDescription = null
+                                painter = painterResource(SaCIcons.UnselectedFavoriteRes),
+                                contentDescription = null,
+                                tint = null
                             )
                         }
                         repeat(lifeCount) {
                             Icon(
-                                imageVector = SaCIcons.Favorite,
-                                contentDescription = null
+                                painter = painterResource(SaCIcons.FavoriteRes),
+                                contentDescription = null,
+                                tint = null
                             )
                         }
                     }
@@ -396,11 +400,11 @@ fun GameInfoPanel(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = stringResource(id = R.string.feature_gameplay_coefficient_title).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+//            Text(
+//                text = stringResource(id = R.string.feature_gameplay_coefficient_title).uppercase(),
+//                style = MaterialTheme.typography.labelSmall,
+//                modifier = Modifier.padding(bottom = 4.dp)
+//            )
             CoefficientProgressLayout(
                 progress = coefficient,
                 currentCoefficient = coefficient.toInt(),

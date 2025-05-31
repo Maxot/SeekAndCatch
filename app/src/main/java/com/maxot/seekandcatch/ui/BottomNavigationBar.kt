@@ -36,7 +36,8 @@ fun BottomNavigationBar(
                 label = {
                     Text(
                         text = stringResource(id = destination.iconTextId),
-                        style = MaterialTheme.typography.displayMedium
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
                     )
                 },
                 selected = selected,

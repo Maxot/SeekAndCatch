@@ -3,9 +3,6 @@ package com.maxot.seekandcatch.feature.gameplay.ui.layout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -47,7 +45,7 @@ fun GameDifficultSelectorLayout(
                     (selectedVariantIndex - 1).coerceIn(0, variants.size - 1)
                 onDifficultChanged(variants[selectedVariantIndex])
             }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
+            Icon(painter = painterResource(R.drawable.ic_arrow_pixel_left), contentDescription = "Previous")
         }
         Text(
             modifier = Modifier,
@@ -61,7 +59,7 @@ fun GameDifficultSelectorLayout(
                     (selectedVariantIndex + 1).coerceIn(0, variants.size - 1)
                 onDifficultChanged(variants[selectedVariantIndex])
             }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
+            Icon(painter = painterResource(R.drawable.ic_arrow_pixel_right), contentDescription = "Next")
         }
     }
 }

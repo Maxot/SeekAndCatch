@@ -24,22 +24,22 @@ enum class TopLevelDestination(
     val route: String
 ) {
     LEADERBOARD(
-        selectedIcon = R.drawable.ic_leaderboard,
-        unselectedIcon =  R.drawable.ic_leaderboard,
+        selectedIcon = SaCIcons.LeaderboardRes,
+        unselectedIcon =  SaCIcons.LeaderboardRes,
         iconTextId = leaderboardR.string.feature_leaderboard_title,
         titleTextId = leaderboardR.string.feature_leaderboard_title,
         route = LEADERBOARD_ROUTE
     ),
     GAME(
-        selectedIcon = R.drawable.ic_game,
-        unselectedIcon = R.drawable.ic_game,
+        selectedIcon = SaCIcons.PlayRes,
+        unselectedIcon = SaCIcons.UnselectedPlayRes,
         iconTextId = gameplayR.string.feature_gameplay_title,
         titleTextId = gameplayR.string.feature_gameplay_title,
         route = GAME_SELECTION_ROUTE
     ),
     ACCOUNT(
-        selectedIcon = R.drawable.ic_account,
-        unselectedIcon = R.drawable.ic_account,
+        selectedIcon = SaCIcons.AccountRes,
+        unselectedIcon = SaCIcons.UnselectedAccountRes,
         iconTextId = accountR.string.feature_account_title,
         titleTextId = accountR.string.feature_account_title,
         route = ACCOUNT_ROUTE
