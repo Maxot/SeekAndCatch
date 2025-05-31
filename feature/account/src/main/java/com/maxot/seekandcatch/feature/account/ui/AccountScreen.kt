@@ -1,13 +1,15 @@
 package com.maxot.seekandcatch.feature.account.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -34,6 +36,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
+import com.maxot.seekandcatch.core.designsystem.ui.drawCircleFigure
+import com.maxot.seekandcatch.core.designsystem.ui.drawSquareFigure
+import com.maxot.seekandcatch.core.designsystem.ui.drawTriangleFigure
+import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.feature.account.AccountViewModel
 import com.maxot.seekandcatch.feature.account.R
 import com.maxot.seekandcatch.feature.colorpicker.ColorPicker
@@ -89,6 +95,9 @@ fun AccountScreen(
             onUserNameChanged = onUserNameChanged
         )
 
+        StyleField(
+            modifier = Modifier.padding(5.dp),
+        )
         ColorsField(
             modifier = Modifier.padding(5.dp),
             availableColors = availableColors,
@@ -189,7 +198,7 @@ fun UserNameField(
 }
 
 @Composable
-fun ColorsField(
+private fun ColorsField(
     modifier: Modifier = Modifier,
     availableColors: Set<Color>,
     selectedColors: Set<Color>,
@@ -228,6 +237,52 @@ fun ColorsField(
                         }
                     }
                 }
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun StyleField(
+    modifier: Modifier = Modifier
+) {
+    PixelBorderBox(
+        modifier = Modifier
+            .then(modifier)
+            .fillMaxWidth()
+            .padding(10.dp)
+    ) {
+        Column(modifier = Modifier.padding(10.dp)) {
+            Text(
+                text = stringResource(R.string.feature_account_selected_style),
+                modifier = Modifier
+                    .padding(5.dp)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Figure.FigureType.entries.forEach {
+                    Box {
+                        Canvas(modifier = Modifier.size(50.dp)) {
+                            val sizePx = this.size.minDimension
+
+                            when (it) {
+                                Figure.FigureType.SQUARE -> drawSquareFigure(sizePx, Color.Red)
+                                Figure.FigureType.CIRCLE -> drawCircleFigure(sizePx, Color.Blue)
+                                Figure.FigureType.TRIANGLE -> drawTriangleFigure(
+                                    sizePx,
+                                    Color.Green
+                                )
+                            }
+                        }
+                    }
+                }
+
             }
         }
 
