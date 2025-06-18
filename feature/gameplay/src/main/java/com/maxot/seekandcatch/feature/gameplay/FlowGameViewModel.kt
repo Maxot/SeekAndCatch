@@ -5,13 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.domain.FlowGameUseCase
 import com.maxot.seekandcatch.core.domain.model.FlowGameEvent
 import com.maxot.seekandcatch.core.domain.model.FlowGameState
+import com.maxot.seekandcatch.core.media.MusicManager
+import com.maxot.seekandcatch.core.media.SoundManager
+import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
-import com.maxot.seekandcatch.feature.settings.MusicManager
 import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -31,7 +33,8 @@ class FlowGameViewModel
     private val gameUseCase: FlowGameUseCase,
     private val settingsRepository: SettingsRepository,
     private val musicManager: MusicManager,
-    private val vibrationManager: VibrationManager
+    private val vibrationManager: VibrationManager,
+    private val soundManager: SoundManager,
 ) : ViewModel() {
     private var lastLifeCount: Int = 0
     private var lastCoefficient: Float = 0f
@@ -239,7 +242,10 @@ class FlowGameViewModel
     }
 
     private fun onItemClick(id: Int) {
-        gameUseCase.onEvent(FlowGameEvent.OnItemClick(id))
+        viewModelScope.launch {
+            soundManager.playSound(SoundType.FIGURE_CLICK)
+            gameUseCase.onEvent(FlowGameEvent.OnItemClick(id))
+        }
     }
 
     private fun onFirstVisibleItemIndexChanged(index: Int) {
@@ -268,7 +274,7 @@ data class FlowGameUiState(
     val pixelsToScroll: Float = 0f,
     val rowWidth: Int = 4,
     val isLoading: Boolean = false,
-    val isReady:Boolean = false,
+    val isReady: Boolean = false,
     val isActive: Boolean = false,
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,

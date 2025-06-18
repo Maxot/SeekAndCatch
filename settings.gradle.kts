@@ -19,6 +19,7 @@ include(":core:common")
 include(":core:domain")
 include(":core:designsystem")
 include(":core:model")
+include(":core:media")
 include(":data")
 include(":data-test")
 

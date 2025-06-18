@@ -2,6 +2,7 @@ package com.maxot.seekandcatch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxot.seekandcatch.core.media.MusicManager
 import com.maxot.seekandcatch.core.model.UserConfig
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,8 +15,14 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel
 @Inject constructor(
+    private val musicManager: MusicManager,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
+
+    init {
+        musicManager.startMusic()
+    }
+
     val uiState: StateFlow<MainActivityUiState> =
         settingsRepository.userConfig.map {
             MainActivityUiState.Success(UserConfig(darkThemeConfig = it.darkThemeConfig))
