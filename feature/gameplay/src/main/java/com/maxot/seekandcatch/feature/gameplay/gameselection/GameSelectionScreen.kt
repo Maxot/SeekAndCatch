@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.gameplay.ui
+package com.maxot.seekandcatch.feature.gameplay.gameselection
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -38,8 +39,9 @@ import com.maxot.seekandcatch.core.designsystem.ui.drawPixelBorders
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
-import com.maxot.seekandcatch.feature.gameplay.GameSelectionViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.gameselection.model.GameSelectionUiEvent
+import com.maxot.seekandcatch.feature.gameplay.ui.GameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.StartGameLayout
 import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
 import kotlinx.coroutines.CoroutineScope
@@ -50,18 +52,17 @@ fun GameSelectionScreenRoute(
     viewModel: GameSelectionViewModel = hiltViewModel(),
     navigateToFlowGame: () -> Unit
 ) {
-    val selectedDifficulty = viewModel.selectedGameDifficulty.collectAsState()
-    val selectedGameMode = viewModel.selectedGameMode.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     GameSelectionScreen(
         navigateToFlowGame = navigateToFlowGame,
-        selectedDifficulty = selectedDifficulty.value ?: GameDifficulty.NORMAL,
+        selectedDifficulty = uiState.selectedDifficulty,
         onDifficultChanged = { difficulty ->
-            viewModel.setSelectedDifficulty(difficulty)
+            viewModel.onEvent(GameSelectionUiEvent.ChangeGameDifficult(difficulty))
         },
-        selectedMode = selectedGameMode.value ?: GameMode.FLOW,
+        selectedMode = uiState.selectedGameMode,
         onSelectedModeChanged = { gameMode ->
-            viewModel.setSelectedGameMode(gameMode)
+            viewModel.onEvent(GameSelectionUiEvent.ChangeGameMode(gameMode))
         }
     )
 }

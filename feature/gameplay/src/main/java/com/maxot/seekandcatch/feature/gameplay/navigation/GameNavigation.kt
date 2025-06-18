@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.maxot.seekandcatch.feature.gameplay.ui.FlowGameScreenRoute
 import com.maxot.seekandcatch.feature.gameplay.ui.GameResultScreen
-import com.maxot.seekandcatch.feature.gameplay.ui.GameSelectionScreenRoute
+import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreenRoute
 
 const val GAME_MAIN_ROUTE = "game_main_route"
 const val GAME_SELECTION_ROUTE = "game_selection_route"
