@@ -79,6 +79,7 @@ dependencies {
 
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
+    implementation(project(":core:media"))
     implementation(project(":feature:account"))
     implementation(project(":feature:gameplay"))
     implementation(project(":feature:settings"))
