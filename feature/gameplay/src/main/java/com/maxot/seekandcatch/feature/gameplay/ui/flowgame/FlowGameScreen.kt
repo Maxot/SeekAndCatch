@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.feature.gameplay.ui
+package com.maxot.seekandcatch.feature.gameplay.ui.flowgame
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -66,10 +66,10 @@ import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Goal
-import com.maxot.seekandcatch.feature.gameplay.FlowGameUiState
-import com.maxot.seekandcatch.feature.gameplay.FlowGameViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
+import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
+import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout

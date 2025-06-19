@@ -7,7 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.maxot.seekandcatch.feature.gameplay.ui.FlowGameScreenRoute
+import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreenRoute
 import com.maxot.seekandcatch.feature.gameplay.ui.GameResultScreen
 import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreenRoute
 
