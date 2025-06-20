@@ -7,9 +7,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreenRoute
+import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.GameResultScreen
-import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreenRoute
+import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreenRoute
 
 const val GAME_MAIN_ROUTE = "game_main_route"
 const val GAME_SELECTION_ROUTE = "game_selection_route"
@@ -34,7 +34,8 @@ fun NavGraphBuilder.gameSelectionScreen(
         startDestination = GAME_SELECTION_ROUTE,
         route = GAME_MAIN_ROUTE
     ) {
-        composable(route = GAME_SELECTION_ROUTE,
+        composable(
+            route = GAME_SELECTION_ROUTE,
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Up,
@@ -48,7 +49,7 @@ fun NavGraphBuilder.gameSelectionScreen(
                 )
             }
         ) {
-            GameSelectionScreenRoute(
+            GameSelectionScreen(
                 navigateToFlowGame = navigateToFlowGame
             )
         }
