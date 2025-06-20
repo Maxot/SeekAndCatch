@@ -289,7 +289,7 @@ private fun FlowGameScreen(
 }
 
 @Composable
-fun ReadyToGameLayout(
+private fun ReadyToGameLayout(
     modifier: Modifier = Modifier,
     goals: Set<Goal<Any>>,
     goalsSuitableFigures: Set<Figure>,
@@ -341,7 +341,7 @@ fun ReadyToGameLayout(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameInfoPanel(
+private fun GameInfoPanel(
     modifier: Modifier = Modifier,
     maxLifeCount: Int = 5,
     lifeCount: Int = 3,
@@ -478,7 +478,7 @@ fun GameFieldLayout(
 
 @Preview(showBackground = true)
 @Composable
-fun ReadyToGameLayoutPreview() {
+private fun ReadyToGameLayoutPreview() {
     SeekAndCatchTheme {
         ReadyToGameLayout(
             goals = setOf(),
@@ -490,7 +490,7 @@ fun ReadyToGameLayoutPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun FlowGameScreenLoadingPreview() {
+private fun FlowGameScreenLoadingPreview() {
     val figures = listOf(
         Figure.getRandomFigure(1),
         Figure.getRandomFigure(2),
@@ -511,7 +511,7 @@ fun FlowGameScreenLoadingPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun FlowGameScreenActivePreview() {
+private fun FlowGameScreenActivePreview() {
     val figures = listOf(
         Figure.getRandomFigure(1),
         Figure.getRandomFigure(2),
@@ -532,7 +532,7 @@ fun FlowGameScreenActivePreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun FlowGameScreenPausedPreview() {
+private fun FlowGameScreenPausedPreview() {
     val figures = listOf(
         Figure.getRandomFigure(1),
         Figure.getRandomFigure(2),

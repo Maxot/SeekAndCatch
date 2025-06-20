@@ -48,13 +48,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun GameSelectionScreenRoute(
+fun GameSelectionScreen(
     viewModel: GameSelectionViewModel = hiltViewModel(),
     navigateToFlowGame: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    GameSelectionScreen(
+    GameSelectionScreenContent(
         navigateToFlowGame = navigateToFlowGame,
         selectedDifficulty = uiState.selectedDifficulty,
         onDifficultChanged = { difficulty ->
@@ -68,7 +68,7 @@ fun GameSelectionScreenRoute(
 }
 
 @Composable
-fun GameSelectionScreen(
+private fun GameSelectionScreenContent(
     modifier: Modifier = Modifier,
     navigateToFlowGame: () -> Unit,
     selectedDifficulty: GameDifficulty,
@@ -212,9 +212,10 @@ fun FlowGamePreviewCard(
 
 @Preview(showBackground = true)
 @Composable
-fun GameSelectionScreenPreview() {
+private fun GameSelectionScreenPreview() {
     SeekAndCatchTheme {
-        GameSelectionScreen(
+        GameSelectionScreenContent(
+            modifier = Modifier,
             navigateToFlowGame = {},
             selectedDifficulty = GameDifficulty.HARD,
             selectedMode = GameMode.FLOW,

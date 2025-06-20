@@ -54,7 +54,7 @@ fun StartGameLayout(
 
 @Preview(showBackground = true)
 @Composable
-fun StartGameLayoutPreview() {
+private fun StartGameLayoutPreview() {
     SeekAndCatchTheme {
         StartGameLayout(
             selectedDifficulty = GameDifficulty.NORMAL,
