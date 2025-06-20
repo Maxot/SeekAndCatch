@@ -2,10 +2,12 @@ package com.maxot.seekandcatch.feature.leaderboard.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,16 +39,16 @@ import com.maxot.seekandcatch.feature.leaderboard.LeaderboardViewModel
 import com.maxot.seekandcatch.feature.leaderboard.R
 
 @Composable
-fun LeaderBoardScreenRoute(
+fun LeaderBoardScreen(
     viewModel: LeaderboardViewModel = hiltViewModel()
 ) {
     val leaderboardUiState by viewModel.leaderboardUiState.collectAsStateWithLifecycle()
 
-    LeaderBoardScreen(leaderboardUiState = leaderboardUiState)
+    LeaderBoardScreenContent(leaderboardUiState = leaderboardUiState)
 }
 
 @Composable
-fun LeaderBoardScreen(
+private fun LeaderBoardScreenContent(
     leaderboardUiState: LeaderboardUiState,
     modifier: Modifier = Modifier
 ) {
@@ -72,18 +74,26 @@ fun LeaderBoardScreen(
                     .semantics {
                         contentDescription = contentDesc
                     }
-                    .fillMaxSize()
-                    .padding(vertical = 10.dp),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+//                item {
+//                    Spacer(modifier = Modifier.height(10.dp))
+//                }
+
                 itemsIndexed(
                     items = leaderboardUiState.data,
-                    key = { index: Int, item: LeaderboardRecord -> index }
+                    key = { index: Int, _: LeaderboardRecord -> index }
                 ) { index: Int, item: LeaderboardRecord ->
                     LeaderLayout(
                         itemIndex = index, leaderRecord = item
                     )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }
@@ -92,7 +102,7 @@ fun LeaderBoardScreen(
 }
 
 @Composable
-fun LeaderLayout(
+private fun LeaderLayout(
     modifier: Modifier = Modifier,
     itemIndex: Int,
     leaderRecord: LeaderboardRecord,
@@ -128,7 +138,7 @@ fun LeaderLayout(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun LeaderboardScreenSuccessfulPreview() {
     val leaderRecords = listOf(
@@ -138,14 +148,14 @@ private fun LeaderboardScreenSuccessfulPreview() {
         LeaderboardRecord(userName = "Stas", score = 125),
     )
     SeekAndCatchTheme {
-        LeaderBoardScreen(leaderboardUiState = LeaderboardUiState.Successful(leaderRecords))
+        LeaderBoardScreenContent(leaderboardUiState = LeaderboardUiState.Successful(leaderRecords))
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun LeaderboardScreenLoadingPreview() {
     SeekAndCatchTheme {
-        LeaderBoardScreen(leaderboardUiState = LeaderboardUiState.Loading)
+        LeaderBoardScreenContent(leaderboardUiState = LeaderboardUiState.Loading)
     }
 }
