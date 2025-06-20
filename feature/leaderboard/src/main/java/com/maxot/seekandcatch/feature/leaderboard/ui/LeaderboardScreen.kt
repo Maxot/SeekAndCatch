@@ -79,10 +79,6 @@ private fun LeaderBoardScreenContent(
                 contentPadding = PaddingValues(vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-//                item {
-//                    Spacer(modifier = Modifier.height(10.dp))
-//                }
-
                 itemsIndexed(
                     items = leaderboardUiState.data,
                     key = { index: Int, _: LeaderboardRecord -> index }
