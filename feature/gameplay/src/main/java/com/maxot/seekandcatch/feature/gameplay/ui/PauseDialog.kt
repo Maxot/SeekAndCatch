@@ -23,8 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
-import com.maxot.seekandcatch.core.designsystem.ui.PixelButton
+import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
+import com.maxot.seekandcatch.core.designsystem.component.PixelButton
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable

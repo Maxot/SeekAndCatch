@@ -41,9 +41,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
-import com.maxot.seekandcatch.core.designsystem.ui.PixelButton
-import com.maxot.seekandcatch.core.designsystem.ui.PixelToggle
+import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
+import com.maxot.seekandcatch.core.designsystem.component.PixelButton
+import com.maxot.seekandcatch.core.designsystem.component.PixelToggle
 import com.maxot.seekandcatch.feature.settings.R
 import com.maxot.singleselectionlazyrow.ScaleParams
 import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow

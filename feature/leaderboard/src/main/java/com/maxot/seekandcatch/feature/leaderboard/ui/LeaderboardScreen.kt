@@ -32,7 +32,7 @@ import com.maxot.seekandcatch.core.designsystem.theme.Shapes
 import com.maxot.seekandcatch.core.designsystem.theme.bronze
 import com.maxot.seekandcatch.core.designsystem.theme.gold
 import com.maxot.seekandcatch.core.designsystem.theme.silver
-import com.maxot.seekandcatch.core.designsystem.ui.PixelBorderBox
+import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.data.model.LeaderboardRecord
 import com.maxot.seekandcatch.feature.leaderboard.LeaderboardUiState
 import com.maxot.seekandcatch.feature.leaderboard.LeaderboardViewModel

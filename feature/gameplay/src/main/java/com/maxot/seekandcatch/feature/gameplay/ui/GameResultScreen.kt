@@ -27,8 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.designsystem.ui.PixelButton
-import com.maxot.seekandcatch.feature.account.ui.UserNameDialog
+import com.maxot.seekandcatch.core.designsystem.component.PixelButton
+import com.maxot.seekandcatch.core.designsystem.component.dialog.UserNameDialog
 import com.maxot.seekandcatch.feature.gameplay.GameResultViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 
