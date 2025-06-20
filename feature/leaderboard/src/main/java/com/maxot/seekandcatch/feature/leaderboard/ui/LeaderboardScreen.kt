@@ -87,10 +87,6 @@ private fun LeaderBoardScreenContent(
                         itemIndex = index, leaderRecord = item
                     )
                 }
-
-                item {
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
             }
         }
     }
