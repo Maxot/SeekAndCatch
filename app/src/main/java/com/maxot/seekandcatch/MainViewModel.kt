@@ -15,13 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel
 @Inject constructor(
-    private val musicManager: MusicManager,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
-
-    init {
-        musicManager.startMusic()
-    }
 
     val uiState: StateFlow<MainActivityUiState> =
         settingsRepository.userConfig.map {

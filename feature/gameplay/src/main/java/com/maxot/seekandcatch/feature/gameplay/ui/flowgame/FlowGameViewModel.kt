@@ -6,14 +6,14 @@ import com.maxot.seekandcatch.core.domain.FlowGameUseCase
 import com.maxot.seekandcatch.core.domain.model.FlowGameEvent
 import com.maxot.seekandcatch.core.domain.model.FlowGameState
 import com.maxot.seekandcatch.core.media.MusicManager
+import com.maxot.seekandcatch.core.media.MusicType
 import com.maxot.seekandcatch.core.media.SoundManager
 import com.maxot.seekandcatch.core.media.SoundType
-import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
-import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
+import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
 import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -215,11 +215,13 @@ class FlowGameViewModel
 
 
     private fun initGame(gameDifficulty: GameDifficulty) {
+        soundManager.playSound(SoundType.COUNTDOWN)
+        musicManager.stopMusic()
         gameUseCase.initGame(gameDifficulty.gameParams)
     }
 
     private fun startGame() {
-        musicManager.startMusic()
+        musicManager.play(MusicType.GAME)
         gameUseCase.onEvent(FlowGameEvent.StartGame)
     }
 
@@ -232,12 +234,13 @@ class FlowGameViewModel
 
     private fun resumeGame() {
         if (readyToStart.value) {
-            musicManager.startMusic()
+            musicManager.resumeMusic()
             gameUseCase.onEvent(FlowGameEvent.ResumeGame)
         }
     }
 
     private fun finishGame() {
+        soundManager.playSound(SoundType.GAME_OVER)
         gameUseCase.onEvent(FlowGameEvent.FinishGame)
     }
 
@@ -257,6 +260,6 @@ class FlowGameViewModel
 
     override fun onCleared() {
         super.onCleared()
-        musicManager.release()
+        musicManager.releaseMusic()
     }
 }

@@ -2,6 +2,8 @@ package com.maxot.seekandcatch.feature.settings.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxot.seekandcatch.core.media.SoundManager
+import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.settings.SCLocaleManager
@@ -17,7 +19,8 @@ import javax.inject.Inject
 class SettingsViewModel
 @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val localeManager: SCLocaleManager
+    private val localeManager: SCLocaleManager,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     val soundState = settingsRepository.observeSoundState()
@@ -41,18 +44,21 @@ class SettingsViewModel
     fun setSoundState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setSoundState(newState)
+            soundManager.playSound(SoundType.BUTTON_CLICK)
         }
     }
 
     fun setMusicState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setMusicState(newState)
+            soundManager.playSound(SoundType.BUTTON_CLICK)
         }
     }
 
     fun setVibrationState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setVibrationState(newState)
+            soundManager.playSound(SoundType.BUTTON_CLICK)
         }
     }
 
@@ -60,11 +66,13 @@ class SettingsViewModel
         localeManager.setLocale(locale)
         selectedLocale = localeManager.getSelectedLocale()?.toLanguageTag() ?: "en-US"
         allSupportedLocales = localeManager.getLocales()
+        soundManager.playSound(SoundType.BUTTON_CLICK)
     }
 
     fun setDarkTheme(isDarkTheme: Boolean) {
         viewModelScope.launch {
             settingsRepository.setDarkTheme(isDarkTheme)
+            soundManager.playSound(SoundType.BUTTON_CLICK)
         }
     }
 }

@@ -5,14 +5,17 @@ import android.media.AudioAttributes
 import android.media.SoundPool
 import com.maxot.seekandcatch.core.media.provider.SettingsProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class SoundType(val resId: Int) {
     FIGURE_CLICK(R.raw.figure_click),
     BUTTON_CLICK(R.raw.button_click),
-//    GAME_START(R.raw.game_start),
-//    GAME_OVER(R.raw.game_over)
+    COUNTDOWN(R.raw.bit_countdown),
+    GAME_OVER(R.raw.game_over)
 }
 
 @Singleton
@@ -41,12 +44,14 @@ class SoundManager @Inject constructor(
         }
     }
 
-    suspend fun playSound(soundType: SoundType) {
-        if (settingsProvider.isSoundEnabled()) {
-            soundMap[soundType]?.let { soundId ->
-                soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
-            } ?: run {
-                android.util.Log.w("SoundManager", "Sound not loaded: $soundType")
+    fun playSound(soundType: SoundType) {
+        CoroutineScope(Dispatchers.Default).launch {
+            if (settingsProvider.isSoundEnabled()) {
+                soundMap[soundType]?.let { soundId ->
+                    soundPool.play(soundId, 0.25f, 0.25f, 1, 0, 1f)
+                } ?: run {
+                    android.util.Log.w("SoundManager", "Sound not loaded: $soundType")
+                }
             }
         }
     }

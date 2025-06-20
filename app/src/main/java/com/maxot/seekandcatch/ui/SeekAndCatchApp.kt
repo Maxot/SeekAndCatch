@@ -23,6 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.maxot.seekandcatch.core.designsystem.R
+import com.maxot.seekandcatch.core.media.SoundType
+import com.maxot.seekandcatch.core.media.di.rememberSoundManager
 import com.maxot.seekandcatch.feature.settings.ui.SettingsDialog
 import com.maxot.seekandcatch.navigation.SeekCatchNavHost
 import com.maxot.seekandcatch.navigation.TopLevelDestination
@@ -35,6 +37,9 @@ fun SeekAndCatchApp(
     var showSettingsDialog by rememberSaveable {
         mutableStateOf(false)
     }
+
+    val soundManager = rememberSoundManager()
+
     if (showSettingsDialog) {
         SettingsDialog(
             onDismiss = { showSettingsDialog = false }
@@ -55,7 +60,10 @@ fun SeekAndCatchApp(
             appState.currentTopLevelDestination?.let {
                 SaCTopBar(
                     titleRes = it.titleTextId,
-                    onActionClick = { showSettingsDialog = true })
+                    onActionClick = {
+                        soundManager.playSound(SoundType.BUTTON_CLICK)
+                        showSettingsDialog = true
+                    })
             }
         }
     ) { padding ->
