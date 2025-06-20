@@ -4,9 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navOptions
+import com.maxot.seekandcatch.core.media.MusicManager
+import com.maxot.seekandcatch.core.media.MusicType
 import com.maxot.seekandcatch.feature.account.navigation.ACCOUNT_ROUTE
 import com.maxot.seekandcatch.feature.account.navigation.navigateToAccount
 import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_SELECTION_ROUTE
@@ -48,7 +51,26 @@ class SeekAndCatchAppState(
         }
 
     }
+
+    @Composable
+    fun ObserveMusicByDestination() {
+        val destination = currentDestination
+        androidx.compose.runtime.LaunchedEffect(destination) {
+            getMusicTypeForRoute(destination?.route)?.let { musicType ->
+                if (musicManager.currentMusicType != musicType) {
+                    musicManager.play(musicType)
+                }
+            }
+        }
+    }
 }
+    private fun getMusicTypeForRoute(route: String?): MusicType? {
+        return when (route) {
+            GAME_SELECTION_ROUTE, LEADERBOARD_ROUTE, ACCOUNT_ROUTE -> MusicType.MENU
+            "game_active_route" -> MusicType.GAME
+            else -> null
+        }
+    }
 
 fun NavDestination?.isTopLevelDestination() =
     this?.hierarchy?.any { navDestination ->

@@ -13,6 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
+import com.maxot.seekandcatch.core.media.SoundType
+import com.maxot.seekandcatch.core.media.di.rememberSoundManager
 import com.maxot.seekandcatch.navigation.TopLevelDestination
 
 @Composable
@@ -22,6 +24,7 @@ fun BottomNavigationBar(
     currentDestination: NavDestination?,
     modifier: Modifier = Modifier,
 ) {
+    val soundManager = rememberSoundManager()
     NavigationBar(
         modifier = Modifier
             .then(modifier),
@@ -48,7 +51,10 @@ fun BottomNavigationBar(
                     unselectedTextColor = MaterialTheme.colorScheme.secondary,
                     indicatorColor = MaterialTheme.colorScheme.onPrimary,
                 ),
-                onClick = { onNavigateToDestination(destination) },
+                onClick = {
+                    soundManager.playSound(SoundType.BUTTON_CLICK)
+                    onNavigateToDestination(destination)
+                },
                 icon = {
                     Icon(
                         painter = painterResource(icon),
@@ -62,7 +68,7 @@ fun BottomNavigationBar(
 
 @Preview
 @Composable
-fun BottomNavigationBarPreview() {
+private fun BottomNavigationBarPreview() {
     SeekAndCatchTheme {
         BottomNavigationBar(
             destinations = TopLevelDestination.entries,
