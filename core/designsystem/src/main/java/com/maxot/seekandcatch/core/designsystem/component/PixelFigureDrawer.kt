@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.core.designsystem.ui
+package com.maxot.seekandcatch.core.designsystem.component
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size

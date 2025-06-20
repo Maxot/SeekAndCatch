@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.core.designsystem.ui
+package com.maxot.seekandcatch.core.designsystem.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
