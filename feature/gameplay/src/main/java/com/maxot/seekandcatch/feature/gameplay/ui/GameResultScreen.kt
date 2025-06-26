@@ -75,7 +75,9 @@ private fun GameResultScreenBody(
     if (showUserNameDialog.value) {
         UserNameDialog(
             onConfirmation = { showUserNameDialog.value = false },
-            onDismissRequest = { showUserNameDialog.value = false }
+            onDismissRequest = { showUserNameDialog.value = false },
+            userName = "",
+            updateUserName = {}
         )
     }
 
