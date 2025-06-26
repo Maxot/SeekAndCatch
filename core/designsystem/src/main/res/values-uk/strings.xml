@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_account_user_name_title">Ім\'я користувача</string>
+    <string name="feature_account_enter_user_name">Enter user name</string>
+    <string name="feature_account_your_info">Your info:</string>
+</resources>

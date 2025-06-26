@@ -32,7 +32,6 @@ dependencies {
     implementation(project(":core:media"))
     implementation(project(":data"))
     implementation(project(":feature:settings"))
-    implementation(project(":feature:account"))
     implementation(project(":singleselectionlazyrow"))
 
     implementation(platform(libs.androidx.compose.bom))

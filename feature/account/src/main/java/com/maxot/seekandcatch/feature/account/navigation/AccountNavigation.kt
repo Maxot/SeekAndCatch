@@ -6,7 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.maxot.seekandcatch.feature.account.ui.AccountScreenRoute
+import com.maxot.seekandcatch.feature.account.ui.AccountScreen
 
 const val ACCOUNT_ROUTE = "account_route"
 
@@ -27,6 +27,6 @@ fun NavGraphBuilder.accountScreen() {
                 tween(1000)
             )
         }) {
-        AccountScreenRoute()
+        AccountScreen()
     }
 }
