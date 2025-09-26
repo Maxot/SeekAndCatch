@@ -1,6 +1,6 @@
 [versions]
 # AGP and tools should be updated together
-androidGradlePlugin = "8.3.2"
+androidGradlePlugin = "8.13.0"
 androidxActivity = "1.9.0"
 androidxLifecycle = "2.7.0"
 androidxComposeBom = "2025.05.01"
