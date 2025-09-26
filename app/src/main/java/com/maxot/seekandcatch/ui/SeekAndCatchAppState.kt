@@ -22,7 +22,8 @@ import kotlinx.coroutines.CoroutineScope
 @Stable
 class SeekAndCatchAppState(
     val navController: NavHostController,
-    val coroutineScope: CoroutineScope
+    val coroutineScope: CoroutineScope,
+    val musicManager: MusicManager
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController
@@ -39,7 +40,22 @@ class SeekAndCatchAppState(
         @Composable get() = currentDestination.isTopLevelDestination()
 
     fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
+        // Play menu music when navigating to a top-level destination, only if not already playing
+        if (musicManager.currentMusicType != MusicType.MENU) {
+            musicManager.play(MusicType.MENU)
+        }
         val topLevelNavOptions = navOptions {
+            // Pop up to the start destination of the graph to
+            // avoid building up a large stack of destinations
+            // on the back stack as users select items
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            // Avoid multiple copies of the same destination when
+            // reselecting the same item
+            launchSingleTop = true
+            // Restore state when reselecting a previously selected item
+            restoreState = true
         }
         when (topLevelDestination) {
             TopLevelDestination.LEADERBOARD -> navController.navigateToLeaderboard(
@@ -49,7 +65,6 @@ class SeekAndCatchAppState(
             TopLevelDestination.GAME -> navController.navigateToGameSelection(topLevelNavOptions)
             TopLevelDestination.ACCOUNT -> navController.navigateToAccount(topLevelNavOptions)
         }
-
     }
 
     @Composable
