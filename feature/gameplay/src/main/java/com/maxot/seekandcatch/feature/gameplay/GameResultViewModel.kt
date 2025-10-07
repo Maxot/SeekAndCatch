@@ -2,15 +2,19 @@ package com.maxot.seekandcatch.feature.gameplay
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.LeaderboardRecord
 import com.maxot.seekandcatch.data.repository.AccountRepository
 import com.maxot.seekandcatch.data.repository.LeaderboardRepository
 import com.maxot.seekandcatch.data.repository.ScoreRepository
+import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,37 +24,71 @@ class GameResultViewModel
     private val scoreRepository: ScoreRepository,
     private val leaderboardRepository: LeaderboardRepository,
     private val accountRepository: AccountRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
-    val userName: StateFlow<String> = accountRepository.observeUserName()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = ""
+    private val _uiState = MutableStateFlow(
+        GameResultUiState(
+            userName = "",
+            lastScore = scoreRepository.getLastScore(),
+            bestScore = scoreRepository.getBestScore()
         )
+    )
+    val uiState: StateFlow<GameResultUiState> = _uiState
 
-    fun getLastScore() = scoreRepository.getLastScore()
-    fun getBestScore() = scoreRepository.getBestScore()
-
-    fun processNewBestScore(score: Int, addToLeaderboard: Boolean) {
-        if (score > getBestScore()) {
-            scoreRepository.setBestScore(score)
-        }
-
-        if (addToLeaderboard) {
-            addResultToLeaderboard(score)
+    init {
+        // Keep username in sync
+        viewModelScope.launch {
+            accountRepository.observeUserName().collectLatest { name ->
+                _uiState.update { it.copy(userName = name) }
+            }
         }
     }
 
-    private fun addResultToLeaderboard(score: Int) {
+    fun onEvent(event: GameResultEvent) {
+        when (event) {
+            is GameResultEvent.AddToLeaderboardClicked -> handleAddToLeaderboard()
+            is GameResultEvent.ContinueClicked -> handleContinue()
+            is GameResultEvent.DismissUserNameDialog -> _uiState.update { it.copy(showUserNameDialog = false) }
+        }
+    }
+
+    private fun handleContinue() {
+        val score = _uiState.value.lastScore
+        val best = _uiState.value.bestScore
+        if (score > best) {
+            scoreRepository.setBestScore(score)
+            _uiState.update { it.copy(bestScore = score) }
+        }
+    }
+
+    private fun handleAddToLeaderboard() {
+        val current = _uiState.value
+        val score = current.lastScore
+        // Update best if needed
+        if (score > current.bestScore) {
+            scoreRepository.setBestScore(score)
+            _uiState.update { it.copy(bestScore = score) }
+        }
+        // Ensure user has a name
+        if (current.userName.isBlank()) {
+            _uiState.update { it.copy(showUserNameDialog = true) }
+            return
+        }
+        // Submit to leaderboard
         viewModelScope.launch {
-            val userName = accountRepository.observeUserName().first()
+            _uiState.update { it.copy(isProcessing = true) }
+            val mode: GameMode = settingsRepository.observeGameMode().first()
+            val difficulty: GameDifficulty = settingsRepository.observeDifficulty().first()
             leaderboardRepository.addRecord(
                 LeaderboardRecord(
-                    userName = userName,
-                    score = score
+                    userName = current.userName,
+                    score = score,
+                    gameMode = mode,
+                    difficulty = difficulty
                 )
             )
+            _uiState.update { it.copy(isProcessing = false) }
         }
     }
 }

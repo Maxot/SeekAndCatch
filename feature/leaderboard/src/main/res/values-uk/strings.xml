@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_leaderboard_title">Лідери</string>
+    <string name="feature_leaderboard_screen_content_desc">Екран лідерів</string>
+    <string name="feature_leaderboard_empty_state">Поки що немає записів</string>
 </resources>

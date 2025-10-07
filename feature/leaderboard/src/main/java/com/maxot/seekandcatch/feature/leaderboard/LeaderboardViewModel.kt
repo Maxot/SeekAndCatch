@@ -2,13 +2,16 @@ package com.maxot.seekandcatch.feature.leaderboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.data.model.LeaderboardRecord
+import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.repository.LeaderboardRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 const val TAG = "LeaderBoardViewModel"
@@ -19,23 +22,45 @@ class LeaderboardViewModel
     private val repository: LeaderboardRepository
 ) : ViewModel() {
 
-    val leaderboardUiState: StateFlow<LeaderboardUiState> =
-        repository.observeRecords()
-            .map {
-                val sortedList = it.sortedByDescending { leaderboardRecord ->
-                    leaderboardRecord.score
-                }
-                LeaderboardUiState.Successful(sortedList)
-            }
-            .stateIn(
-                viewModelScope,
-                started = SharingStarted.Lazily,
-                initialValue = LeaderboardUiState.Loading
-            )
-}
+    // Internal selection state (MVI inputs)
+    private val selectedMode = MutableStateFlow<GameMode?>(null) // null = All modes
+    private val selectedDifficulty = MutableStateFlow<GameDifficulty?>(null) // null = All difficulty
 
-sealed interface LeaderboardUiState {
-    data class Successful(val data: List<LeaderboardRecord>) : LeaderboardUiState
-    data object Loading : LeaderboardUiState
-    data object Failed : LeaderboardUiState
+    // Source of truth: all records
+    private val allRecords = repository.observeRecords()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    // Single UI state flow (MVI output)
+    val leaderboardUiState: StateFlow<LeaderboardUiState> =
+        combine(allRecords, selectedMode, selectedDifficulty) { list, mode, difficulty ->
+            val filtered = list.asSequence()
+                .filter { record ->
+                    // Mode filter: if a specific mode is selected, include only matching; if All (null), include all (even nulls)
+                    mode == null || record.gameMode == mode
+                }
+                .filter { record ->
+                    // Difficulty filter: if a specific difficulty is selected, include only matching; if All (null), include all (even nulls)
+                    difficulty == null || record.difficulty == difficulty
+                }
+                .sortedByDescending { it.score ?: 0 }
+                .toList()
+            LeaderboardUiState.Successful(
+                data = filtered,
+                selectedMode = mode,
+                selectedDifficulty = difficulty
+            ) as LeaderboardUiState
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            LeaderboardUiState.Loading
+        )
+
+    // Single public entrypoint to mutate state
+    fun onEvent(event: LeaderboardEvent) {
+        when (event) {
+            is LeaderboardEvent.SelectMode -> selectedMode.update { event.mode }
+            is LeaderboardEvent.SelectDifficulty -> selectedDifficulty.update { event.difficulty }
+        }
+    }
+
 }
