@@ -2,5 +2,5 @@
 <resources>
     <string name="feature_leaderboard_title">Leaderboard</string>
     <string name="feature_leaderboard_screen_content_desc">Leaderboard Screen</string>
-
+    <string name="feature_leaderboard_empty_state">No records yet</string>
 </resources>

@@ -11,12 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -26,9 +21,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.PixelButton
 import com.maxot.seekandcatch.core.designsystem.component.dialog.UserNameDialog
+import com.maxot.seekandcatch.feature.gameplay.GameResultEvent
+import com.maxot.seekandcatch.feature.gameplay.GameResultUiState
 import com.maxot.seekandcatch.feature.gameplay.GameResultViewModel
 import com.maxot.seekandcatch.feature.gameplay.R
 
@@ -37,45 +35,33 @@ fun GameResultScreen(
     viewModel: GameResultViewModel = hiltViewModel(),
     toMainScreen: () -> Unit,
 ) {
-    val userName by viewModel.userName.collectAsState()
-
-    val lastScore by rememberSaveable {
-        mutableStateOf(viewModel.getLastScore())
-    }
-    val bestScore by rememberSaveable {
-        mutableStateOf(viewModel.getBestScore())
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     GameResultScreenBody(
-        userName = userName,
-        lastScore = lastScore,
-        bestScore = bestScore,
-        toMainScreen = toMainScreen,
-        processNewBestScore = viewModel::processNewBestScore
+        uiState = uiState,
+        onAddToLeaderboard = {
+            viewModel.onEvent(GameResultEvent.AddToLeaderboardClicked)
+            toMainScreen()
+        },
+        onContinue = {
+            viewModel.onEvent(GameResultEvent.ContinueClicked)
+            toMainScreen()
+        },
+        onDismissUserNameDialog = { viewModel.onEvent(GameResultEvent.DismissUserNameDialog) }
     )
 }
 
 @Composable
 private fun GameResultScreenBody(
-    userName: String = "",
-    lastScore: Int,
-    bestScore: Int,
-    toMainScreen: () -> Unit,
-    processNewBestScore: (Int, Boolean) -> Unit
+    uiState: GameResultUiState,
+    onAddToLeaderboard: () -> Unit,
+    onContinue: () -> Unit,
+    onDismissUserNameDialog: () -> Unit,
 ) {
-    val showUserNameDialog = remember {
-        mutableStateOf(false)
-    }
-    val isNewBest by remember {
-        derivedStateOf {
-            lastScore > bestScore
-        }
-    }
-
-    if (showUserNameDialog.value) {
+    if (uiState.showUserNameDialog) {
         UserNameDialog(
-            onConfirmation = { showUserNameDialog.value = false },
-            onDismissRequest = { showUserNameDialog.value = false },
+            onConfirmation = { onDismissUserNameDialog() },
+            onDismissRequest = { onDismissUserNameDialog() },
             userName = "",
             updateUserName = {}
         )
@@ -96,7 +82,7 @@ private fun GameResultScreenBody(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (isNewBest) {
+            if (uiState.isNewBest) {
                 Column(
                     modifier = Modifier,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -111,7 +97,7 @@ private fun GameResultScreenBody(
                     Text(
                         text = stringResource(
                             id = R.string.feature_gameplay_label_score,
-                            lastScore
+                            uiState.lastScore
                         ),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge
@@ -119,12 +105,7 @@ private fun GameResultScreenBody(
                     Spacer(modifier = Modifier.height(20.dp))
                     PixelButton(
                         onClick = {
-                            if (userName.isEmpty()) {
-                                showUserNameDialog.value = true
-                            } else {
-                                processNewBestScore(lastScore, true)
-                                toMainScreen()
-                            }
+                            onAddToLeaderboard()
                         },
                     ) {
                         Text(
@@ -136,7 +117,7 @@ private fun GameResultScreenBody(
                 }
             } else {
                 Text(
-                    text = stringResource(id = R.string.feature_gameplay_label_score, lastScore),
+                    text = stringResource(id = R.string.feature_gameplay_label_score, uiState.lastScore),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge
                 )
@@ -144,7 +125,7 @@ private fun GameResultScreenBody(
                 Text(
                     text = stringResource(
                         id = R.string.feature_gameplay_label_your_best_score,
-                        bestScore
+                        uiState.bestScore
                     ),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge
@@ -152,15 +133,12 @@ private fun GameResultScreenBody(
             }
             Spacer(modifier = Modifier.height(20.dp))
             PixelButton(
-                onClick = {
-                    processNewBestScore(lastScore, false)
-                    toMainScreen()
-                },
+                onClick = { onContinue() },
             ) {
                 Text(
                     text = stringResource(
                         id = R.string.feature_gameplay_button_to_main_screen,
-                        lastScore
+                        uiState.lastScore
                     ),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onPrimary,
@@ -176,10 +154,10 @@ private fun GameResultScreenBody(
 private fun GameResultScreenPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
-            lastScore = 5,
-            bestScore = 15,
-            toMainScreen = {},
-            processNewBestScore = { _, _ -> }
+            uiState = GameResultUiState(lastScore = 5, bestScore = 15),
+            onAddToLeaderboard = {},
+            onContinue = {},
+            onDismissUserNameDialog = {}
         )
     }
 }
@@ -189,10 +167,10 @@ private fun GameResultScreenPreview() {
 private fun GameResultScreenNewBestPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
-            lastScore = 20,
-            bestScore = 15,
-            toMainScreen = {},
-            processNewBestScore = { _, _ -> }
+            uiState = GameResultUiState(lastScore = 20, bestScore = 15),
+            onAddToLeaderboard = {},
+            onContinue = {},
+            onDismissUserNameDialog = {}
         )
     }
 
