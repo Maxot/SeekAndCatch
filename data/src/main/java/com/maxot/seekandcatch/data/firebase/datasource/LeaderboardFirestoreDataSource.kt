@@ -33,6 +33,10 @@ class LeaderboardFirestoreDataSource
             LEADERBOARD_DOCUMENT_USER_NAME_KEY to record.userName,
             LEADERBOARD_DOCUMENT_SCORE_KEY to record.score
         )
+        // Add optional fields if present
+        record.gameMode?.name?.let { recordMap[LEADERBOARD_DOCUMENT_MODE_KEY] = it }
+        record.difficulty?.name?.let { recordMap[LEADERBOARD_DOCUMENT_DIFFICULTY_KEY] = it }
+
         if (userId.isNotEmpty()) {
             val userDocument = leaderboardCollection.document(userId)
             userDocument.set(recordMap)
@@ -56,5 +60,7 @@ class LeaderboardFirestoreDataSource
 
         const val LEADERBOARD_DOCUMENT_USER_NAME_KEY = "userName"
         const val LEADERBOARD_DOCUMENT_SCORE_KEY = "score"
+        const val LEADERBOARD_DOCUMENT_MODE_KEY = "gameMode"
+        const val LEADERBOARD_DOCUMENT_DIFFICULTY_KEY = "difficulty"
     }
 }
