@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.core.domain.model
+package com.maxot.seekandcatch.core.domain.flow
 
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
