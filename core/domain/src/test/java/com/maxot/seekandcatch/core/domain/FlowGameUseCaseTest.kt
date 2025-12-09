@@ -1,6 +1,7 @@
 package com.maxot.seekandcatch.core.domain
 
 import androidx.compose.ui.graphics.Color
+import com.maxot.seekandcatch.core.domain.flow.FlowGameUseCase
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameParams
 import com.maxot.seekandcatch.data.model.Goal

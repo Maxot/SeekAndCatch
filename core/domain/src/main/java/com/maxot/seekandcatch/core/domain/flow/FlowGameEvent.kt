@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.core.domain.model
+package com.maxot.seekandcatch.core.domain.flow
 
 sealed class FlowGameEvent {
     object StartGame : FlowGameEvent()

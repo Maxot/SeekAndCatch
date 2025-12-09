@@ -2,9 +2,9 @@ package com.maxot.seekandcatch.feature.gameplay.ui.flowgame
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.core.domain.FlowGameUseCase
-import com.maxot.seekandcatch.core.domain.model.FlowGameEvent
-import com.maxot.seekandcatch.core.domain.model.FlowGameState
+import com.maxot.seekandcatch.core.domain.flow.FlowGameUseCase
+import com.maxot.seekandcatch.core.domain.flow.FlowGameEvent
+import com.maxot.seekandcatch.core.domain.flow.FlowGameState
 import com.maxot.seekandcatch.core.media.MusicManager
 import com.maxot.seekandcatch.core.media.MusicType
 import com.maxot.seekandcatch.core.media.SoundManager

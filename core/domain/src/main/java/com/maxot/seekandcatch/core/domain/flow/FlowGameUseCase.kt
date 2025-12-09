@@ -1,10 +1,7 @@
-package com.maxot.seekandcatch.core.domain
+package com.maxot.seekandcatch.core.domain.flow
 
 import androidx.annotation.Px
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
-import com.maxot.seekandcatch.core.domain.model.FlowGameData
-import com.maxot.seekandcatch.core.domain.model.FlowGameEvent
-import com.maxot.seekandcatch.core.domain.model.FlowGameState
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameParams
 import com.maxot.seekandcatch.data.model.Goal
