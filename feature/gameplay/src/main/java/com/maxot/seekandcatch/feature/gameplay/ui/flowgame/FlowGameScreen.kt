@@ -11,19 +11,10 @@ import androidx.compose.foundation.gestures.stopScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,15 +45,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.Goal
@@ -70,9 +58,9 @@ import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.CoefficientProgressLayout
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameFieldLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameInfoPanel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -335,142 +323,9 @@ private fun ReadyToGameLayout(
             modifier = Modifier.padding(top = 20.dp),
             style = MaterialTheme.typography.displayLarge
         )
-
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun GameInfoPanel(
-    modifier: Modifier = Modifier,
-    maxLifeCount: Int = 5,
-    lifeCount: Int = 3,
-    goals: Set<Goal<Any>>,
-    goalsSuitableFigures: Set<Figure>,
-    score: Int,
-    coefficient: Float,
-    gameDuration: Long,
-) {
-    PixelBorderBox(modifier = modifier.padding(6.dp)) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = stringResource(id = R.string.feature_gameplay_label_score, score),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Time: ${formatMilliseconds(gameDuration)}",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-
-                Column(horizontalAlignment = Alignment.End) {
-                    Row(
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        repeat(maxLifeCount - lifeCount) {
-                            Icon(
-                                painter = painterResource(SaCIcons.UnselectedFavoriteRes),
-                                contentDescription = null,
-                                tint = null
-                            )
-                        }
-                        repeat(lifeCount) {
-                            Icon(
-                                painter = painterResource(SaCIcons.FavoriteRes),
-                                contentDescription = null,
-                                tint = null
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            DetailedGoalsLayout(
-                modifier = Modifier.fillMaxWidth(),
-                goalsSuitableFigures = goalsSuitableFigures
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-//            Text(
-//                text = stringResource(id = R.string.feature_gameplay_coefficient_title).uppercase(),
-//                style = MaterialTheme.typography.labelSmall,
-//                modifier = Modifier.padding(bottom = 4.dp)
-//            )
-            CoefficientProgressLayout(
-                progress = coefficient,
-                currentCoefficient = coefficient.toInt(),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@Composable
-fun GameFieldLayout(
-    modifier: Modifier = Modifier,
-    gridWidth: Int = 4,
-//    itemsSize: Dp = 100.dp,
-    spacerHeight: Dp,
-    figures: List<Figure>,
-    gridState: LazyGridState,
-    onItemHeightMeasured: (height: Int) -> Unit = { },
-    onItemClick: (id: Int) -> Unit,
-    reverseLayout: Boolean = false
-) {
-    val gameFieldLayoutContentDesc = stringResource(id = R.string.game_field_layout_content_desc)
-
-    LazyVerticalGrid(
-        modifier = Modifier
-            .then(modifier)
-            .semantics { contentDescription = gameFieldLayoutContentDesc },
-        userScrollEnabled = false,
-        state = gridState,
-        columns = GridCells.Fixed(gridWidth),
-        reverseLayout = reverseLayout
-    ) {
-        // Add spacer for one row to reach scrolling from empty space
-        repeat(gridWidth) {
-            item {
-                Spacer(
-                    modifier = Modifier
-                        .height(spacerHeight)
-                )
-            }
-        }
-        items(
-            items = figures,
-            key = { figure -> figure.id }
-        ) { figure ->
-            ColoredFigureLayout(
-                modifier = Modifier
-                    .onGloballyPositioned {
-                        onItemHeightMeasured(it.size.height)
-                    },
-                figure = figure,
-                onItemClick = { onItemClick(figure.id) },
-            )
-        }
-        // Add spacer for one row to reach scrolling to empty space
-        repeat(gridWidth) {
-            item {
-                Spacer(
-                    modifier = Modifier
-                        .height(spacerHeight)
-                )
-            }
-        }
-    }
-
-}
 
 /**
  * Previews
@@ -548,9 +403,4 @@ private fun FlowGameScreenPausedPreview() {
             sendEvent = { },
         )
     }
-}
-
-fun formatMilliseconds(milliseconds: Long): String {
-    val format = SimpleDateFormat("mm:ss", Locale.US)
-    return format.format(Date(milliseconds))
 }
