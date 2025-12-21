@@ -59,13 +59,10 @@ import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameFieldLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlowGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameInfoPanel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 const val TAG = "FlowGameScreen"
 
@@ -220,7 +217,7 @@ private fun FlowGameScreen(
                     gameDuration = flowGameUiState.gameDuration
                 )
 
-                GameFieldLayout(
+                FlowGameFieldLayout(
                     gridWidth = flowGameUiState.rowWidth,
                     spacerHeight = spacerHeight,
                     figures = flowGameUiState.figures,
