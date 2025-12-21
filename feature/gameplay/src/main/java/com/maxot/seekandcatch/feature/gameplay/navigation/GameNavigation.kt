@@ -10,10 +10,12 @@ import androidx.navigation.compose.navigation
 import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.GameResultScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreenRoute
+import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.FlashGameScreen
 
 const val GAME_MAIN_ROUTE = "game_main_route"
 const val GAME_SELECTION_ROUTE = "game_selection_route"
 const val FLOW_GAME_ROUTE = "flow_game_route"
+const val FLASH_GAME_ROUTE = "flash_game_route"
 const val GAME_RESULT_ROUTE = "game_result_route"
 
 fun NavController.navigateToGameSelection(navOptions: NavOptions? = null) =
@@ -22,11 +24,15 @@ fun NavController.navigateToGameSelection(navOptions: NavOptions? = null) =
 fun NavController.navigateToFlowGame(navOptions: NavOptions? = null) =
     navigate(FLOW_GAME_ROUTE, navOptions)
 
+fun NavController.navigateToFlashGame(navOptions: NavOptions? = null) =
+    navigate(FLASH_GAME_ROUTE, navOptions)
+
 fun NavController.navigateToGameResult(navOptions: NavOptions? = null) =
     navigate(GAME_RESULT_ROUTE, navOptions)
 
 fun NavGraphBuilder.gameSelectionScreen(
     navigateToFlowGame: () -> Unit,
+    navigateToFlashGame: () -> Unit,
     navigateToGameResult: () -> Unit,
     navigateToGameSelection: () -> Unit
 ) {
@@ -50,7 +56,8 @@ fun NavGraphBuilder.gameSelectionScreen(
             }
         ) {
             GameSelectionScreen(
-                navigateToFlowGame = navigateToFlowGame
+                navigateToFlowGame = navigateToFlowGame,
+                navigateToFlashGame = navigateToFlashGame,
             )
         }
         composable(
@@ -69,6 +76,23 @@ fun NavGraphBuilder.gameSelectionScreen(
             },
         ) {
             FlowGameScreenRoute(toGameResultScreen = navigateToGameResult)
+        }
+        composable(
+            route = FLASH_GAME_ROUTE,
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(1000)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    tween(1000)
+                )
+            },
+        ) {
+            FlashGameScreen(toGameResultScreen = navigateToGameResult)
         }
         composable(route = GAME_RESULT_ROUTE,
             enterTransition = {

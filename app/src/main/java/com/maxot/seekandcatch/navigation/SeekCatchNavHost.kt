@@ -7,6 +7,7 @@ import com.maxot.seekandcatch.feature.account.navigation.accountScreen
 import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_MAIN_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.gameSelectionScreen
 import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToFlowGame
+import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToFlashGame
 import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToGameResult
 import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToGameSelection
 import com.maxot.seekandcatch.feature.leaderboard.navigation.leaderboardScreen
@@ -27,6 +28,7 @@ fun SeekCatchNavHost(
         leaderboardScreen()
         gameSelectionScreen(
             navigateToFlowGame = navController::navigateToFlowGame,
+            navigateToFlashGame = navController::navigateToFlashGame,
             navigateToGameResult = navController::navigateToGameResult,
             navigateToGameSelection = navController::navigateToGameSelection
         )
