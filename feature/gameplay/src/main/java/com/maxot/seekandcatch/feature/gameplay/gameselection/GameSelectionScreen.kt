@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,21 +42,26 @@ import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.gameselection.model.GameSelectionUiEvent
-import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.GameFieldLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlashGameFieldLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlowGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.StartGameLayout
 import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 @Composable
 fun GameSelectionScreen(
     viewModel: GameSelectionViewModel = hiltViewModel(),
-    navigateToFlowGame: () -> Unit
+    navigateToFlowGame: () -> Unit,
+    navigateToFlashGame: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     GameSelectionScreenContent(
         navigateToFlowGame = navigateToFlowGame,
+        navigateToFlashGame = navigateToFlashGame,
         selectedDifficulty = uiState.selectedDifficulty,
         onDifficultChanged = { difficulty ->
             viewModel.onEvent(GameSelectionUiEvent.ChangeGameDifficult(difficulty))
@@ -71,6 +77,7 @@ fun GameSelectionScreen(
 private fun GameSelectionScreenContent(
     modifier: Modifier = Modifier,
     navigateToFlowGame: () -> Unit,
+    navigateToFlashGame: () -> Unit,
     selectedDifficulty: GameDifficulty,
     onDifficultChanged: (GameDifficulty) -> Unit,
     selectedMode: GameMode,
@@ -115,14 +122,17 @@ private fun GameSelectionScreenContent(
                     onDifficultChanged(it)
                 },
                 onStartButtonClick = {
-                    navigateToFlowGame()
+                    when (selectedMode) {
+                        GameMode.FLASH -> navigateToFlashGame()
+                        else -> navigateToFlowGame()
+                    }
                 })
         }
     }
 }
 
 @Composable
-fun ModeSelectionLayout(
+private fun ModeSelectionLayout(
     selectedMode: GameMode,
     selectedDifficulty: GameDifficulty,
     onSelectedModeChanged: (GameMode) -> Unit
@@ -135,17 +145,25 @@ fun ModeSelectionLayout(
         onSelectedItemChanged = { index ->
             onSelectedModeChanged(gameModes[index])
         }) { modifier, gameMode ->
-        FlowGamePreviewCard(
-            id = gameMode.ordinal,
-            gameMode = gameMode,
-            selectedDifficulty = selectedDifficulty,
-            modifier = modifier
-        )
+        when (gameMode) {
+            GameMode.FLASH -> FlashGamePreviewCard(
+                id = gameMode.ordinal,
+                gameMode = gameMode,
+                selectedDifficulty = selectedDifficulty,
+                modifier = modifier
+            )
+            else -> FlowGamePreviewCard(
+                id = gameMode.ordinal,
+                gameMode = gameMode,
+                selectedDifficulty = selectedDifficulty,
+                modifier = modifier
+            )
+        }
     }
 }
 
 @Composable
-fun FlowGamePreviewCard(
+private fun FlowGamePreviewCard(
     id: Int,
     gameMode: GameMode,
     selectedDifficulty: GameDifficulty,
@@ -182,7 +200,7 @@ fun FlowGamePreviewCard(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
-        GameFieldLayout(
+        FlowGameFieldLayout(
             gridWidth = gridWidth,
             spacerHeight = 300.dp,
             figures = figures.toList(),
@@ -209,6 +227,72 @@ fun FlowGamePreviewCard(
 
 }
 
+@Composable
+private fun FlashGamePreviewCard(
+    id: Int,
+    gameMode: GameMode,
+    selectedDifficulty: GameDifficulty,
+    modifier: Modifier = Modifier,
+) {
+    val gridWidth = when (selectedDifficulty) {
+        GameDifficulty.EASY -> 3
+        GameDifficulty.NORMAL -> 4
+        GameDifficulty.HARD -> 5
+    }
+    val gridSize = gridWidth * gridWidth
+
+    val figuresByCell = remember(id, gridWidth) {
+        buildMap {
+            repeat(gridSize) { index ->
+                put(index, Figure.getRandomFigure(index))
+            }
+        }
+    }
+
+    val visibleCellsState = androidx.compose.runtime.remember {
+        mutableStateOf<Set<Int>>(emptySet())
+    }
+
+    LaunchedEffect(key1 = id, key2 = gridWidth) {
+        while (true) {
+            val count = when (selectedDifficulty) {
+                GameDifficulty.EASY -> 2
+                GameDifficulty.NORMAL -> 3
+                GameDifficulty.HARD -> 4
+            }
+            val newVisible = buildSet {
+                repeat(count) {
+                    add(Random.nextInt(0, gridSize))
+                }
+            }
+            visibleCellsState.value = newVisible
+            delay(600)
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .then(modifier)
+            .height(350.dp)
+            .width(250.dp)
+            .drawBehind { drawPixelBorders(this) }
+            .padding(20.dp),
+    ) {
+        Text(
+            text = gameMode.name,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        FlashGameFieldLayout(
+            gridWidth = gridWidth,
+            gridSize = gridSize,
+            figuresByCell = figuresByCell,
+            visibleCells = visibleCellsState.value,
+            onCellClick = { }
+        )
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -217,6 +301,7 @@ private fun GameSelectionScreenPreview() {
         GameSelectionScreenContent(
             modifier = Modifier,
             navigateToFlowGame = {},
+            navigateToFlashGame = {},
             selectedDifficulty = GameDifficulty.HARD,
             selectedMode = GameMode.FLOW,
             onDifficultChanged = {},

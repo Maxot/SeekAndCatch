@@ -27,5 +27,8 @@
     <string name="pause_dialog_content_desc">Продовжити</string>
     <string name="game_field_layout_content_desc">Game Field</string>
     <string name="feature_gameplay_game_selection_screen_content_desc">Game Selection</string>
-
+    <string name="feature_gameplay_goals_title">Цілі</string>
+    <string name="feature_gameplay_coefficient_title">Коефіцієнт</string>
+    <string name="feature_gameplay_loading">Завантаження…</string>
+    <string name="feature_gameplay_press_to_start">Натисніть, щоб почати</string>
 </resources>
