@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.GameResultScreen
-import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreenRoute
+import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.FlashGameScreen
 
 const val GAME_MAIN_ROUTE = "game_main_route"
@@ -75,7 +75,7 @@ fun NavGraphBuilder.gameSelectionScreen(
                 )
             },
         ) {
-            FlowGameScreenRoute(toGameResultScreen = navigateToGameResult)
+            FlowGameScreen(toGameResultScreen = navigateToGameResult)
         }
         composable(
             route = FLASH_GAME_ROUTE,
