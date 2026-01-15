@@ -15,7 +15,7 @@ sealed class FlashGameState {
 /**
  * Flash game data: a grid where some cells become visible for a short time.
  */
- data class FlashGameData(
+data class FlashGameData(
     val goals: Set<Goal<Any>> = emptySet(),
     val gridSize: Int = 16, // cells
     val visibleCells: Set<Int> = emptySet(), // indices of currently visible figures
@@ -24,7 +24,8 @@ sealed class FlashGameState {
     val maxLifeCount: Int = 3,
     val lifeCount: Int = 0,
     val score: Int = 0,
+    val coefficient: Float = 1f,
     val gameDuration: Long = 0L,
     val flashMillis: Long = 1200L, // how long a figure is visible
     val spawnPeriodMillis: Long = 900L // how often new figures appear
- )
+)

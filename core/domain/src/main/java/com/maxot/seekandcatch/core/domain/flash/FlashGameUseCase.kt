@@ -39,24 +39,36 @@ class FlashGameUseCase @Inject constructor(
     // How many cells are visible simultaneously; derived from difficulty
     private var visibleAtOnce: Int = 2
 
+    // Scoring params from GameParams (same semantics as Flow mode)
+    private var scorePoint: Int = 10
+    private var coefficientStep: Float = 0.25f
+
+    // Track clicked suitable cells within current flash window to avoid counting them as missed
+    private val clickedSuitableCells = mutableSetOf<Int>()
+
     fun initGame(gameParams: GameParams) {
         // Reuse GameParams fields where meaningful: itemsCount -> gridSize upper bound, lifeCount, etc.
         coroutineScope.launch {
+            scorePoint = gameParams.scorePoint
+            coefficientStep = gameParams.coefficientStep
             val goal = goalsRepository.getRandomGoal()
             val goals = setOf(goal)
             val suitable = figuresRepository.getFigureSuitableForGoal(goal)
+            // Grid size and figures pool depend on difficulty via GameParams.rowWidth
+            val gridWidth = gameParams.rowWidth.coerceAtLeast(1)
+            val grid = gridWidth * gridWidth
+
             val allFigures: List<Figure> = figuresRepository.getRandomFigures(
-                itemsCount = 32,
-                percentageOfSuitableGoalItems = 0.5f,
+                itemsCount = maxOf(32, grid),
+                percentageOfSuitableGoalItems = gameParams.percentOfSuitableItem,
                 goal = goal
             )
-            val grid = 16 // 4x4 minimal grid for now
             val initialMap = (0 until grid).associateWith { idx ->
                 allFigures[idx % allFigures.size]
             }
 
             // derive how many items should be visible at once from difficulty params
-            visibleAtOnce = maxOf(2, gameParams.rowWidth - 1)
+            visibleAtOnce = maxOf(1, gridWidth - 1)
 
             gameData.value = FlashGameData(
                 goals = goals,
@@ -67,9 +79,11 @@ class FlashGameUseCase @Inject constructor(
                 maxLifeCount = gameParams.maxLifeCount.coerceAtLeast(1),
                 lifeCount = gameParams.lifeCount,
                 score = 0,
+                coefficient = 1f,
                 gameDuration = 0L,
-                flashMillis = 1200L,
-                spawnPeriodMillis = 900L
+                // Use rowDuration to influence flash timing; keep spawn slightly shorter
+                flashMillis = gameParams.rowDuration.toLong().coerceAtLeast(1000L),
+                spawnPeriodMillis = (gameParams.rowDuration * 0.75f).toLong().coerceAtLeast(200L)
             )
             _gameState.value = FlashGameState.Created(suitable)
         }
@@ -128,6 +142,38 @@ class FlashGameUseCase @Inject constructor(
                 }
                 // hide after flash duration
                 delay(current.flashMillis)
+                // Before hiding, process skipped suitable cells to adjust coefficient/lives
+                val beforeHideVisible = gameData.value.visibleCells
+                val goals = gameData.value.goals
+                val figuresByCell = gameData.value.figuresByCell
+                // Count suitable cells that were visible and not clicked
+                var missedSuitable = 0
+                beforeHideVisible.forEach { cellId ->
+                    val fig = figuresByCell[cellId]
+                    if (fig != null && isItemFitForGoals(goals, fig) && !clickedSuitableCells.contains(cellId)) {
+                        missedSuitable++
+                    }
+                }
+                repeat(missedSuitable) {
+                    if (gameData.value.coefficient > 1f) {
+                        decreaseCoefficients()
+                    } else {
+                        // decrease life; finish if no lives left
+                        val newLife = gameData.value.lifeCount - 1
+                        if (newLife < 0) {
+                            gameData.update { it.copy(lifeCount = 0) }
+                            _gameState.update { state -> if (state is FlashGameState.Resumed) state.copy(gameData.value) else state }
+                            finishGame()
+                            return@launch
+                        } else {
+                            gameData.update { it.copy(lifeCount = newLife) }
+                        }
+                    }
+                }
+
+                // Clear for next window
+                clickedSuitableCells.clear()
+
                 gameData.update { data -> data.copy(visibleCells = emptySet()) }
                 _gameState.update { state ->
                     if (state is FlashGameState.Resumed) state.copy(gameData.value) else state
@@ -136,6 +182,7 @@ class FlashGameUseCase @Inject constructor(
                 delay(current.spawnPeriodMillis)
                 // increment duration
                 gameData.update { data -> data.copy(gameDuration = data.gameDuration + current.flashMillis + current.spawnPeriodMillis) }
+                _gameState.update { state -> if (state is FlashGameState.Resumed) state.copy(gameData.value) else state }
             }
         }
     }
@@ -151,8 +198,32 @@ class FlashGameUseCase @Inject constructor(
         val figure: Figure? = current.figuresByCell[cellId]
         val isFit = figure?.let { isItemFitForGoals(current.goals, it) } ?: false
         if (isFit) {
-            val newScore = current.score + 10
-            gameData.update { it.copy(score = newScore) }
+            // Track so it won't be considered as missed when window hides
+            clickedSuitableCells.add(cellId)
+            val pointsAdded = increaseScore()
+            increaseCoefficients()
+            // Add transient points to the clicked figure so UI can show "+points"
+            figure?.let { base ->
+                val updated = base.copy(pointsReceived = pointsAdded)
+                gameData.update { d ->
+                    val newMap = d.figuresByCell.toMutableMap()
+                    newMap[cellId] = updated
+                    d.copy(figuresByCell = newMap)
+                }
+                // Clear points after a short delay to avoid persisting label across flashes
+                coroutineScope.launch {
+                    delay(1000)
+                    gameData.update { d ->
+                        val f = d.figuresByCell[cellId]
+                        if (f?.pointsReceived != null) {
+                            val newMap = d.figuresByCell.toMutableMap()
+                            newMap[cellId] = f.copy(pointsReceived = null)
+                            d.copy(figuresByCell = newMap)
+                        } else d
+                    }
+                    _gameState.update { state -> if (state is FlashGameState.Resumed) state.copy(gameData.value) else state }
+                }
+            }
         } else {
             val newLife = (current.lifeCount - 1)
             if (newLife <= 0) {
@@ -169,4 +240,27 @@ class FlashGameUseCase @Inject constructor(
 
     private fun isItemFitForGoals(goals: Set<Goal<Any>>, item: Figure): Boolean =
         goals.any { goal -> item.isFitForGoal(goal) }
+
+    private fun increaseCoefficients() {
+        val coefficient = gameData.value.coefficient + coefficientStep
+        gameData.update { it.copy(coefficient = coefficient) }
+    }
+
+    private fun decreaseCoefficients() {
+        gameData.update { currentData ->
+            val newCoefficient =
+                if (currentData.coefficient > 1f) (currentData.coefficient / 2f).coerceAtLeast(1f) else
+                    currentData.coefficient
+            currentData.copy(coefficient = newCoefficient.coerceAtLeast(1f))
+        }
+    }
+
+    private fun increaseScore(): Int {
+        val pointsAdded = gameData.value.coefficient.toInt() * scorePoint
+        gameData.update { currentData ->
+            val newScore = currentData.score + pointsAdded
+            currentData.copy(score = newScore)
+        }
+        return pointsAdded
+    }
 }

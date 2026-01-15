@@ -70,7 +70,9 @@ class FlashGameViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             isReady = true,
-                            isActive = false
+                            isActive = false,
+                            // Ensure goals info is visible before the game starts
+                            goalSuitableFigures = state.figuresSuitableForGoal
                         )
                     }
 
@@ -88,6 +90,8 @@ class FlashGameViewModel @Inject constructor(
                                 visibleCells = d.visibleCells,
                                 score = d.score,
                                 lifeCount = d.lifeCount,
+                                coefficient = d.coefficient,
+                                gameDuration = d.gameDuration,
                                 goals = d.goals,
                                 goalSuitableFigures = d.goalSuitableFigures,
                                 figuresByCell = d.figuresByCell,

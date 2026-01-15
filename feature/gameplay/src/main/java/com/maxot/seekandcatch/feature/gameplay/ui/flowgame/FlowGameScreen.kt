@@ -67,7 +67,7 @@ import kotlinx.coroutines.launch
 const val TAG = "FlowGameScreen"
 
 @Composable
-fun FlowGameScreenRoute(
+fun FlowGameScreen(
     viewModel: FlowGameViewModel = hiltViewModel(),
     toGameResultScreen: () -> Unit
 ) {
@@ -79,7 +79,7 @@ fun FlowGameScreenRoute(
 
     val showPauseDialog = remember { mutableStateOf(false) }
 
-    FlowGameScreen(
+    FlowGameScreenContent(
         gameMode = gameMode.value,
         gridState = gridState,
         flowGameUiState = flowGameUiState,
@@ -151,7 +151,7 @@ fun FlowGameScreenRoute(
 }
 
 @Composable
-private fun FlowGameScreen(
+private fun FlowGameScreenContent(
     modifier: Modifier = Modifier,
     gridState: LazyGridState = rememberLazyGridState(),
     gameMode: GameMode = GameMode.FLOW,
@@ -353,7 +353,7 @@ private fun FlowGameScreenLoadingPreview() {
     )
 
     SeekAndCatchTheme {
-        FlowGameScreen(
+        FlowGameScreenContent(
             flowGameUiState = FlowGameUiState(figures = figures, isLoading = true),
             sendEvent = { },
             toGameResultScreen = { },
@@ -374,7 +374,7 @@ private fun FlowGameScreenActivePreview() {
     )
 
     SeekAndCatchTheme {
-        FlowGameScreen(
+        FlowGameScreenContent(
             flowGameUiState = FlowGameUiState(figures = figures, isActive = true),
             sendEvent = { },
             toGameResultScreen = { },
@@ -395,7 +395,7 @@ private fun FlowGameScreenPausedPreview() {
     )
 
     SeekAndCatchTheme {
-        FlowGameScreen(
+        FlowGameScreenContent(
             flowGameUiState = FlowGameUiState(isPaused = true, figures = figures),
             sendEvent = { },
         )

@@ -14,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,8 +34,10 @@ import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiState
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlashGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameInfoPanel
+import kotlinx.coroutines.delay
 
 @Composable
 fun FlashGameScreen(
@@ -101,14 +105,22 @@ private fun FlashGameScreenContent(
                     goals = uiState.goals,
                     goalsSuitableFigures = uiState.goalSuitableFigures,
                     score = uiState.score,
-                    coefficient = 0f,
+                    coefficient = uiState.coefficient,
                     gameDuration = uiState.gameDuration,
                 )
 
-                ReadyToFlashGameLayout(
-                    goalsSuitableFigures = uiState.goalSuitableFigures,
-                    onCountdownFinished = onStart
-                )
+                // Center the ready-to-start layout within the free space of the screen
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ReadyToFlashGameLayout(
+                        goalsSuitableFigures = uiState.goalSuitableFigures,
+                        onCountdownFinished = onStart
+                    )
+                }
             } else {
                 GameInfoPanel(
                     maxLifeCount = 5,
@@ -116,7 +128,7 @@ private fun FlashGameScreenContent(
                     goals = uiState.goals,
                     goalsSuitableFigures = uiState.goalSuitableFigures,
                     score = uiState.score,
-                    coefficient = 0f,
+                    coefficient = uiState.coefficient,
                     gameDuration = uiState.gameDuration,
                 )
                 FlashGameFieldLayout(
@@ -177,35 +189,40 @@ private fun ReadyToFlashGameLayout(
     goalsSuitableFigures: Set<Figure>,
     onCountdownFinished: () -> Unit
 ) {
-    var countDown by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(3) }
+    var countDown by remember { mutableIntStateOf(3) }
     val text = if (countDown > 0) "$countDown" else "Go!"
 
-    com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout(
-        goalsSuitableFigures = goalsSuitableFigures
-    )
-    Text(
-        modifier = Modifier.padding(top = 20.dp),
-        text = stringResource(R.string.feature_gameplay_click_on_items),
-        style = MaterialTheme.typography.displayLarge,
-        textAlign = TextAlign.Center
-    )
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        DetailedGoalsLayout(
+            goalsSuitableFigures = goalsSuitableFigures
+        )
+        Text(
+            modifier = Modifier.padding(top = 20.dp),
+            text = stringResource(R.string.feature_gameplay_click_on_items),
+            style = MaterialTheme.typography.displayLarge,
+            textAlign = TextAlign.Center
+        )
 
-    LaunchedEffect(key1 = Unit) {
-        kotlinx.coroutines.delay(1_000)
-        repeat(2) {
+        LaunchedEffect(key1 = Unit) {
+            delay(1_000)
+            repeat(2) {
+                countDown--
+                delay(1_000)
+            }
             countDown--
-            kotlinx.coroutines.delay(1_000)
+            delay(500)
+            onCountdownFinished()
         }
-        countDown--
-        kotlinx.coroutines.delay(500)
-        onCountdownFinished()
-    }
 
-    Text(
-        text = text,
-        modifier = Modifier.padding(top = 20.dp),
-        style = MaterialTheme.typography.displayLarge
-    )
+        Text(
+            text = text,
+            modifier = Modifier.padding(top = 20.dp),
+            style = MaterialTheme.typography.displayLarge
+        )
+    }
 }
 
 /**

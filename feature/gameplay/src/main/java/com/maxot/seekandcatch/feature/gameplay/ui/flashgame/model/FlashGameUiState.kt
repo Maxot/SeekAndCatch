@@ -15,6 +15,7 @@ data class FlashGameUiState(
     val score: Int = 0,
     val lifeCount: Int = 0,
     val gameDuration: Long = 0L,
+    val coefficient: Float = 1f,
     val goals: Set<Goal<Any>> = emptySet(),
     val goalSuitableFigures: Set<Figure> = emptySet(),
     val figuresByCell: Map<Int, Figure> = emptyMap(),
