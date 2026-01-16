@@ -7,7 +7,6 @@ import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.model.isFitForGoal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 import com.maxot.seekandcatch.data.repository.GoalsRepository
-import com.maxot.seekandcatch.data.repository.ScoreRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -23,7 +22,6 @@ import kotlin.random.Random
  */
 class FlashGameUseCase @Inject constructor(
     @ApplicationScope private val coroutineScope: CoroutineScope,
-    private val scoreRepository: ScoreRepository,
     private val figuresRepository: FiguresRepository,
     private val goalsRepository: GoalsRepository,
 ) {
@@ -118,9 +116,7 @@ class FlashGameUseCase @Inject constructor(
 
     private fun finishGame() {
         stopLoops()
-        val score = gameData.value.score
-        scoreRepository.setLastScore(score)
-        _gameState.value = FlashGameState.Finished(score)
+        _gameState.value = FlashGameState.Finished(gameData.value.score)
     }
 
     private fun startLoops() {

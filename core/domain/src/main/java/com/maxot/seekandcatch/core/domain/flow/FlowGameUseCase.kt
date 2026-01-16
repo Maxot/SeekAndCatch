@@ -8,7 +8,6 @@ import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.model.isFitForGoal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 import com.maxot.seekandcatch.data.repository.GoalsRepository
-import com.maxot.seekandcatch.data.repository.ScoreRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,7 +33,6 @@ const val TAG = "FlowGameUseCase"
 class FlowGameUseCase
 @Inject constructor(
     @ApplicationScope private val coroutineScope: CoroutineScope,
-    private val scoreRepository: ScoreRepository,
     private val figuresRepository: FiguresRepository,
     private val goalsRepository: GoalsRepository
 ) {
@@ -163,8 +161,6 @@ class FlowGameUseCase
         gameJob?.cancel()
         gameDataJob?.cancel()
         timeJob?.cancel()
-
-        scoreRepository.setLastScore(score = gameData.value.score)
 
         _gameState.value = FlowGameState.Finished(gameData.value.score)
     }

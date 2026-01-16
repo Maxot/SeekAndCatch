@@ -42,7 +42,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun FlashGameScreen(
     viewModel: FlashGameViewModel = hiltViewModel(),
-    toGameResultScreen: () -> Unit
+    toGameResultScreen: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -51,13 +51,13 @@ fun FlashGameScreen(
         onStart = { viewModel.startGame() },
         onPause = { viewModel.pauseGame() },
         onResume = { viewModel.resumeGame() },
-        onFinish = { viewModel.finishGame(); toGameResultScreen() },
+        onFinish = { viewModel.finishGame(); toGameResultScreen(uiState.score) },
         onCellClick = { id -> viewModel.onCellClick(id) }
     )
 
     LaunchedEffect(uiState.isFinished) {
         if (uiState.isFinished) {
-            toGameResultScreen()
+            toGameResultScreen(uiState.score)
         }
     }
 }

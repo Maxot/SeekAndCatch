@@ -39,31 +39,28 @@ fun GameResultScreen(
 
     GameResultScreenBody(
         uiState = uiState,
-        onAddToLeaderboard = {
-            viewModel.onEvent(GameResultEvent.AddToLeaderboardClicked)
-            toMainScreen()
-        },
         onContinue = {
             viewModel.onEvent(GameResultEvent.ContinueClicked)
             toMainScreen()
         },
-        onDismissUserNameDialog = { viewModel.onEvent(GameResultEvent.DismissUserNameDialog) }
+        onDismissUserNameDialog = { viewModel.onEvent(GameResultEvent.DismissUserNameDialog) },
+        updateUserName = { viewModel.updateUserName(it) }
     )
 }
 
 @Composable
 private fun GameResultScreenBody(
     uiState: GameResultUiState,
-    onAddToLeaderboard: () -> Unit,
     onContinue: () -> Unit,
     onDismissUserNameDialog: () -> Unit,
+    updateUserName: (String) -> Unit,
 ) {
     if (uiState.showUserNameDialog) {
         UserNameDialog(
             onConfirmation = { onDismissUserNameDialog() },
             onDismissRequest = { onDismissUserNameDialog() },
-            userName = "",
-            updateUserName = {}
+            userName = uiState.userName,
+            updateUserName = updateUserName
         )
     }
 
@@ -94,44 +91,28 @@ private fun GameResultScreenBody(
                         color = MaterialTheme.colorScheme.error
                     )
                     Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = stringResource(
-                            id = R.string.feature_gameplay_label_score,
-                            uiState.lastScore
-                        ),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    PixelButton(
-                        onClick = {
-                            onAddToLeaderboard()
-                        },
-                    ) {
-                        Text(
-                            text = "Add to leaderboard",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
                 }
-            } else {
-                Text(
-                    text = stringResource(id = R.string.feature_gameplay_label_score, uiState.lastScore),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(20.dp))
+            }
+            Text(
+                text = stringResource(
+                    id = R.string.feature_gameplay_label_score,
+                    uiState.lastScore
+                ),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            if (!uiState.isNewBest) {
                 Text(
                     text = stringResource(
                         id = R.string.feature_gameplay_label_your_best_score,
-                        uiState.bestScore
+                        uiState.remoteBestForContext
                     ),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleLarge
                 )
+                Spacer(modifier = Modifier.height(20.dp))
             }
-            Spacer(modifier = Modifier.height(20.dp))
             PixelButton(
                 onClick = { onContinue() },
             ) {
@@ -154,10 +135,10 @@ private fun GameResultScreenBody(
 private fun GameResultScreenPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
-            uiState = GameResultUiState(lastScore = 5, bestScore = 15),
-            onAddToLeaderboard = {},
+            uiState = GameResultUiState(lastScore = 5, remoteBestForContext = 15),
             onContinue = {},
-            onDismissUserNameDialog = {}
+            onDismissUserNameDialog = {},
+            updateUserName = {}
         )
     }
 }
@@ -167,11 +148,10 @@ private fun GameResultScreenPreview() {
 private fun GameResultScreenNewBestPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
-            uiState = GameResultUiState(lastScore = 20, bestScore = 15),
-            onAddToLeaderboard = {},
+            uiState = GameResultUiState(lastScore = 20, remoteBestForContext = 15),
             onContinue = {},
-            onDismissUserNameDialog = {}
+            onDismissUserNameDialog = {},
+            updateUserName = {}
         )
     }
-
 }

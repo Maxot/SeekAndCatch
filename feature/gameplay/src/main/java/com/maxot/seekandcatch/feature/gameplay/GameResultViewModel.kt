@@ -1,13 +1,14 @@
 package com.maxot.seekandcatch.feature.gameplay
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.maxot.seekandcatch.feature.gameplay.navigation.SCORE_ARG
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.model.LeaderboardRecord
 import com.maxot.seekandcatch.data.repository.AccountRepository
 import com.maxot.seekandcatch.data.repository.LeaderboardRepository
-import com.maxot.seekandcatch.data.repository.ScoreRepository
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,26 +23,30 @@ import javax.inject.Inject
 @HiltViewModel
 class GameResultViewModel
 @Inject constructor(
-    private val scoreRepository: ScoreRepository,
+    savedStateHandle: SavedStateHandle,
     private val leaderboardRepository: LeaderboardRepository,
     private val accountRepository: AccountRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
+    private val score: Int = checkNotNull(savedStateHandle[SCORE_ARG])
+
     private val _uiState = MutableStateFlow(
         GameResultUiState(
             userName = "",
-            lastScore = scoreRepository.getLastScore(),
-            bestScore = scoreRepository.getBestScore()
+            lastScore = score
         )
     )
     val uiState: StateFlow<GameResultUiState> = _uiState
 
     init {
-        // Keep username in sync
+        // Keep username in sync and auto-submit when it changes
         viewModelScope.launch {
             accountRepository.observeUserName().collectLatest { name ->
                 _uiState.update { it.copy(userName = name) }
+                if (name.isNotBlank()) {
+                    autoSubmitScore()
+                }
             }
         }
 
@@ -61,59 +66,58 @@ class GameResultViewModel
                 best
             }.collectLatest { remoteBest ->
                 _uiState.update { it.copy(remoteBestForContext = remoteBest) }
+                autoSubmitScore()
             }
         }
     }
 
     fun onEvent(event: GameResultEvent) {
         when (event) {
-            is GameResultEvent.AddToLeaderboardClicked -> handleAddToLeaderboard()
             is GameResultEvent.ContinueClicked -> handleContinue()
             is GameResultEvent.DismissUserNameDialog -> _uiState.update { it.copy(showUserNameDialog = false) }
         }
     }
 
-    private fun handleContinue() {
-        val score = _uiState.value.lastScore
-        val best = _uiState.value.bestScore
-        if (score > best) {
-            scoreRepository.setBestScore(score)
-            _uiState.update { it.copy(bestScore = score) }
+    fun updateUserName(name: String) {
+        viewModelScope.launch {
+            accountRepository.setUserName(name)
         }
     }
 
-    private fun handleAddToLeaderboard() {
+    private fun handleContinue() {
+        // Score submission is already handled by autoSubmitScore
+    }
+
+    private fun autoSubmitScore() {
         val current = _uiState.value
         val score = current.lastScore
-        // Update best if needed
-        if (score > current.bestScore) {
-            scoreRepository.setBestScore(score)
-            _uiState.update { it.copy(bestScore = score) }
-        }
-        // Ensure user has a name
-        if (current.userName.isBlank()) {
-            _uiState.update { it.copy(showUserNameDialog = true) }
-            return
-        }
-        // Submit to leaderboard
-        viewModelScope.launch {
-            _uiState.update { it.copy(isProcessing = true) }
-            val mode: GameMode = settingsRepository.observeGameMode().first()
-            val difficulty: GameDifficulty = settingsRepository.observeDifficulty().first()
 
-            val remoteBestForContext = _uiState.value.remoteBestForContext
-
-            if (score >= remoteBestForContext) {
-                leaderboardRepository.addRecord(
-                    LeaderboardRecord(
-                        userName = current.userName,
-                        score = score,
-                        gameMode = mode,
-                        difficulty = difficulty
-                    )
-                )
+        // Submit to remote leaderboard if it's a new best
+        if (score > current.remoteBestForContext) {
+            // Ensure user has a name
+            if (current.userName.isBlank()) {
+                _uiState.update { it.copy(showUserNameDialog = true) }
+                return
             }
-            _uiState.update { it.copy(isProcessing = false) }
+
+            viewModelScope.launch {
+                _uiState.update { it.copy(isProcessing = true) }
+                val mode: GameMode = settingsRepository.observeGameMode().first()
+                val difficulty: GameDifficulty = settingsRepository.observeDifficulty().first()
+
+                // Re-verify it's still a new best before adding
+                if (score > _uiState.value.remoteBestForContext) {
+                    leaderboardRepository.addRecord(
+                        LeaderboardRecord(
+                            userName = current.userName,
+                            score = score,
+                            gameMode = mode,
+                            difficulty = difficulty
+                        )
+                    )
+                }
+                _uiState.update { it.copy(isProcessing = false) }
+            }
         }
     }
 }
