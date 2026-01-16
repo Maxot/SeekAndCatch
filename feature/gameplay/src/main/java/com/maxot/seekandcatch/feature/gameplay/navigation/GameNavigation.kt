@@ -7,6 +7,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.GameResultScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreen
@@ -16,7 +18,8 @@ const val GAME_MAIN_ROUTE = "game_main_route"
 const val GAME_SELECTION_ROUTE = "game_selection_route"
 const val FLOW_GAME_ROUTE = "flow_game_route"
 const val FLASH_GAME_ROUTE = "flash_game_route"
-const val GAME_RESULT_ROUTE = "game_result_route"
+const val GAME_RESULT_ROUTE = "game_result_route/{score}"
+const val SCORE_ARG = "score"
 
 fun NavController.navigateToGameSelection(navOptions: NavOptions? = null) =
     navigate(GAME_SELECTION_ROUTE, navOptions)
@@ -27,13 +30,13 @@ fun NavController.navigateToFlowGame(navOptions: NavOptions? = null) =
 fun NavController.navigateToFlashGame(navOptions: NavOptions? = null) =
     navigate(FLASH_GAME_ROUTE, navOptions)
 
-fun NavController.navigateToGameResult(navOptions: NavOptions? = null) =
-    navigate(GAME_RESULT_ROUTE, navOptions)
+fun NavController.navigateToGameResult(score: Int, navOptions: NavOptions? = null) =
+    navigate("game_result_route/$score", navOptions)
 
 fun NavGraphBuilder.gameSelectionScreen(
     navigateToFlowGame: () -> Unit,
     navigateToFlashGame: () -> Unit,
-    navigateToGameResult: () -> Unit,
+    navigateToGameResult: (Int) -> Unit,
     navigateToGameSelection: () -> Unit
 ) {
     navigation(
@@ -94,7 +97,11 @@ fun NavGraphBuilder.gameSelectionScreen(
         ) {
             FlashGameScreen(toGameResultScreen = navigateToGameResult)
         }
-        composable(route = GAME_RESULT_ROUTE,
+        composable(
+            route = GAME_RESULT_ROUTE,
+            arguments = listOf(
+                navArgument(SCORE_ARG) { type = NavType.IntType }
+            ),
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Down,

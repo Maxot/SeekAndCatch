@@ -3,7 +3,6 @@ package com.maxot.seekandcatch.feature.gameplay
 data class GameResultUiState(
     val userName: String = "",
     val lastScore: Int = 0,
-    val bestScore: Int = 0,
     // Best score found in remote leaderboard for the same user, game mode and difficulty
     val remoteBestForContext: Int = 0,
     val showUserNameDialog: Boolean = false,

@@ -69,7 +69,7 @@ const val TAG = "FlowGameScreen"
 @Composable
 fun FlowGameScreen(
     viewModel: FlowGameViewModel = hiltViewModel(),
-    toGameResultScreen: () -> Unit
+    toGameResultScreen: (Int) -> Unit
 ) {
     val gridState: LazyGridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
@@ -84,7 +84,7 @@ fun FlowGameScreen(
         gridState = gridState,
         flowGameUiState = flowGameUiState,
         sendEvent = { flowGameUiEvent -> viewModel.onEvent(flowGameUiEvent) },
-        toGameResultScreen = toGameResultScreen,
+        toGameResultScreen = { toGameResultScreen(flowGameUiState.score) },
         showPauseDialog = showPauseDialog.value,
         updatePauseDialogVisibility = { showPauseDialog.value = it }
     )
@@ -129,7 +129,7 @@ fun FlowGameScreen(
         LaunchedEffect(key1 = true) {
             coroutineScope.launch {
                 delay(1)
-                toGameResultScreen()
+                toGameResultScreen(flowGameUiState.score)
             }
         }
     }
@@ -157,7 +157,7 @@ private fun FlowGameScreenContent(
     gameMode: GameMode = GameMode.FLOW,
     flowGameUiState: FlowGameUiState,
     sendEvent: (FlowGameUiEvent) -> Unit,
-    toGameResultScreen: () -> Unit = {},
+    toGameResultScreen: (Int) -> Unit = {},
     showPauseDialog: Boolean = false,
     updatePauseDialogVisibility: (Boolean) -> Unit = {}
 ) {
