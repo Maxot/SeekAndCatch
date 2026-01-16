@@ -42,7 +42,10 @@ class MainActivity : AppCompatActivity() {
             SeekAndCatchTheme(darkTheme = isDarkTheme(uiState.value)) {
                 enableEdgeToEdge()
                 appState.ObserveMusicByDestination()
-                SeekAndCatchApp(appState = appState)
+                SeekAndCatchApp(
+                    appState = appState,
+                    visualFeedbackManager = viewModel.visualFeedbackManager
+                )
             }
         }
     }

@@ -2,6 +2,7 @@ package com.maxot.seekandcatch.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,11 +18,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RadialGradientShader
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.core.designsystem.R
 import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.core.media.di.rememberSoundManager
@@ -32,13 +41,27 @@ import com.maxot.seekandcatch.feature.settings.R as SettingsR
 
 @Composable
 fun SeekAndCatchApp(
-    appState: SeekAndCatchAppState
+    appState: SeekAndCatchAppState,
+    visualFeedbackManager: VisualFeedbackManager
 ) {
     var showSettingsDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
     val soundManager = rememberSoundManager()
+    val isLifeWasted by visualFeedbackManager.isLifeWasted.collectAsStateWithLifecycle()
+
+    val largeRadialGradient = object : ShaderBrush() {
+        override fun createShader(size: Size): Shader {
+            val biggerDimension = maxOf(size.height, size.width)
+            return RadialGradientShader(
+                colors = listOf(Color.Transparent, Color.Red.copy(alpha = 0.4f)),
+                center = size.center,
+                radius = biggerDimension / 2f,
+                colorStops = listOf(0f, 0.95f)
+            )
+        }
+    }
 
     if (showSettingsDialog) {
         SettingsDialog(
@@ -46,37 +69,47 @@ fun SeekAndCatchApp(
         )
     }
 
-    Scaffold(
-        bottomBar = {
-            if (appState.shouldShowBottomBar) {
-                BottomNavigationBar(
-                    destinations = TopLevelDestination.entries,
-                    onNavigateToDestination = appState::navigateToTopLevelDestination,
-                    currentDestination = appState.currentDestination
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            bottomBar = {
+                if (appState.shouldShowBottomBar) {
+                    BottomNavigationBar(
+                        destinations = TopLevelDestination.entries,
+                        onNavigateToDestination = appState::navigateToTopLevelDestination,
+                        currentDestination = appState.currentDestination
+                    )
+                }
+            },
+            topBar = {
+                appState.currentTopLevelDestination?.let {
+                    SaCTopBar(
+                        titleRes = it.titleTextId,
+                        onActionClick = {
+                            soundManager.playSound(SoundType.BUTTON_CLICK)
+                            showSettingsDialog = true
+                        })
+                }
+            }
+        ) { padding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(id = R.drawable.background),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                SeekCatchNavHost(
+                    appState = appState,
+                    modifier = Modifier.padding(padding)
                 )
             }
-        },
-        topBar = {
-            appState.currentTopLevelDestination?.let {
-                SaCTopBar(
-                    titleRes = it.titleTextId,
-                    onActionClick = {
-                        soundManager.playSound(SoundType.BUTTON_CLICK)
-                        showSettingsDialog = true
-                    })
-            }
         }
-    ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painter = painterResource(id = R.drawable.background),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-            SeekCatchNavHost(
-                appState = appState,
-                modifier = Modifier.padding(padding)
+
+        if (isLifeWasted) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(largeRadialGradient)
             )
         }
     }

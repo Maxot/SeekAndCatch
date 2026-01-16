@@ -2,6 +2,7 @@ package com.maxot.seekandcatch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.core.media.MusicManager
 import com.maxot.seekandcatch.core.model.UserConfig
 import com.maxot.seekandcatch.data.repository.SettingsRepository
@@ -15,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel
 @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    val visualFeedbackManager: VisualFeedbackManager
 ) : ViewModel() {
 
     val uiState: StateFlow<MainActivityUiState> =

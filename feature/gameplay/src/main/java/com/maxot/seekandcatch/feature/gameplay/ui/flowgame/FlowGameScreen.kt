@@ -258,19 +258,6 @@ private fun FlowGameScreenContent(
             }
         }
     }
-
-    val wastedBackground = if (flowGameUiState.isLifeWasted)
-        largeRadialGradient else Brush.linearGradient(
-        colors = listOf(
-            Color.Transparent,
-            Color.Transparent
-        )
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(wastedBackground)
-    )
 }
 
 @Composable
