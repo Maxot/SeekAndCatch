@@ -12,6 +12,7 @@ import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -41,6 +42,25 @@ class GameResultViewModel
         viewModelScope.launch {
             accountRepository.observeUserName().collectLatest { name ->
                 _uiState.update { it.copy(userName = name) }
+            }
+        }
+
+        // Track remote best for current user, mode and difficulty
+        viewModelScope.launch {
+            combine(
+                accountRepository.observeUserName(),
+                settingsRepository.observeGameMode(),
+                settingsRepository.observeDifficulty(),
+                leaderboardRepository.observeRecords()
+            ) { name, mode, difficulty, records ->
+                val best = records.asSequence()
+                    .filter { it.gameMode == mode && it.difficulty == difficulty }
+                    .filter { it.userName == name }
+                    .mapNotNull { it.score }
+                    .maxOrNull() ?: 0
+                best
+            }.collectLatest { remoteBest ->
+                _uiState.update { it.copy(remoteBestForContext = remoteBest) }
             }
         }
     }
@@ -80,14 +100,19 @@ class GameResultViewModel
             _uiState.update { it.copy(isProcessing = true) }
             val mode: GameMode = settingsRepository.observeGameMode().first()
             val difficulty: GameDifficulty = settingsRepository.observeDifficulty().first()
-            leaderboardRepository.addRecord(
-                LeaderboardRecord(
-                    userName = current.userName,
-                    score = score,
-                    gameMode = mode,
-                    difficulty = difficulty
+
+            val remoteBestForContext = _uiState.value.remoteBestForContext
+
+            if (score >= remoteBestForContext) {
+                leaderboardRepository.addRecord(
+                    LeaderboardRecord(
+                        userName = current.userName,
+                        score = score,
+                        gameMode = mode,
+                        difficulty = difficulty
+                    )
                 )
-            )
+            }
             _uiState.update { it.copy(isProcessing = false) }
         }
     }
