@@ -12,6 +12,7 @@ import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.repository.SettingsRepository
+import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
 import com.maxot.seekandcatch.feature.settings.VibrationManager
@@ -34,6 +35,7 @@ class FlowGameViewModel
     private val settingsRepository: SettingsRepository,
     private val musicManager: MusicManager,
     private val vibrationManager: VibrationManager,
+    private val visualFeedbackManager: VisualFeedbackManager,
     private val soundManager: SoundManager,
 ) : ViewModel() {
     private var lastLifeCount: Int = 0
@@ -206,10 +208,12 @@ class FlowGameViewModel
         lifeWastedJob?.cancel()
         lifeWastedJob = viewModelScope.launch {
             vibrationManager.vibrate()
+            visualFeedbackManager.triggerLifeWasted()
             delay(100)
             _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = true)
             delay(1000)
             _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = false)
+            visualFeedbackManager.resetLifeWasted()
         }
     }
 

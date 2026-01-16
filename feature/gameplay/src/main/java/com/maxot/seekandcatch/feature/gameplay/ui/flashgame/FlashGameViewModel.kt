@@ -12,8 +12,12 @@ import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.data.model.GameDifficulty
 import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.data.repository.SettingsRepository
+import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiState
+import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +31,8 @@ class FlashGameViewModel @Inject constructor(
     private val gameUseCase: FlashGameUseCase,
     private val settingsRepository: SettingsRepository,
     private val musicManager: MusicManager,
+    private val vibrationManager: VibrationManager,
+    private val visualFeedbackManager: VisualFeedbackManager,
     private val soundManager: SoundManager,
 ) : ViewModel() {
 
@@ -47,6 +53,10 @@ class FlashGameViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(FlashGameUiState())
     val uiState: StateFlow<FlashGameUiState> get() = _uiState
+
+    private var lastLifeCount = 0
+    private var lastCoefficient = 1f
+    private var lifeWastedJob: Job? = null
 
     init {
         observeGameState()
@@ -97,6 +107,8 @@ class FlashGameViewModel @Inject constructor(
                                 figuresByCell = d.figuresByCell,
                             )
                         }
+                        processLifeCountChanges(state.data.lifeCount)
+                        processCoefficientChanges(state.data.coefficient)
                     }
 
                     FlashGameState.Paused -> _uiState.update {
@@ -148,6 +160,33 @@ class FlashGameViewModel @Inject constructor(
     fun finishGame() {
         musicManager.stopMusic()
         gameUseCase.onEvent(FlashGameEvent.FinishGame)
+    }
+
+    private fun processLifeCountChanges(lifeCount: Int) {
+        if (lastLifeCount > lifeCount)
+            updateLifeWastedValue()
+        lastLifeCount = lifeCount
+    }
+
+    private fun processCoefficientChanges(coefficient: Float) {
+        if (lastCoefficient > coefficient)
+            updateLifeWastedValue()
+        lastCoefficient = coefficient
+    }
+
+
+    private fun updateLifeWastedValue() {
+        _uiState.value = uiState.value.copy(isLifeWasted = false)
+        lifeWastedJob?.cancel()
+        lifeWastedJob = viewModelScope.launch {
+            vibrationManager.vibrate()
+            visualFeedbackManager.triggerLifeWasted()
+            delay(100)
+            _uiState.value = uiState.value.copy(isLifeWasted = true)
+            delay(1000)
+            _uiState.value = uiState.value.copy(isLifeWasted = false)
+            visualFeedbackManager.resetLifeWasted()
+        }
     }
 
     fun onCellClick(id: Int) {

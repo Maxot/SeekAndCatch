@@ -77,6 +77,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.firebase.bom))
 
+    implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
     implementation(project(":core:media"))
