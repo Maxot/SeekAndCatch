@@ -12,6 +12,8 @@ import com.maxot.seekandcatch.core.media.MusicManager
 import com.maxot.seekandcatch.core.media.MusicType
 import com.maxot.seekandcatch.feature.account.navigation.ACCOUNT_ROUTE
 import com.maxot.seekandcatch.feature.account.navigation.navigateToAccount
+import com.maxot.seekandcatch.feature.gameplay.navigation.FLASH_GAME_ROUTE
+import com.maxot.seekandcatch.feature.gameplay.navigation.FLOW_GAME_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_SELECTION_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToGameSelection
 import com.maxot.seekandcatch.feature.leaderboard.navigation.LEADERBOARD_ROUTE
@@ -82,7 +84,7 @@ class SeekAndCatchAppState(
     private fun getMusicTypeForRoute(route: String?): MusicType? {
         return when (route) {
             GAME_SELECTION_ROUTE, LEADERBOARD_ROUTE, ACCOUNT_ROUTE -> MusicType.MENU
-            "game_active_route" -> MusicType.GAME
+            FLOW_GAME_ROUTE, FLASH_GAME_ROUTE -> MusicType.GAME
             else -> null
         }
     }

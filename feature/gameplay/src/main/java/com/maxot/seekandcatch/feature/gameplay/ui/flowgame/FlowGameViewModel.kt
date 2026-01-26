@@ -61,13 +61,17 @@ class FlowGameViewModel
     private val _readyToStart = MutableStateFlow(false)
     private val readyToStart: StateFlow<Boolean> = _readyToStart
 
-    private var lifeWastedJob: Job? = null
-
     init {
         observeFlowGameState()
         launchGame()
 
         processReadyToStart()
+
+        viewModelScope.launch {
+            visualFeedbackManager.isLifeWasted.collect { isWasted ->
+                _flowGameUiState.update { it.copy(isLifeWasted = isWasted) }
+            }
+        }
     }
 
     fun onEvent(event: FlowGameUiEvent) {
@@ -148,7 +152,6 @@ class FlowGameViewModel
                     }
 
                     is FlowGameState.Finished -> {
-                        musicManager.stopMusic()
                         _flowGameUiState.update {
                             it.copy(
                                 isReady = false,
@@ -204,17 +207,10 @@ class FlowGameViewModel
 
 
     private fun updateLifeWastedValue() {
-        _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = false)
-        lifeWastedJob?.cancel()
-        lifeWastedJob = viewModelScope.launch {
+        viewModelScope.launch {
             vibrationManager.vibrate()
-            visualFeedbackManager.triggerLifeWasted()
-            delay(100)
-            _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = true)
-            delay(1000)
-            _flowGameUiState.value = flowGameUiState.value.copy(isLifeWasted = false)
-            visualFeedbackManager.resetLifeWasted()
         }
+        visualFeedbackManager.triggerLifeWasted(viewModelScope)
     }
 
 
@@ -224,27 +220,28 @@ class FlowGameViewModel
         gameUseCase.initGame(gameDifficulty.gameParams)
     }
 
-    private fun startGame() {
+    fun startGame() {
         musicManager.play(MusicType.GAME)
         gameUseCase.onEvent(FlowGameEvent.StartGame)
     }
 
-    private fun pauseGame() {
+    fun pauseGame() {
         if (readyToStart.value) {
             musicManager.pauseMusic()
             gameUseCase.onEvent(FlowGameEvent.PauseGame)
         }
     }
 
-    private fun resumeGame() {
+    fun resumeGame() {
         if (readyToStart.value) {
             musicManager.resumeMusic()
             gameUseCase.onEvent(FlowGameEvent.ResumeGame)
         }
     }
 
-    private fun finishGame() {
+    fun finishGame() {
         soundManager.playSound(SoundType.GAME_OVER)
+        musicManager.stopMusic()
         gameUseCase.onEvent(FlowGameEvent.FinishGame)
     }
 

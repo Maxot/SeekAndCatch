@@ -56,11 +56,16 @@ class FlashGameViewModel @Inject constructor(
 
     private var lastLifeCount = 0
     private var lastCoefficient = 1f
-    private var lifeWastedJob: Job? = null
 
     init {
         observeGameState()
         launchGame()
+
+        viewModelScope.launch {
+            visualFeedbackManager.isLifeWasted.collect { isWasted ->
+                _uiState.update { it.copy(isLifeWasted = isWasted) }
+            }
+        }
     }
 
     private fun observeGameState() {
@@ -134,6 +139,8 @@ class FlashGameViewModel @Inject constructor(
         viewModelScope.launch {
             selectedGameDifficulty.collect { diff ->
                 diff?.let {
+                    soundManager.playSound(SoundType.COUNTDOWN)
+                    musicManager.stopMusic()
                     gameUseCase.initGame(it.gameParams)
                     return@collect
                 }
@@ -149,7 +156,6 @@ class FlashGameViewModel @Inject constructor(
     fun pauseGame() {
         gameUseCase.onEvent(FlashGameEvent.PauseGame)
         musicManager.pauseMusic()
-        soundManager.playSound(SoundType.GAME_OVER)
     }
 
     fun resumeGame() {
@@ -158,6 +164,7 @@ class FlashGameViewModel @Inject constructor(
     }
 
     fun finishGame() {
+        soundManager.playSound(SoundType.GAME_OVER)
         musicManager.stopMusic()
         gameUseCase.onEvent(FlashGameEvent.FinishGame)
     }
@@ -176,20 +183,14 @@ class FlashGameViewModel @Inject constructor(
 
 
     private fun updateLifeWastedValue() {
-        _uiState.value = uiState.value.copy(isLifeWasted = false)
-        lifeWastedJob?.cancel()
-        lifeWastedJob = viewModelScope.launch {
+        viewModelScope.launch {
             vibrationManager.vibrate()
-            visualFeedbackManager.triggerLifeWasted()
-            delay(100)
-            _uiState.value = uiState.value.copy(isLifeWasted = true)
-            delay(1000)
-            _uiState.value = uiState.value.copy(isLifeWasted = false)
-            visualFeedbackManager.resetLifeWasted()
         }
+        visualFeedbackManager.triggerLifeWasted(viewModelScope)
     }
 
     fun onCellClick(id: Int) {
+        soundManager.playSound(SoundType.FIGURE_CLICK)
         gameUseCase.onEvent(FlashGameEvent.OnCellClick(id))
     }
 }
