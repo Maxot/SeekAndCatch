@@ -2,12 +2,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.services)
 }
 
 android {
     namespace = "com.maxot.seekandcatch.data"
-    compileSdk = 34
+    compileSdk = 36
     defaultConfig {
         minSdk = 26
     }
@@ -39,6 +38,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.firebase.firestore)
+    implementation("com.google.firebase:firebase-auth:23.1.0")
     implementation(libs.hilt.android)
     implementation(libs.androidx.datastore.preferences)
 
