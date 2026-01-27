@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.maxot.seekandcatch.core.media"
-    compileSdk = 34
+    compileSdk = 36
     defaultConfig {
         minSdk = 26
     }
