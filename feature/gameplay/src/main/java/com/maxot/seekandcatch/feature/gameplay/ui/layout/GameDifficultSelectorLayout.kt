@@ -16,7 +16,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.feature.gameplay.R
 import kotlin.enums.EnumEntries
 

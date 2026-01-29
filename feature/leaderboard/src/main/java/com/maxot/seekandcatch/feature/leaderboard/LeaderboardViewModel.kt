@@ -2,8 +2,8 @@ package com.maxot.seekandcatch.feature.leaderboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.data.repository.LeaderboardRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

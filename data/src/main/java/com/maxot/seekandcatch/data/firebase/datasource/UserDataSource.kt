@@ -1,6 +1,6 @@
 package com.maxot.seekandcatch.data.firebase.datasource
 
-import com.maxot.seekandcatch.data.model.User
+import com.maxot.seekandcatch.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface UserDataSource {

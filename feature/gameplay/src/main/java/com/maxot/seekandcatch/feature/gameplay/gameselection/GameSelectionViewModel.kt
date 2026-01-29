@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.media.SoundManager
 import com.maxot.seekandcatch.core.media.SoundType
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.gameplay.gameselection.model.GameSelectionUiEvent
 import com.maxot.seekandcatch.feature.gameplay.gameselection.model.GameSelectionUiState

@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.data.repository.impl
 
 import com.maxot.seekandcatch.data.firebase.datasource.UserDataSource
-import com.maxot.seekandcatch.data.model.User
+import com.maxot.seekandcatch.core.common.model.User
 import com.maxot.seekandcatch.data.repository.AuthRepository
 import com.maxot.seekandcatch.data.repository.UserRepository
 import javax.inject.Inject

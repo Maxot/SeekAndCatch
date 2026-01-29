@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
-import com.maxot.seekandcatch.core.designsystem.component.UserNameField
+import com.maxot.seekandcatch.core.designsystem.component.UserInfoPanel
 import com.maxot.seekandcatch.core.designsystem.component.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure

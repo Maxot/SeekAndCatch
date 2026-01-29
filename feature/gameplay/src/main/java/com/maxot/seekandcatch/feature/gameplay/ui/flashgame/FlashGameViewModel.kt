@@ -9,15 +9,13 @@ import com.maxot.seekandcatch.core.media.MusicManager
 import com.maxot.seekandcatch.core.media.MusicType
 import com.maxot.seekandcatch.core.media.SoundManager
 import com.maxot.seekandcatch.core.media.SoundType
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiState
 import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

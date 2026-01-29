@@ -5,7 +5,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObjects
 import com.google.firebase.ktx.Firebase
-import com.maxot.seekandcatch.data.model.LeaderboardRecord
+import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
