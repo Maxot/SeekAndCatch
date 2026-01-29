@@ -2,8 +2,8 @@ package com.maxot.seekandcatch.data.di
 
 import com.maxot.seekandcatch.data.firebase.datasource.LeaderboardDataSource
 import com.maxot.seekandcatch.data.firebase.datasource.LeaderboardFirestoreDataSource
-import com.maxot.seekandcatch.data.repository.AccountRepository
-import com.maxot.seekandcatch.data.repository.AccountRepositoryImpl
+import com.maxot.seekandcatch.data.firebase.datasource.UserDataSource
+import com.maxot.seekandcatch.data.firebase.datasource.UserFirestoreDataSource
 import com.maxot.seekandcatch.data.repository.AuthRepository
 import com.maxot.seekandcatch.data.repository.AuthRepositoryImpl
 import com.maxot.seekandcatch.data.repository.ColorsRepository
@@ -16,6 +16,8 @@ import com.maxot.seekandcatch.data.repository.LeaderboardRepository
 import com.maxot.seekandcatch.data.repository.LeaderboardRepositoryImpl
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.data.repository.SettingsRepositoryImpl
+import com.maxot.seekandcatch.data.repository.UserRepository
+import com.maxot.seekandcatch.data.repository.impl.UserRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -45,5 +47,11 @@ interface DataModule {
 
     @Binds
     fun bindLeaderboardDataSource(impl: LeaderboardFirestoreDataSource): LeaderboardDataSource
+
+    @Binds
+    fun bindUserDataSource(impl: UserFirestoreDataSource): UserDataSource
+
+    @Binds
+    fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 
 }
