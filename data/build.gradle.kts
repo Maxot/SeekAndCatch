@@ -38,7 +38,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.firebase.firestore)
-    implementation("com.google.firebase:firebase-auth:23.1.0")
+    implementation(libs.firebase.auth)
     implementation(libs.hilt.android)
     implementation(libs.androidx.datastore.preferences)
 

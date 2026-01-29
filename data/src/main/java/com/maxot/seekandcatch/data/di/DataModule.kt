@@ -4,6 +4,8 @@ import com.maxot.seekandcatch.data.firebase.datasource.LeaderboardDataSource
 import com.maxot.seekandcatch.data.firebase.datasource.LeaderboardFirestoreDataSource
 import com.maxot.seekandcatch.data.repository.AccountRepository
 import com.maxot.seekandcatch.data.repository.AccountRepositoryImpl
+import com.maxot.seekandcatch.data.repository.AuthRepository
+import com.maxot.seekandcatch.data.repository.AuthRepositoryImpl
 import com.maxot.seekandcatch.data.repository.ColorsRepository
 import com.maxot.seekandcatch.data.repository.ColorsRepositoryImpl
 import com.maxot.seekandcatch.data.repository.FiguresRepository
@@ -33,7 +35,7 @@ interface DataModule {
     fun bindGoalsRepository(impl: GoalsRepositoryImpl): GoalsRepository
 
     @Binds
-    fun bindAccountRepository(impl: AccountRepositoryImpl): AccountRepository
+    fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 
     @Binds
     fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
