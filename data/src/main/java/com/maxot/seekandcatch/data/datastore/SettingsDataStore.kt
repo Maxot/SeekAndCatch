@@ -9,8 +9,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.core.model.UserConfig
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

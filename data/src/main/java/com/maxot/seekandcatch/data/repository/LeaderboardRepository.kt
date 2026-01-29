@@ -1,6 +1,6 @@
 package com.maxot.seekandcatch.data.repository
 
-import com.maxot.seekandcatch.data.model.LeaderboardRecord
+import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
 import kotlinx.coroutines.flow.Flow
 
 interface LeaderboardRepository {

@@ -3,6 +3,7 @@ package com.maxot.seekandcatch.data.repository
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.data.firebase.datasource.LeaderboardDataSource
 import com.maxot.seekandcatch.data.model.LeaderboardRecord
+import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

@@ -1,4 +1,4 @@
-package com.maxot.seekandcatch.data.model
+package com.maxot.seekandcatch.core.common.model
 
 enum class GameMode(name: String) {
     FLOW(name = "Flow"),

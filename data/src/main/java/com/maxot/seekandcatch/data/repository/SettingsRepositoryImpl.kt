@@ -2,8 +2,8 @@ package com.maxot.seekandcatch.data.repository
 
 import com.maxot.seekandcatch.core.model.UserConfig
 import com.maxot.seekandcatch.data.datastore.SettingsDataStore
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

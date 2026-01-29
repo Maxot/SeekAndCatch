@@ -1,8 +1,8 @@
 package com.maxot.seekandcatch.core.domain.flash
 
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
+import com.maxot.seekandcatch.core.common.model.GameParams
 import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.GameParams
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.model.isFitForGoal
 import com.maxot.seekandcatch.data.repository.FiguresRepository

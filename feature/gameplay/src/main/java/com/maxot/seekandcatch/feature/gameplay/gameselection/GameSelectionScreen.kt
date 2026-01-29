@@ -37,9 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.drawPixelBorders
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.gameselection.model.GameSelectionUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlashGameFieldLayout

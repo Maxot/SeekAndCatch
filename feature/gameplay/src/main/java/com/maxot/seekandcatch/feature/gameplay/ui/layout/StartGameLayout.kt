@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.PixelButton
-import com.maxot.seekandcatch.data.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable

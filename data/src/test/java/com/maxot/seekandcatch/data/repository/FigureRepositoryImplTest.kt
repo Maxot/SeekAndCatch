@@ -3,6 +3,8 @@ package com.maxot.seekandcatch.data.repository
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.model.isFitForGoal
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

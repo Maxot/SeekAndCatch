@@ -34,15 +34,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
+import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
 import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.theme.Shapes
 import com.maxot.seekandcatch.core.designsystem.theme.bronze
 import com.maxot.seekandcatch.core.designsystem.theme.gold
 import com.maxot.seekandcatch.core.designsystem.theme.silver
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
-import com.maxot.seekandcatch.data.model.LeaderboardRecord
 import kotlinx.coroutines.launch
 
 @Composable
