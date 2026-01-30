@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthDataSource @Inject constructor() {
+class FirebaseAuthDataSource @Inject constructor() {
     private val auth = Firebase.auth
 
     suspend fun getOrCreateUser(): FirebaseUser? {
