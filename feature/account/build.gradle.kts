@@ -27,7 +27,9 @@ android {
 
 dependencies {
     implementation(project(":data"))
+    implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:domain"))
     implementation(project(":feature:colorpicker"))
 
     implementation(platform(libs.androidx.compose.bom))

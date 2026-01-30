@@ -11,10 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.maxot.seekandcatch.core.common.model.User
 import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.core.designsystem.component.UserInfoPanel
 import com.maxot.seekandcatch.core.designsystem.component.drawCircleFigure
@@ -34,6 +32,7 @@ import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.feature.account.AccountViewModel
 import com.maxot.seekandcatch.feature.account.R
+import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenEvent
 import com.maxot.seekandcatch.feature.colorpicker.ColorPicker
 
 @Composable
@@ -41,28 +40,26 @@ fun AccountScreen(
     modifier: Modifier = Modifier,
     viewModel: AccountViewModel = hiltViewModel()
 ) {
-    val userName by viewModel.userName.collectAsStateWithLifecycle("")
-    val selectedColors by viewModel.selectedColors.collectAsStateWithLifecycle(setOf())
-    val availableColors = remember {
-        mutableStateOf(
-            viewModel.getAvailableColors()
-        )
-    }
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
     AccountScreenContent(
         modifier = modifier,
-        userName = userName,
-        onUserNameChanged = viewModel::setUserName,
-        availableColors = availableColors.value,
-        selectedColors = selectedColors,
-        onSelectedColorsChanged = viewModel::onSelectedColorsChanged
+        user = uiState.value.user ?: User("unknow user"),
+        onUserNameChanged = {
+            viewModel.onEvent(AccountScreenEvent.ChangeName(it))
+        },
+        availableColors = uiState.value.availableColors,
+        selectedColors = uiState.value.selectedColors,
+        onSelectedColorsChanged = {
+            viewModel.onEvent(AccountScreenEvent.ChangeSelectedColors(it))
+        }
     )
 }
 
 @Composable
 private fun AccountScreenContent(
     modifier: Modifier = Modifier,
-    userName: String,
+    user: User,
     onUserNameChanged: (userName: String) -> Unit,
     availableColors: Set<Color>,
     selectedColors: Set<Color>,
@@ -80,9 +77,9 @@ private fun AccountScreenContent(
             },
         verticalArrangement = Arrangement.Center
     ) {
-        UserNameField(
+        UserInfoPanel(
             modifier = Modifier.fillMaxWidth(),
-            userName = userName,
+            user = user,
             onUserNameChanged = onUserNameChanged
         )
 
@@ -192,10 +189,13 @@ private fun StyleField(
 
 @Preview(showBackground = true)
 @Composable
-fun AccountScreenPreview() {
+private fun AccountScreenPreview() {
     SeekAndCatchTheme {
         AccountScreenContent(
-            userName = "User name",
+            user = User(
+                id = "userId",
+                name = "userName"
+            ),
             onUserNameChanged = {},
             availableColors = setOf(
                 Color.Red,
