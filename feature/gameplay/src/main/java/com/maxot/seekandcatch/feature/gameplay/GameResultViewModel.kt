@@ -2,19 +2,19 @@ package com.maxot.seekandcatch.feature.gameplay
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.maxot.seekandcatch.feature.gameplay.navigation.SCORE_ARG
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.data.model.GameDifficulty
-import com.maxot.seekandcatch.data.model.GameMode
-import com.maxot.seekandcatch.data.model.LeaderboardRecord
-import com.maxot.seekandcatch.data.repository.AccountRepository
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
+import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
+import com.maxot.seekandcatch.data.repository.AuthRepository
 import com.maxot.seekandcatch.data.repository.LeaderboardRepository
 import com.maxot.seekandcatch.data.repository.SettingsRepository
+import com.maxot.seekandcatch.feature.gameplay.navigation.SCORE_ARG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,7 +25,7 @@ class GameResultViewModel
 @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val leaderboardRepository: LeaderboardRepository,
-    private val accountRepository: AccountRepository,
+    private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
@@ -40,27 +40,17 @@ class GameResultViewModel
     val uiState: StateFlow<GameResultUiState> = _uiState
 
     init {
-        // Keep username in sync and auto-submit when it changes
-        viewModelScope.launch {
-            accountRepository.observeUserName().collectLatest { name ->
-                _uiState.update { it.copy(userName = name) }
-                if (name.isNotBlank()) {
-                    autoSubmitScore()
-                }
-            }
-        }
-
         // Track remote best for current user, mode and difficulty
         viewModelScope.launch {
+            val userId = authRepository.getUserId()
             combine(
-                accountRepository.observeUserName(),
                 settingsRepository.observeGameMode(),
                 settingsRepository.observeDifficulty(),
                 leaderboardRepository.observeRecords()
-            ) { name, mode, difficulty, records ->
+            ) { mode, difficulty, records ->
                 val best = records.asSequence()
                     .filter { it.gameMode == mode && it.difficulty == difficulty }
-                    .filter { it.userName == name }
+                    .filter { it.userId == userId }
                     .mapNotNull { it.score }
                     .maxOrNull() ?: 0
                 best
@@ -74,13 +64,6 @@ class GameResultViewModel
     fun onEvent(event: GameResultEvent) {
         when (event) {
             is GameResultEvent.ContinueClicked -> handleContinue()
-            is GameResultEvent.DismissUserNameDialog -> _uiState.update { it.copy(showUserNameDialog = false) }
-        }
-    }
-
-    fun updateUserName(name: String) {
-        viewModelScope.launch {
-            accountRepository.setUserName(name)
         }
     }
 
@@ -94,21 +77,19 @@ class GameResultViewModel
 
         // Submit to remote leaderboard if it's a new best
         if (score > current.remoteBestForContext) {
-            // Ensure user has a name
-            if (current.userName.isBlank()) {
-                _uiState.update { it.copy(showUserNameDialog = true) }
-                return
-            }
-
             viewModelScope.launch {
+                val userId = authRepository.getUserId()
+
                 _uiState.update { it.copy(isProcessing = true) }
                 val mode: GameMode = settingsRepository.observeGameMode().first()
                 val difficulty: GameDifficulty = settingsRepository.observeDifficulty().first()
 
                 // Re-verify it's still a new best before adding
                 if (score > _uiState.value.remoteBestForContext) {
+                    val userId = userId
                     leaderboardRepository.addRecord(
                         LeaderboardRecord(
+                            userId = userId,
                             userName = current.userName,
                             score = score,
                             gameMode = mode,
