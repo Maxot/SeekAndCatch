@@ -24,7 +24,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.PixelButton
-import com.maxot.seekandcatch.core.designsystem.component.dialog.UserNameDialog
 import com.maxot.seekandcatch.feature.gameplay.GameResultEvent
 import com.maxot.seekandcatch.feature.gameplay.GameResultUiState
 import com.maxot.seekandcatch.feature.gameplay.GameResultViewModel
@@ -42,9 +41,7 @@ fun GameResultScreen(
         onContinue = {
             viewModel.onEvent(GameResultEvent.ContinueClicked)
             toMainScreen()
-        },
-        onDismissUserNameDialog = { viewModel.onEvent(GameResultEvent.DismissUserNameDialog) },
-        updateUserName = { viewModel.updateUserName(it) }
+        }
     )
 }
 
@@ -52,18 +49,7 @@ fun GameResultScreen(
 private fun GameResultScreenBody(
     uiState: GameResultUiState,
     onContinue: () -> Unit,
-    onDismissUserNameDialog: () -> Unit,
-    updateUserName: (String) -> Unit,
 ) {
-    if (uiState.showUserNameDialog) {
-        UserNameDialog(
-            onConfirmation = { onDismissUserNameDialog() },
-            onDismissRequest = { onDismissUserNameDialog() },
-            userName = uiState.userName,
-            updateUserName = updateUserName
-        )
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = com.maxot.seekandcatch.core.designsystem.R.drawable.background),
@@ -136,9 +122,7 @@ private fun GameResultScreenPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
             uiState = GameResultUiState(lastScore = 5, remoteBestForContext = 15),
-            onContinue = {},
-            onDismissUserNameDialog = {},
-            updateUserName = {}
+            onContinue = {}
         )
     }
 }
@@ -149,9 +133,7 @@ private fun GameResultScreenNewBestPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
             uiState = GameResultUiState(lastScore = 20, remoteBestForContext = 15),
-            onContinue = {},
-            onDismissUserNameDialog = {},
-            updateUserName = {}
+            onContinue = {}
         )
     }
 }
