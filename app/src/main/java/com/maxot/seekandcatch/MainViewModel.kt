@@ -3,8 +3,8 @@ package com.maxot.seekandcatch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.common.VisualFeedbackManager
+import com.maxot.seekandcatch.core.domain.AuthUseCase
 import com.maxot.seekandcatch.core.model.UserConfig
-import com.maxot.seekandcatch.data.repository.AuthRepository
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,13 +18,13 @@ import javax.inject.Inject
 class MainViewModel
 @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val authRepository: AuthRepository,
+    private val authUseCase: AuthUseCase,
     val visualFeedbackManager: VisualFeedbackManager
 ) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            authRepository.autoRegisterIfNeeded()
+            authUseCase.autoRegisterIfNeeded()
         }
     }
 
