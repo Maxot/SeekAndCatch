@@ -29,9 +29,9 @@ class LeaderboardFirestoreDataSource
         userId: String,
         onSuccessful: (String) -> Unit
     ) {
-        val recordMap = hashMapOf(
-            LEADERBOARD_DOCUMENT_USER_NAME_KEY to record.userName,
-            LEADERBOARD_DOCUMENT_SCORE_KEY to record.score
+        val recordMap = hashMapOf<String, Any?>(
+            LEADERBOARD_DOCUMENT_USER_ID_KEY to userId,
+            LEADERBOARD_DOCUMENT_SCORE_KEY to record.score,
         )
         // Add optional fields if present
         record.gameMode?.name?.let { recordMap[LEADERBOARD_DOCUMENT_MODE_KEY] = it }
@@ -45,6 +45,7 @@ class LeaderboardFirestoreDataSource
                 }
                 .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
         } else {
+            // This case should be rare now as we auto-register on app start
             leaderboardCollection
                 .add(recordMap)
                 .addOnSuccessListener { documentReference ->
@@ -58,6 +59,7 @@ class LeaderboardFirestoreDataSource
     companion object {
         const val COLLECTION_NAME_LEADERBOARD = "leaderboard"
 
+        const val LEADERBOARD_DOCUMENT_USER_ID_KEY = "userId"
         const val LEADERBOARD_DOCUMENT_USER_NAME_KEY = "userName"
         const val LEADERBOARD_DOCUMENT_SCORE_KEY = "score"
         const val LEADERBOARD_DOCUMENT_MODE_KEY = "gameMode"
