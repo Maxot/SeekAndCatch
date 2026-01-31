@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.core.common.model.GameMode
+import com.maxot.seekandcatch.core.domain.user.UserUseCase
 import com.maxot.seekandcatch.data.repository.LeaderboardRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ const val TAG = "LeaderBoardViewModel"
 @HiltViewModel
 class LeaderboardViewModel
 @Inject constructor(
+    private val userUseCase: UserUseCase,
     private val repository: LeaderboardRepository
 ) : ViewModel() {
 
@@ -47,6 +49,7 @@ class LeaderboardViewModel
             LeaderboardUiState.Successful(
                 data = filtered,
                 selectedMode = mode,
+                userData = userUseCase.getUser(),
                 selectedDifficulty = difficulty
             ) as LeaderboardUiState
         }.stateIn(

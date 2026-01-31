@@ -27,10 +27,10 @@ android {
 }
 
 dependencies {
-//    implementation(project(":feature:settings"))
-    implementation(project(":data"))
-//    implementation(project(":core:domain"))
+    implementation(project(":core:common"))
+    implementation(project(":core:domain"))
     implementation(project(":core:designsystem"))
+    implementation(project(":data"))
 //
     implementation(platform(libs.androidx.compose.bom))
 //

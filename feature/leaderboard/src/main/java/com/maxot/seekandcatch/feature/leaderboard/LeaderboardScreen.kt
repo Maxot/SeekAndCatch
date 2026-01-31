@@ -37,11 +37,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
+import com.maxot.seekandcatch.core.common.model.User
 import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.theme.Shapes
 import com.maxot.seekandcatch.core.designsystem.theme.bronze
 import com.maxot.seekandcatch.core.designsystem.theme.gold
+import com.maxot.seekandcatch.core.designsystem.theme.red
 import com.maxot.seekandcatch.core.designsystem.theme.silver
 import kotlinx.coroutines.launch
 
@@ -104,7 +106,8 @@ private fun LeaderBoardScreenContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val selectedDifficulty = (leaderboardUiState as? LeaderboardUiState.Successful)?.selectedDifficulty
+            val selectedDifficulty =
+                (leaderboardUiState as? LeaderboardUiState.Successful)?.selectedDifficulty
             difficulties.forEach { diff ->
                 val label = diff?.name ?: "ALL"
                 val selected = selectedDifficulty == diff
@@ -174,7 +177,9 @@ private fun LeaderBoardPageContent(
                         key = { index: Int, _: LeaderboardRecord -> index }
                     ) { index: Int, item: LeaderboardRecord ->
                         LeaderLayout(
-                            itemIndex = index, leaderRecord = item
+                            itemIndex = index,
+                            leaderRecord = item,
+                            user = leaderboardUiState.userData
                         )
                     }
                 }
@@ -186,14 +191,19 @@ private fun LeaderBoardPageContent(
 @Composable
 private fun LeaderLayout(
     modifier: Modifier = Modifier,
+    user: User? = null,
     itemIndex: Int,
     leaderRecord: LeaderboardRecord,
 ) {
-    val borderColor = when (itemIndex) {
-        0 -> gold
-        1 -> silver
-        2 -> bronze
-        else -> Color.DarkGray
+    val borderColor = if (user?.id == leaderRecord.userId) {
+        red
+    } else {
+        when (itemIndex) {
+            0 -> gold
+            1 -> silver
+            2 -> bronze
+            else -> Color.DarkGray
+        }
     }
 
     val shape = Shapes.large
@@ -234,7 +244,8 @@ private fun LeaderboardScreenSuccessfulPreview() {
             leaderboardUiState = LeaderboardUiState.Successful(
                 data = leaderRecords,
                 selectedMode = GameMode.FLOW,
-                selectedDifficulty = null
+                selectedDifficulty = null,
+                userData = null
             )
         )
     }
