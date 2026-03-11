@@ -97,7 +97,7 @@ private fun FlashGameScreenContent(
                     text = stringResource(id = R.string.feature_gameplay_loading),
                     style = MaterialTheme.typography.titleLarge
                 )
-            } else if (uiState.isReady && !uiState.isActive) {
+            } else if (uiState.isReady && !uiState.isActive && !uiState.isPaused) {
                 // Show goals and countdown before start
                 GameInfoPanel(
                     maxLifeCount = 5,
