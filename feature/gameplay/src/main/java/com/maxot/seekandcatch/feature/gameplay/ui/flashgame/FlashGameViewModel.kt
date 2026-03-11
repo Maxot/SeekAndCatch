@@ -137,6 +137,7 @@ class FlashGameViewModel @Inject constructor(
         viewModelScope.launch {
             selectedGameDifficulty.collect { diff ->
                 diff?.let {
+                    _uiState.update { it.copy(isFinished = false) }
                     soundManager.playSound(SoundType.COUNTDOWN)
                     musicManager.stopMusic()
                     gameUseCase.initGame(it.gameParams)

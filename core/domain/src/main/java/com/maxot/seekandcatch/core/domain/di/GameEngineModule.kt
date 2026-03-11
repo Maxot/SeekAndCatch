@@ -25,4 +25,14 @@ object GameEngineModule {
     ): FlowGameEngine {
         return FlowGameEngine(coroutineScope, figuresRepository, goalsRepository)
     }
+
+    @Provides
+    @Singleton
+    fun provideFlashGameEngine(
+        @ApplicationScope coroutineScope: CoroutineScope,
+        figuresRepository: FiguresRepository,
+        goalsRepository: GoalsRepository
+    ): FlashGameEngine {
+        return FlashGameEngine(coroutineScope, figuresRepository, goalsRepository)
+    }
 }
