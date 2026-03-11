@@ -213,6 +213,7 @@ class FlowGameViewModel
 
 
     private fun initGame(gameDifficulty: GameDifficulty) {
+        _flowGameUiState.update { it.copy(isFinished = false) }
         soundManager.playSound(SoundType.COUNTDOWN)
         musicManager.stopMusic()
         gameUseCase.initGame(gameDifficulty.gameParams)

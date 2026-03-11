@@ -95,7 +95,7 @@ fun FlowGameScreen(
             }
     }
 
-    if (flowGameUiState.isReady && !flowGameUiState.isActive) {
+    if (flowGameUiState.isReady && !flowGameUiState.isActive && !flowGameUiState.isPaused) {
         ReadyToGameLayout(
             goals = flowGameUiState.goals,
             goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
@@ -180,7 +180,7 @@ private fun FlowGameScreenContent(
     }
     val spacerHeight by remember {
         derivedStateOf {
-            screenHeight - gameInfoPanelSize
+            if (gameInfoPanelSize == 0.dp) 0.dp else (screenHeight - gameInfoPanelSize).coerceAtLeast(0.dp)
         }
     }
 
