@@ -40,6 +40,23 @@ class GameResultViewModel
     val uiState: StateFlow<GameResultUiState> = _uiState
 
     init {
+        // Observe game mode and difficulty for restarting with same settings
+        viewModelScope.launch {
+            combine(
+                settingsRepository.observeGameMode(),
+                settingsRepository.observeDifficulty()
+            ) { mode, difficulty ->
+                mode to difficulty
+            }.collectLatest { (mode, difficulty) ->
+                _uiState.update {
+                    it.copy(
+                        gameMode = mode,
+                        gameDifficulty = difficulty
+                    )
+                }
+            }
+        }
+
         // Track remote best for current user, mode and difficulty
         viewModelScope.launch {
             val userId = authRepository.getUserId()
@@ -64,7 +81,12 @@ class GameResultViewModel
     fun onEvent(event: GameResultEvent) {
         when (event) {
             is GameResultEvent.ContinueClicked -> handleContinue()
+            is GameResultEvent.RestartClicked -> handleRestart()
         }
+    }
+
+    private fun handleRestart() {
+        // Placeholder for any state updates before navigation if needed
     }
 
     private fun handleContinue() {

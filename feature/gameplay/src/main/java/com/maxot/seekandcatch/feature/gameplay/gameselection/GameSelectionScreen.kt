@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavOptions
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.drawPixelBorders
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
@@ -54,14 +55,14 @@ import kotlin.random.Random
 @Composable
 fun GameSelectionScreen(
     viewModel: GameSelectionViewModel = hiltViewModel(),
-    navigateToFlowGame: () -> Unit,
-    navigateToFlashGame: () -> Unit
+    navigateToFlowGame: (NavOptions?) -> Unit,
+    navigateToFlashGame: (NavOptions?) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     GameSelectionScreenContent(
-        navigateToFlowGame = navigateToFlowGame,
-        navigateToFlashGame = navigateToFlashGame,
+        navigateToFlowGame = { navigateToFlowGame(null) },
+        navigateToFlashGame = { navigateToFlashGame(null) },
         selectedDifficulty = uiState.selectedDifficulty,
         onDifficultChanged = { difficulty ->
             viewModel.onEvent(GameSelectionUiEvent.ChangeGameDifficult(difficulty))

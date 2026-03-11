@@ -33,6 +33,7 @@ import com.maxot.seekandcatch.feature.gameplay.R
 fun GameResultScreen(
     viewModel: GameResultViewModel = hiltViewModel(),
     toMainScreen: () -> Unit,
+    onRestart: (com.maxot.seekandcatch.core.common.model.GameMode) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -41,6 +42,10 @@ fun GameResultScreen(
         onContinue = {
             viewModel.onEvent(GameResultEvent.ContinueClicked)
             toMainScreen()
+        },
+        onRestart = {
+            viewModel.onEvent(GameResultEvent.RestartClicked)
+            uiState.gameMode?.let { onRestart(it) }
         }
     )
 }
@@ -49,6 +54,7 @@ fun GameResultScreen(
 private fun GameResultScreenBody(
     uiState: GameResultUiState,
     onContinue: () -> Unit,
+    onRestart: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -100,6 +106,17 @@ private fun GameResultScreenBody(
                 Spacer(modifier = Modifier.height(20.dp))
             }
             PixelButton(
+                onClick = { onRestart() },
+            ) {
+                Text(
+                    text = stringResource(id = R.string.feature_gameplay_button_restart),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            PixelButton(
                 onClick = { onContinue() },
             ) {
                 Text(
@@ -122,7 +139,8 @@ private fun GameResultScreenPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
             uiState = GameResultUiState(lastScore = 5, remoteBestForContext = 15),
-            onContinue = {}
+            onContinue = {},
+            onRestart = {}
         )
     }
 }
@@ -133,7 +151,8 @@ private fun GameResultScreenNewBestPreview() {
     SeekAndCatchTheme {
         GameResultScreenBody(
             uiState = GameResultUiState(lastScore = 20, remoteBestForContext = 15),
-            onContinue = {}
+            onContinue = {},
+            onRestart = {}
         )
     }
 }

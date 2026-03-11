@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.feature.gameplay.gameselection.GameSelectionScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.GameResultScreen
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreen
@@ -34,10 +35,10 @@ fun NavController.navigateToGameResult(score: Int, navOptions: NavOptions? = nul
     navigate("game_result_route/$score", navOptions)
 
 fun NavGraphBuilder.gameSelectionScreen(
-    navigateToFlowGame: () -> Unit,
-    navigateToFlashGame: () -> Unit,
+    navigateToFlowGame: (NavOptions?) -> Unit,
+    navigateToFlashGame: (NavOptions?) -> Unit,
     navigateToGameResult: (Int) -> Unit,
-    navigateToGameSelection: () -> Unit
+    navigateToGameSelection: (NavOptions?) -> Unit
 ) {
     navigation(
         startDestination = GAME_SELECTION_ROUTE,
@@ -114,7 +115,19 @@ fun NavGraphBuilder.gameSelectionScreen(
                     tween(1000)
                 )
             }) {
-            GameResultScreen(toMainScreen = navigateToGameSelection)
+            GameResultScreen(
+                toMainScreen = { navigateToGameSelection(null) },
+                onRestart = { mode ->
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(GAME_SELECTION_ROUTE, inclusive = false)
+                        .build()
+                    when (mode) {
+                        GameMode.FLOW -> navigateToFlowGame(navOptions)
+                        GameMode.FLASH -> navigateToFlashGame(navOptions)
+                        GameMode.DROP -> {} // Not implemented?
+                    }
+                }
+            )
         }
     }
 }

@@ -17,6 +17,7 @@
     <string name="dismiss_button_pause_dialog">Продовжити</string>
 
     <string name="feature_gameplay_button_to_main_screen">До головного екрану</string>
+    <string name="feature_gameplay_button_restart">Спробувати ще раз</string>
     <string name="feature_gameplay_label_your_best_score">Ваш найкращий рахунок: %1$d</string>
 
     <string name="flow_game_screen_content_desc">FlowGameScreen</string>
