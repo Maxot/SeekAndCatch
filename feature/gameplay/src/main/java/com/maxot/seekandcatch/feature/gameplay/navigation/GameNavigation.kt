@@ -124,7 +124,7 @@ fun NavGraphBuilder.gameSelectionScreen(
                     when (mode) {
                         GameMode.FLOW -> navigateToFlowGame(navOptions)
                         GameMode.FLASH -> navigateToFlashGame(navOptions)
-                        GameMode.DROP -> {} // Not implemented?
+                        else -> Unit
                     }
                 }
             )

@@ -36,7 +36,7 @@ No retention, monetization, or social KPIs are tracked in MVP.
 
 5. Game Modes
 5.1 Flow Mode
-Items are auto-scrolled continuously through the screen
+Items are auto-scrolled continuously through the screen in random direction (up or down)
 Speed increases proportionally to the coefficient
 Player reacts to moving items in real time
 

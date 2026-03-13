@@ -110,7 +110,8 @@ abstract class BaseGameEngine(
         if (_gameState.value !is GameEngineState.Started) return
 
         val currentData = _gameData.value
-        val figure = currentData.figures.find { it.id == itemId } ?: return
+        val figures = currentData.figures
+        val figure = figures.find { it.id == itemId } ?: return
         if (!figure.isActive) return
 
         if (isItemFitForGoals(currentData.goals, figure)) {

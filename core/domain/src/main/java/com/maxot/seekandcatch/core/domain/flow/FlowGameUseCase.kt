@@ -83,7 +83,8 @@ class FlowGameUseCase
             gameDuration = engineData.gameDuration,
             scrollDuration = engineData.scrollDuration,
             pixelsToScroll = engineData.pixelsToScroll,
-            rowWidth = engineData.rowWidth
+            rowWidth = engineData.rowWidth,
+            isReverseScrolling = engineData.isReverseScrolling
         )
     }
 }

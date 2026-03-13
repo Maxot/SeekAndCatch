@@ -45,7 +45,13 @@ fun GameResultScreen(
         },
         onRestart = {
             viewModel.onEvent(GameResultEvent.RestartClicked)
-            uiState.gameMode?.let { onRestart(it) }
+            uiState.gameMode?.let { 
+                if (it != com.maxot.seekandcatch.core.common.model.GameMode.DROP) {
+                    onRestart(it)
+                } else {
+                    toMainScreen()
+                }
+            }
         }
     )
 }

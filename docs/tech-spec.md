@@ -13,8 +13,7 @@ Derived from: Codebase + PRD + Jira Tickets
 2. Game Modes
 2.1 Supported Modes
 - FLASH
-- FLOW
-- DROP exists in enum but is out of scope and must not be activated.
+- FLOW (with randomized scrolling direction)
 
 3. Game State Machine
 3.1 Shared States
@@ -183,7 +182,6 @@ Where:
 - Resume restores exact state
 
 14. Non-Goals (Explicit)
-- Drop mode implementation
 - Multiplayer
 - Cheating protection
 - Server-side validation

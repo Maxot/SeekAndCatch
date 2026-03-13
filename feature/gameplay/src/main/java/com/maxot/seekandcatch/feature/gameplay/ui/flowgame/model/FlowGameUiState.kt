@@ -20,5 +20,6 @@ data class FlowGameUiState(
     val isActive: Boolean = false,
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,
-    val isLifeWasted: Boolean = false
+    val isLifeWasted: Boolean = false,
+    val isReverseScrolling: Boolean = false
 )

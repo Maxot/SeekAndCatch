@@ -138,11 +138,11 @@ private fun ModeSelectionLayout(
     selectedDifficulty: GameDifficulty,
     onSelectedModeChanged: (GameMode) -> Unit
 ) {
-    val gameModes = GameMode.entries.toTypedArray()
+    val gameModes = GameMode.entries.filter { it != GameMode.DROP }
 
     SingleSelectionLazyRow(
-        items = gameModes.toList(),
-        selectedItemIndex = GameMode.entries.indexOf(selectedMode),
+        items = gameModes,
+        selectedItemIndex = gameModes.indexOf(selectedMode),
         onSelectedItemChanged = { index ->
             onSelectedModeChanged(gameModes[index])
         }) { modifier, gameMode ->
@@ -153,6 +153,7 @@ private fun ModeSelectionLayout(
                 selectedDifficulty = selectedDifficulty,
                 modifier = modifier
             )
+
             else -> FlowGamePreviewCard(
                 id = gameMode.ordinal,
                 gameMode = gameMode,
@@ -207,7 +208,7 @@ private fun FlowGamePreviewCard(
             figures = figures.toList(),
             gridState = gridState,
             onItemClick = { 0 },
-            reverseLayout = gameMode == GameMode.DROP
+            reverseLayout = false
         )
         LaunchedEffect(key1 = true) {
             coroutineScope.launch {
