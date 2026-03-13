@@ -76,7 +76,7 @@ class FlowGameEngine(
             val missedItemsCount = getMissedItemsCount(startIndex, endIndex)
             repeat(missedItemsCount) {
                 itemsPassedWithoutMissing = 0
-                if (currentData.coefficient > 1f) {
+                if (_gameData.value.coefficient > 1f) {
                     decreaseCoefficient()
                 } else {
                     decreaseLifeCount()

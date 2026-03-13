@@ -22,7 +22,7 @@ class FlashGameEngine(
     private val clickedSuitableCells = mutableSetOf<Int>()
 
     override fun initGame(gameParams: GameParams) {
-        this.gameParams = gameParams
+        super.initGame(gameParams)
         itemsPassedWithoutMissing = 0
         stopTimeTracking()
         clickedSuitableCells.clear()
@@ -160,19 +160,21 @@ class FlashGameEngine(
     }
 
     private fun handleCorrectTap(figure: Figure, index: Int) {
+        itemsPassedWithoutMissing++
+
         val pointsAdded = calculatePoints()
-        
+
         _gameData.update { current ->
             val updatedFigures = current.figures.toMutableList()
             updatedFigures[index] = figure.copy(pointsReceived = pointsAdded)
+            val newCoefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
             current.copy(
                 figures = updatedFigures,
                 score = current.score + pointsAdded,
-                coefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
+                coefficient = newCoefficient
             )
         }
 
-        itemsPassedWithoutMissing++
         gameParams?.let { params ->
             if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
                 increaseLifeCount()

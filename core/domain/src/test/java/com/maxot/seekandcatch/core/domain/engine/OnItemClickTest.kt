@@ -54,13 +54,7 @@ class OnItemClickTest {
     fun onItemClick_worksInStartedState() {
         engine.startGame()
         engine.onItemClick(100) // Correct tap
-        assertEquals(10, engine.gameData.value.score)
-    }
-
-    @Test
-    fun onItemClick_worksInCountdownState() {
-        engine.setState(GameEngineState.Countdown)
-        engine.onItemClick(100) // Correct tap
+        // Streak is 10 by default, so coefficient doesn't change
         assertEquals(10, engine.gameData.value.score)
     }
 

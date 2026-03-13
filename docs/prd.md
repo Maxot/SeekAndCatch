@@ -88,7 +88,7 @@ If health reaches zero → Game Over
 6.6 Health System
 Starting health depends on difficulty
 Health is only reduced by missed right items, never by wrong taps
-Health can be recovered by passing a defined number of items without misses (Flow mode only)
+Health can be recovered by passing a defined number of items without misses
 When health reaches zero → Game Over
 
 7. Difficulty Rules

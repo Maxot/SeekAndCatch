@@ -121,21 +121,23 @@ abstract class BaseGameEngine(
     }
 
     protected open fun handleCorrectTap(figure: Figure) {
+        itemsPassedWithoutMissing++
+
         val pointsAdded = calculatePoints()
-        
+
         // Update figure state
         _gameData.update { current ->
             val updatedFigures = current.figures.map {
                 if (it.id == figure.id) it.copy(isActive = false, pointsReceived = pointsAdded) else it
             }
+            val newCoefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
             current.copy(
                 figures = updatedFigures,
                 score = current.score + pointsAdded,
-                coefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
+                coefficient = newCoefficient
             )
         }
 
-        itemsPassedWithoutMissing++
         gameParams?.let { params ->
             if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
                 increaseLifeCount()
@@ -163,7 +165,7 @@ abstract class BaseGameEngine(
     protected fun decreaseLifeCount() {
         _gameData.update {
             val newLifeCount = it.lifeCount - 1
-            if (newLifeCount < 0) {
+            if (newLifeCount == 0) {
                 finishGame()
             }
             it.copy(lifeCount = newLifeCount)
@@ -172,7 +174,7 @@ abstract class BaseGameEngine(
 
     protected fun decreaseCoefficient() {
         _gameData.update {
-            val newCoef = if (it.coefficient > 1f) (it.coefficient / 2f).coerceAtLeast(1f) else 1f
+            val newCoef = (it.coefficient / 2f).coerceAtLeast(1f)
             it.copy(coefficient = newCoef)
         }
     }

@@ -1,5 +1,5 @@
 Technical Specification v1.2
-Date: 2026-01-26
+Date: 26.01.2026
 Status: Active / Source of Truth
 Derived from: Codebase + PRD + Jira Tickets
 
@@ -97,8 +97,7 @@ This section overrides existing inconsistent behavior
 - Influences speed(scroll for flow, set changes for flash)
 
 7.2 Increase Logic
-- Increased by correct tap streak
-- Streak threshold depends on difficulty
+- Increased by correct tap
 - Increment value configurable (coefficientStep)
 
 7.3 Decrease Logic
