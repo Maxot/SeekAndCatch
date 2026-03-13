@@ -1,5 +1,10 @@
 package com.maxot.seekandcatch.feature.gameplay.ui
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,9 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -36,6 +43,12 @@ fun GameResultScreen(
     onRestart: (com.maxot.seekandcatch.core.common.model.GameMode) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.isNewBest) {
+        if (uiState.isNewBest && !uiState.hasPlayedNewBestSound) {
+            viewModel.onEvent(GameResultEvent.NewBestSoundPlayed)
+        }
+    }
 
     GameResultScreenBody(
         uiState = uiState,
@@ -78,13 +91,23 @@ private fun GameResultScreenBody(
             verticalArrangement = Arrangement.Center
         ) {
             if (uiState.isNewBest) {
+                val infiniteTransition = rememberInfiniteTransition(label = "scale")
+                val scale by infiniteTransition.animateFloat(
+                    initialValue = 1f,
+                    targetValue = 1.1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(500),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "scale"
+                )
                 Column(
                     modifier = Modifier,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        modifier = Modifier,
-                        text = "New best!",
+                        modifier = Modifier.scale(scale),
+                        text = "NEW RECORD!",
                         style = MaterialTheme.typography.displayLarge,
                         color = MaterialTheme.colorScheme.error
                     )

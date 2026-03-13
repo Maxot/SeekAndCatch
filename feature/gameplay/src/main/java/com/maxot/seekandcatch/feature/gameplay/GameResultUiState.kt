@@ -11,7 +11,6 @@ data class GameResultUiState(
     val isProcessing: Boolean = false,
     val gameMode: GameMode? = null,
     val gameDifficulty: GameDifficulty? = null,
-) {
-    // New best is determined against remote leaderboard for current mode & difficulty
-    val isNewBest: Boolean get() = lastScore > remoteBestForContext
-}
+    val hasPlayedNewBestSound: Boolean = false,
+    val isNewBest: Boolean = false,
+)
