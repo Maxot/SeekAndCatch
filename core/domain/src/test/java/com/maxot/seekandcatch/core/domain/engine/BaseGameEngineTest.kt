@@ -88,13 +88,18 @@ class BaseGameEngineTest {
     }
 
     @Test
-    fun correctTap_increasesScoreAndCoefficient() {
+    fun correctTap_increasesScoreAndCoefficientOnEveryTap() {
         engine.startGame()
         engine.onItemClick(0) // 0 is CIRCLE, which matches testGoal
         
-        val data = engine.gameData.value
-        assertEquals(10, data.score)
-        assertEquals(1.5f, data.coefficient, 0.01f)
+        val data1 = engine.gameData.value
+        assertEquals(10, data1.score)
+        assertEquals(1.5f, data1.coefficient, 0.01f) // Increased by 0.5 on first tap
+
+        engine.onItemClick(1)
+        val data2 = engine.gameData.value
+        assertEquals(25, data2.score) // 10 + (10 * 1.5) = 25
+        assertEquals(2.0f, data2.coefficient, 0.01f) // Increased by another 0.5
     }
 
     @Test
@@ -113,10 +118,9 @@ class BaseGameEngineTest {
 
     @Test
     fun lifeReachesZero_finishesGame() {
-        engine.triggerDecreaseLife()
-        engine.triggerDecreaseLife()
-        engine.triggerDecreaseLife()
-        engine.triggerDecreaseLife()
+        engine.triggerDecreaseLife() // 3 -> 2
+        engine.triggerDecreaseLife() // 2 -> 1
+        engine.triggerDecreaseLife() // 1 -> 0, finishes
         
         assertTrue(engine.gameState.value is GameEngineState.Finished)
     }
@@ -124,11 +128,10 @@ class BaseGameEngineTest {
     @Test
     fun decreaseCoefficient_halvesAndClampsAtOne() {
         engine.startGame()
-        engine.onItemClick(0)
-        engine.onItemClick(1) // Coef should be 1.0 + 0.5 + 0.5 = 2.0f
-        assertEquals(2.0f, engine.gameData.value.coefficient, 0.01f)
+        engine.onItemClick(0) // coef becomes 1.5f
+        assertEquals(1.5f, engine.gameData.value.coefficient, 0.01f)
         
-        engine.triggerDecreaseCoef() // halves to 1.0f
+        engine.triggerDecreaseCoef() // halves 1.5f to 0.75f, clamped at 1.0f
         assertEquals(1f, engine.gameData.value.coefficient, 0.01f)
     }
 
