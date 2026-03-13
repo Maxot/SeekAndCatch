@@ -26,4 +26,5 @@ data class GameEngineData(
     val visibleCells: Set<Int> = emptySet(),
     val flashMillis: Long = 1200L,
     val spawnPeriodMillis: Long = 900L,
+    val isReverseScrolling: Boolean = false,
 )

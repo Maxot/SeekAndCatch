@@ -66,7 +66,7 @@ private fun LeaderBoardScreenContent(
     onSelectMode: (GameMode?) -> Unit = {},
     onSelectDifficulty: (GameDifficulty?) -> Unit = {},
 ) {
-    val modes: List<GameMode?> = listOf<GameMode?>(null) + GameMode.entries
+    val modes: List<GameMode?> = listOf<GameMode?>(null) + GameMode.entries.filter { it != GameMode.DROP }
     val difficulties: List<GameDifficulty?> = listOf<GameDifficulty?>(null) + GameDifficulty.entries
 
     val pagerState = rememberPagerState(pageCount = { modes.size })

@@ -228,7 +228,7 @@ private fun FlowGameScreenContent(
                         )
                     },
                     onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
-                    reverseLayout = gameMode != GameMode.FLOW
+                    reverseLayout = flowGameUiState.isReverseScrolling
                 )
             }
         }
@@ -246,8 +246,13 @@ private fun FlowGameScreenContent(
                     flowGameUiState.pixelsToScroll + with(density) {
                         spacerHeight.toPx()
                     }
+                val scrollValue = if (flowGameUiState.isReverseScrolling) {
+                    -pixelsToScrollWithSpacers
+                } else {
+                    pixelsToScrollWithSpacers
+                }
                 gridState.animateScrollBy(
-                    value = pixelsToScrollWithSpacers,
+                    value = scrollValue,
                     animationSpec = tween(
                         durationMillis = flowGameUiState.scrollDuration,
                         easing = LinearEasing

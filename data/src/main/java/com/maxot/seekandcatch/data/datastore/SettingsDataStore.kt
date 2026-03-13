@@ -59,7 +59,11 @@ class SettingsDataStore
     val gameModeFlow: Flow<GameMode> = dataStore.data.map { preferences ->
         val enumName = preferences[gameModeKey]
         enumName?.let {
-            GameMode.valueOf(it)
+            try {
+                GameMode.valueOf(it)
+            } catch (e: IllegalArgumentException) {
+                GameMode.FLOW
+            }
         } ?: GameMode.FLOW
     }
 

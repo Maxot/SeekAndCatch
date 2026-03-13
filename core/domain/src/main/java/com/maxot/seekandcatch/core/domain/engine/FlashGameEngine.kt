@@ -117,9 +117,10 @@ class FlashGameEngine(
 
     private fun handleMissedItems(visibleIndices: Set<Int>) {
         val current = _gameData.value
+        val figures = current.figures
         var missedCount = 0
         visibleIndices.forEach { index ->
-            val figure = current.figures.getOrNull(index)
+            val figure = figures.getOrNull(index)
             if (figure != null && isItemFitForGoals(current.goals, figure) && !clickedSuitableCells.contains(index)) {
                 missedCount++
             }
@@ -144,11 +145,12 @@ class FlashGameEngine(
         if (_gameState.value !is GameEngineState.Started) return
 
         val currentData = _gameData.value
+        val figures = currentData.figures
         // In Flash mode, itemId is actually the index in the grid/figures list
         val index = itemId 
         if (index !in currentData.visibleCells) return
 
-        val figure = currentData.figures.getOrNull(index) ?: return
+        val figure = figures.getOrNull(index) ?: return
         
         if (isItemFitForGoals(currentData.goals, figure)) {
             clickedSuitableCells.add(index)

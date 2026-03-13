@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class FlowGameEngine(
     coroutineScope: CoroutineScope,
@@ -22,6 +23,7 @@ class FlowGameEngine(
     override fun initGame(gameParams: GameParams) {
         super.initGame(gameParams)
         firstVisibleItemIndex = 0
+        _gameData.update { it.copy(isReverseScrolling = Random.nextBoolean()) }
     }
 
     override fun setFirstVisibleItemIndex(index: Int) {
@@ -87,10 +89,11 @@ class FlowGameEngine(
 
     private fun getMissedItemsCount(startIndex: Int, endIndex: Int): Int {
         val data = _gameData.value
+        val figures = data.figures
         var count = 0
-        if (startIndex < 0 || endIndex >= data.figures.size) return 0
+        if (startIndex < 0 || endIndex >= figures.size) return 0
         for (i in startIndex..endIndex) {
-            val item = data.figures[i]
+            val item = figures[i]
             if (isItemFitForGoals(data.goals, item) && item.isActive) {
                 count++
             }

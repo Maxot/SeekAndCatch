@@ -24,4 +24,5 @@ data class FlowGameData(
     val scrollDuration: Int = 0,
     val pixelsToScroll: Float = 0f,
     val rowWidth: Int = 4,
+    val isReverseScrolling: Boolean = false,
 )
