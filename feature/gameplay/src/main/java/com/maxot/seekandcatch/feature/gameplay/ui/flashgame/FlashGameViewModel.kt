@@ -2,17 +2,14 @@ package com.maxot.seekandcatch.feature.gameplay.ui.flashgame
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxot.seekandcatch.core.common.VisualFeedbackManager
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.domain.flash.FlashGameEvent
 import com.maxot.seekandcatch.core.domain.flash.FlashGameState
 import com.maxot.seekandcatch.core.domain.flash.FlashGameUseCase
-import com.maxot.seekandcatch.core.media.MusicManager
-import com.maxot.seekandcatch.core.media.MusicType
-import com.maxot.seekandcatch.core.media.SoundManager
-import com.maxot.seekandcatch.core.media.SoundType
-import com.maxot.seekandcatch.core.common.model.GameDifficulty
-import com.maxot.seekandcatch.core.common.model.GameMode
+import com.maxot.seekandcatch.core.media.AudioManager
 import com.maxot.seekandcatch.data.repository.SettingsRepository
-import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiState
 import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,10 +25,9 @@ import javax.inject.Inject
 class FlashGameViewModel @Inject constructor(
     private val gameUseCase: FlashGameUseCase,
     private val settingsRepository: SettingsRepository,
-    private val musicManager: MusicManager,
     private val vibrationManager: VibrationManager,
     private val visualFeedbackManager: VisualFeedbackManager,
-    private val soundManager: SoundManager,
+    private val audioManager: AudioManager,
 ) : ViewModel() {
 
     private val selectedGameDifficulty: StateFlow<GameDifficulty?> =
@@ -138,8 +134,7 @@ class FlashGameViewModel @Inject constructor(
             selectedGameDifficulty.collect { diff ->
                 diff?.let {
                     _uiState.update { it.copy(isFinished = false) }
-                    soundManager.playSound(SoundType.COUNTDOWN)
-                    musicManager.stopMusic()
+                    audioManager.onGameStart()
                     gameUseCase.initGame(it.gameParams)
                     return@collect
                 }
@@ -148,35 +143,38 @@ class FlashGameViewModel @Inject constructor(
     }
 
     fun startGame() {
-        musicManager.play(MusicType.GAME)
+        audioManager.onGameplayStarted()
         gameUseCase.onEvent(FlashGameEvent.StartGame)
     }
 
     fun pauseGame() {
         gameUseCase.onEvent(FlashGameEvent.PauseGame)
-        musicManager.pauseMusic()
+        audioManager.onGamePaused()
     }
 
     fun resumeGame() {
         gameUseCase.onEvent(FlashGameEvent.ResumeGame)
-        musicManager.resumeMusic()
+        audioManager.onGameResumed()
     }
 
     fun finishGame() {
-        soundManager.playSound(SoundType.GAME_OVER)
-        musicManager.stopMusic()
+        audioManager.onGameOver()
         gameUseCase.onEvent(FlashGameEvent.FinishGame)
     }
 
     private fun processLifeCountChanges(lifeCount: Int) {
-        if (lastLifeCount > lifeCount)
+        if (lastLifeCount > lifeCount) {
             updateLifeWastedValue()
+            audioManager.onMiss()
+        }
         lastLifeCount = lifeCount
     }
 
     private fun processCoefficientChanges(coefficient: Float) {
-        if (lastCoefficient > coefficient)
+        if (lastCoefficient > coefficient) {
             updateLifeWastedValue()
+            audioManager.onMiss()
+        }
         lastCoefficient = coefficient
     }
 
@@ -189,7 +187,12 @@ class FlashGameViewModel @Inject constructor(
     }
 
     fun onCellClick(id: Int) {
-        soundManager.playSound(SoundType.FIGURE_CLICK)
+        audioManager.onCorrectTap()
         gameUseCase.onEvent(FlashGameEvent.OnCellClick(id))
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        audioManager.release()
     }
 }

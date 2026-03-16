@@ -10,7 +10,7 @@ import com.maxot.seekandcatch.data.repository.AuthRepository
 import com.maxot.seekandcatch.data.repository.LeaderboardRepository
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.gameplay.navigation.SCORE_ARG
-import com.maxot.seekandcatch.core.media.SoundManager
+import com.maxot.seekandcatch.core.media.AudioManager
 import com.maxot.seekandcatch.core.media.SoundType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +29,7 @@ class GameResultViewModel
     private val leaderboardRepository: LeaderboardRepository,
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
-    private val soundManager: SoundManager,
+    private val audioManager: AudioManager,
 ) : ViewModel() {
 
     private val score: Int = checkNotNull(savedStateHandle[SCORE_ARG])
@@ -43,6 +43,9 @@ class GameResultViewModel
     val uiState: StateFlow<GameResultUiState> = _uiState
 
     init {
+        // Explicitly stop any playing music on initialization of result screen
+        audioManager.stopMusic()
+
         // Observe game mode and difficulty for restarting with same settings
         viewModelScope.launch {
             combine(
@@ -96,7 +99,7 @@ class GameResultViewModel
 
     private fun handleNewBestSoundPlayed() {
         if (!_uiState.value.hasPlayedNewBestSound && _uiState.value.isNewBest) {
-            soundManager.playSound(SoundType.NEW_BEST_SCORE)
+            audioManager.playSound(SoundType.NEW_BEST_SCORE)
             _uiState.update { it.copy(hasPlayedNewBestSound = true) }
         }
     }

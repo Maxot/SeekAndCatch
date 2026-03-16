@@ -2,7 +2,7 @@ package com.maxot.seekandcatch.feature.gameplay.gameselection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.core.media.SoundManager
+import com.maxot.seekandcatch.core.media.AudioManager
 import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.core.common.model.GameMode
@@ -21,7 +21,7 @@ import javax.inject.Inject
 class GameSelectionViewModel
 @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val soundManager: SoundManager
+    private val audioManager: AudioManager
 ) : ViewModel() {
     private val selectedGameDifficulty: StateFlow<GameDifficulty> =
         settingsRepository.observeDifficulty().stateIn(
@@ -71,14 +71,14 @@ class GameSelectionViewModel
     private fun setSelectedDifficulty(gameDifficulty: GameDifficulty) {
         viewModelScope.launch {
             settingsRepository.setDifficulty(gameDifficulty)
-            soundManager.playSound(SoundType.BUTTON_CLICK)
+            audioManager.onButtonClick()
         }
     }
 
     private fun setSelectedGameMode(gameMode: GameMode) {
         viewModelScope.launch {
             settingsRepository.setGameMode(gameMode)
-            soundManager.playSound(SoundType.BUTTON_CLICK)
+            audioManager.onButtonClick()
         }
     }
 }

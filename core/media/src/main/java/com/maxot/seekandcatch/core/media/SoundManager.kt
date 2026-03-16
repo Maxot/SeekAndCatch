@@ -15,7 +15,9 @@ enum class SoundType(val resId: Int) {
     FIGURE_CLICK(R.raw.figure_click),
     BUTTON_CLICK(R.raw.button_click),
     COUNTDOWN(R.raw.bit_countdown),
-    GAME_OVER(R.raw.game_over)
+    GAME_OVER(R.raw.game_over),
+    NEW_BEST_SCORE(R.raw.new_best_score), // Using countdown as placeholder
+    MISS(R.raw.miss) // Using game over as placeholder for now, since we don't have a specific miss sound
 }
 
 @Singleton
