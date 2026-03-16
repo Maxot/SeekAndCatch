@@ -32,8 +32,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.core.designsystem.R
-import com.maxot.seekandcatch.core.media.SoundType
-import com.maxot.seekandcatch.core.media.di.rememberSoundManager
+import com.maxot.seekandcatch.core.media.di.rememberAudioManager
 import com.maxot.seekandcatch.feature.settings.ui.SettingsDialog
 import com.maxot.seekandcatch.navigation.SeekCatchNavHost
 import com.maxot.seekandcatch.navigation.TopLevelDestination
@@ -48,7 +47,7 @@ fun SeekAndCatchApp(
         mutableStateOf(false)
     }
 
-    val soundManager = rememberSoundManager()
+    val audioManager = rememberAudioManager()
     val isLifeWasted by visualFeedbackManager.isLifeWasted.collectAsStateWithLifecycle()
 
     val largeRadialGradient = object : ShaderBrush() {
@@ -85,7 +84,7 @@ fun SeekAndCatchApp(
                     SaCTopBar(
                         titleRes = it.titleTextId,
                         onActionClick = {
-                            soundManager.playSound(SoundType.BUTTON_CLICK)
+                            audioManager.onButtonClick()
                             showSettingsDialog = true
                         })
                 }

@@ -14,8 +14,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.compose.rememberNavController
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.media.MusicManager
-import com.maxot.seekandcatch.core.media.di.rememberMusicManager
+import com.maxot.seekandcatch.core.media.AudioManager
+import com.maxot.seekandcatch.core.media.di.rememberAudioManager
 import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.ui.SeekAndCatchApp
 import com.maxot.seekandcatch.ui.SeekAndCatchAppState
@@ -35,8 +35,8 @@ class MainActivity : AppCompatActivity() {
             val navController = rememberNavController()
             val coroutineScope = rememberCoroutineScope()
             val viewModel = hiltViewModel<MainViewModel>()
-            val musicManager = rememberMusicManager()
-            val appState = SeekAndCatchAppState(navController, coroutineScope, musicManager)
+            val audioManager = rememberAudioManager()
+            val appState = SeekAndCatchAppState(navController, coroutineScope, audioManager)
             val uiState = viewModel.uiState.collectAsState()
 
             SeekAndCatchTheme(darkTheme = isDarkTheme(uiState.value)) {
@@ -64,17 +64,17 @@ private fun isDarkTheme(uiState: MainActivityUiState): Boolean =
     }
 
 class MusicController @Inject constructor(
-    private val musicManager: MusicManager
+    private val audioManager: AudioManager
 ) : DefaultLifecycleObserver {
     override fun onPause(owner: LifecycleOwner) {
-        musicManager.pauseMusic()
+        audioManager.pauseMusic()
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        musicManager.resumeMusic()
+        audioManager.resumeMusic()
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        musicManager.stopMusic()
+        audioManager.stopMusic()
     }
 }

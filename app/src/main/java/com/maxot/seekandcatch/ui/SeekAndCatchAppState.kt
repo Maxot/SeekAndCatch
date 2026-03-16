@@ -8,7 +8,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navOptions
-import com.maxot.seekandcatch.core.media.MusicManager
+import com.maxot.seekandcatch.core.media.AudioManager
 import com.maxot.seekandcatch.core.media.MusicType
 import com.maxot.seekandcatch.feature.account.navigation.ACCOUNT_ROUTE
 import com.maxot.seekandcatch.feature.account.navigation.navigateToAccount
@@ -25,7 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 class SeekAndCatchAppState(
     val navController: NavHostController,
     val coroutineScope: CoroutineScope,
-    val musicManager: MusicManager
+    val audioManager: AudioManager
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController
@@ -42,10 +42,8 @@ class SeekAndCatchAppState(
         @Composable get() = currentDestination.isTopLevelDestination()
 
     fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
-        // Play menu music when navigating to a top-level destination, only if not already playing
-        if (musicManager.currentMusicType != MusicType.MENU) {
-            musicManager.play(MusicType.MENU)
-        }
+        // Play menu music when navigating to a top-level destination
+        audioManager.playMusic(MusicType.MENU)
         val topLevelNavOptions = navOptions {
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
@@ -74,9 +72,7 @@ class SeekAndCatchAppState(
         val destination = currentDestination
         androidx.compose.runtime.LaunchedEffect(destination) {
             getMusicTypeForRoute(destination?.route)?.let { musicType ->
-                if (musicManager.currentMusicType != musicType) {
-                    musicManager.play(musicType)
-                }
+                audioManager.playMusic(musicType)
             }
         }
     }
@@ -84,7 +80,6 @@ class SeekAndCatchAppState(
     private fun getMusicTypeForRoute(route: String?): MusicType? {
         return when (route) {
             GAME_SELECTION_ROUTE, LEADERBOARD_ROUTE, ACCOUNT_ROUTE -> MusicType.MENU
-            FLOW_GAME_ROUTE, FLASH_GAME_ROUTE -> MusicType.GAME
             else -> null
         }
     }

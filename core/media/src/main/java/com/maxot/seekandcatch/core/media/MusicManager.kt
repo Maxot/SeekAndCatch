@@ -34,23 +34,24 @@ class MusicManager
 
     private fun initializePlayer(musicType: MusicType) {
         scope.launch {
-            val isMusicEnabled = settingsProvider.isMusicEnabled()
-            if (isMusicEnabled) {
-                mediaPlayer = MediaPlayer.create(context, musicType.resId).apply {
+            if (settingsProvider.isMusicEnabled()) {
+                _currentMusicType = musicType
+                mediaPlayer = MediaPlayer.create(context, musicType.resId)?.apply {
                     isLooping = true
                     start()
                 }
-                _currentMusicType = musicType
             }
         }
     }
 
     fun play(musicType: MusicType) {
-        mediaPlayer?.let {
-            it.stop()
-            it.release()
+        if (_currentMusicType == musicType) {
+            mediaPlayer?.let {
+                if (!it.isPlaying) it.start()
+                return
+            }
         }
-        mediaPlayer = null
+        stopMusic()
         initializePlayer(musicType)
     }
 

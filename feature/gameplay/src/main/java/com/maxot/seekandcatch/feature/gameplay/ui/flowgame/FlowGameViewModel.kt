@@ -2,17 +2,14 @@ package com.maxot.seekandcatch.feature.gameplay.ui.flowgame
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.core.domain.flow.FlowGameUseCase
-import com.maxot.seekandcatch.core.domain.flow.FlowGameEvent
-import com.maxot.seekandcatch.core.domain.flow.FlowGameState
-import com.maxot.seekandcatch.core.media.MusicManager
-import com.maxot.seekandcatch.core.media.MusicType
-import com.maxot.seekandcatch.core.media.SoundManager
-import com.maxot.seekandcatch.core.media.SoundType
+import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.core.common.model.GameMode
+import com.maxot.seekandcatch.core.domain.flow.FlowGameEvent
+import com.maxot.seekandcatch.core.domain.flow.FlowGameState
+import com.maxot.seekandcatch.core.domain.flow.FlowGameUseCase
+import com.maxot.seekandcatch.core.media.AudioManager
 import com.maxot.seekandcatch.data.repository.SettingsRepository
-import com.maxot.seekandcatch.core.common.VisualFeedbackManager
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
 import com.maxot.seekandcatch.feature.settings.VibrationManager
@@ -31,10 +28,9 @@ class FlowGameViewModel
 @Inject constructor(
     private val gameUseCase: FlowGameUseCase,
     private val settingsRepository: SettingsRepository,
-    private val musicManager: MusicManager,
     private val vibrationManager: VibrationManager,
     private val visualFeedbackManager: VisualFeedbackManager,
-    private val soundManager: SoundManager,
+    private val audioManager: AudioManager
 ) : ViewModel() {
     private var lastLifeCount: Int = 0
     private var lastCoefficient: Float = 0f
@@ -193,14 +189,18 @@ class FlowGameViewModel
     }
 
     private fun processLifeCountChanges(lifeCount: Int) {
-        if (lastLifeCount > lifeCount)
+        if (lastLifeCount > lifeCount) {
             updateLifeWastedValue()
+            audioManager.onMiss()
+        }
         lastLifeCount = lifeCount
     }
 
     private fun processCoefficientChanges(coefficient: Float) {
-        if (lastCoefficient > coefficient)
+        if (lastCoefficient > coefficient) {
             updateLifeWastedValue()
+            audioManager.onMiss()
+        }
         lastCoefficient = coefficient
     }
 
@@ -215,39 +215,37 @@ class FlowGameViewModel
 
     private fun initGame(gameDifficulty: GameDifficulty) {
         _flowGameUiState.update { it.copy(isFinished = false) }
-        soundManager.playSound(SoundType.COUNTDOWN)
-        musicManager.stopMusic()
+        audioManager.onGameStart()
         gameUseCase.initGame(gameDifficulty.gameParams)
     }
 
     fun startGame() {
-        musicManager.play(MusicType.GAME)
+        audioManager.onGameplayStarted()
         gameUseCase.onEvent(FlowGameEvent.StartGame)
     }
 
     fun pauseGame() {
         if (readyToStart.value) {
-            musicManager.pauseMusic()
+            audioManager.onGamePaused()
             gameUseCase.onEvent(FlowGameEvent.PauseGame)
         }
     }
 
     fun resumeGame() {
         if (readyToStart.value) {
-            musicManager.resumeMusic()
+            audioManager.onGameResumed()
             gameUseCase.onEvent(FlowGameEvent.ResumeGame)
         }
     }
 
     fun finishGame() {
-        soundManager.playSound(SoundType.GAME_OVER)
-        musicManager.stopMusic()
+        audioManager.onGameOver()
         gameUseCase.onEvent(FlowGameEvent.FinishGame)
     }
 
     private fun onItemClick(id: Int) {
         viewModelScope.launch {
-            soundManager.playSound(SoundType.FIGURE_CLICK)
+            audioManager.onCorrectTap()
             gameUseCase.onEvent(FlowGameEvent.OnItemClick(id))
         }
     }
@@ -261,6 +259,6 @@ class FlowGameViewModel
 
     override fun onCleared() {
         super.onCleared()
-        musicManager.releaseMusic()
+        audioManager.release()
     }
 }
