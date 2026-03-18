@@ -186,7 +186,7 @@ data class ScaleParams(
     val scale2: Float = 0.8f,
 )
 
-fun calculateScale(
+private fun calculateScale(
     scaleParams: ScaleParams,
     currentOffset: Float
 ): Float {
@@ -206,7 +206,7 @@ fun calculateScale(
 
 @Preview
 @Composable
-fun <T> SingleSelectionLazyRowPreview() {
+private fun <T> SingleSelectionLazyRowPreview() {
     SingleSelectionLazyRow(
         modifier = Modifier.fillMaxSize(),
         items = listOf("a", "b", "c"),

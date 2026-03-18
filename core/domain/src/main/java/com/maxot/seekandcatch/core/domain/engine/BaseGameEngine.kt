@@ -7,7 +7,6 @@ import com.maxot.seekandcatch.data.model.isFitForGoal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 import com.maxot.seekandcatch.data.repository.GoalsRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,11 +31,14 @@ abstract class BaseGameEngine(
     protected var timeJob: Job? = null
 
     protected var itemsPassedWithoutMissing = 0
+    protected var lastGoalRotationTime = 0L
 
     override fun initGame(gameParams: GameParams) {
         this.gameParams = gameParams
         itemsPassedWithoutMissing = 0
+        lastGoalRotationTime = 0L
         stopTimeTracking()
+        _gameData.value = GameEngineData()
         _gameState.value = GameEngineState.Idle
         coroutineScope.launch {
             val goal = goalsRepository.getRandomGoal()
@@ -103,7 +105,27 @@ abstract class BaseGameEngine(
     }
 
     protected open fun onTimeTick() {
-        // Can be overridden by subclasses
+        val interval = gameParams?.goalRotationIntervalMillis ?: 0L
+        if (interval > 0) {
+            val currentTime = _gameData.value.gameDuration
+            if (currentTime - lastGoalRotationTime >= interval) {
+//                rotateGoal()
+                lastGoalRotationTime = currentTime
+            }
+        }
+    }
+
+    protected fun rotateGoal() {
+        coroutineScope.launch {
+            val newGoal = goalsRepository.getRandomGoal()
+            val newGoalSuitableFigures = figuresRepository.getFigureSuitableForGoal(newGoal)
+            _gameData.update { current ->
+                current.copy(
+                    goals = setOf(newGoal),
+                    goalSuitableFigures = newGoalSuitableFigures
+                )
+            }
+        }
     }
 
     override fun onItemClick(itemId: Int) {
@@ -131,7 +153,15 @@ abstract class BaseGameEngine(
             val updatedFigures = current.figures.map {
                 if (it.id == figure.id) it.copy(isActive = false, pointsReceived = pointsAdded) else it
             }
+            
+            // Streak-based coefficient increase: every 1 correct taps
+//            val newCoefficient = if (itemsPassedWithoutMissing % 5 == 0) {
+//                current.coefficient + (gameParams?.coefficientStep ?: 0f)
+//            } else {
+//                current.coefficient
+//            }
             val newCoefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
+            
             current.copy(
                 figures = updatedFigures,
                 score = current.score + pointsAdded,
@@ -142,7 +172,9 @@ abstract class BaseGameEngine(
         gameParams?.let { params ->
             if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
                 increaseLifeCount()
-                itemsPassedWithoutMissing = 0
+                // Do NOT reset itemsPassedWithoutMissing here if it's used for coefficient too, 
+                // or use a separate counter. Tech spec says "streak of correct taps".
+                // Let's assume the life recovery also works on the same streak.
             }
         }
     }
@@ -166,10 +198,10 @@ abstract class BaseGameEngine(
     protected fun decreaseLifeCount() {
         _gameData.update {
             val newLifeCount = it.lifeCount - 1
-            if (newLifeCount == 0) {
+            if (newLifeCount <= 0) {
                 finishGame()
             }
-            it.copy(lifeCount = newLifeCount)
+            it.copy(lifeCount = newLifeCount.coerceAtLeast(0))
         }
     }
 

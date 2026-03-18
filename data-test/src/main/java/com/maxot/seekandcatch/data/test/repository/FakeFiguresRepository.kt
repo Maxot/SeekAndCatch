@@ -30,4 +30,12 @@ class FakeFiguresRepository() : FiguresRepository {
     fun setRandomFigures(figures: List<Figure>) {
         randomFigures = figures
     }
+
+    override fun getFigureSuitableForGoal(goal: Goal<Any>): Set<Figure> {
+        return emptySet()
+    }
+
+    override fun getFigureUnsuitableForGoal(goal: Goal<Any>): Set<Figure> {
+        return emptySet()
+    }
 }
