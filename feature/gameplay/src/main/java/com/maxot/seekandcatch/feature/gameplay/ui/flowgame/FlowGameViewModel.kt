@@ -147,6 +147,7 @@ class FlowGameViewModel
                     }
 
                     is FlowGameState.Finished -> {
+                        audioManager.onGameOver()
                         _flowGameUiState.update {
                             it.copy(
                                 isReady = false,
@@ -214,7 +215,7 @@ class FlowGameViewModel
 
 
     private fun initGame(gameDifficulty: GameDifficulty) {
-        _flowGameUiState.update { it.copy(isFinished = false) }
+        _flowGameUiState.update { it.copy(isFinished = false, score = 0) }
         audioManager.onGameStart()
         gameUseCase.initGame(gameDifficulty.gameParams)
     }
