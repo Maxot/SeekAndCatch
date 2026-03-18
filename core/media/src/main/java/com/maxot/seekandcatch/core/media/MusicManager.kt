@@ -60,8 +60,16 @@ class MusicManager
     }
 
     fun stopMusic() {
-        mediaPlayer?.takeIf { it.isPlaying }?.stop()
         _currentMusicType = null
+        mediaPlayer?.let {
+            try {
+                if (it.isPlaying) it.stop()
+            } catch (e: Exception) {
+                // Ignore
+            }
+            it.release()
+        }
+        mediaPlayer = null
     }
 
     fun resumeMusic() {

@@ -7,10 +7,16 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class FigureRepositoryImplTest {
 
-    private val repository = FiguresRepositoryImpl()
+    private val colorsRepository: ColorsRepository = mock {
+        on { selectedColors }.thenReturn(flowOf(setOf(androidx.compose.ui.graphics.Color.Red)))
+    }
+    private val testScope = TestScope()
+
+    private val repository = FiguresRepositoryImpl(colorsRepository, testScope)
 
     private val goal = Goal.Shaped(Figure.FigureType.SQUARE)
 
