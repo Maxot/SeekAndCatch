@@ -41,11 +41,10 @@ Derived from: Codebase + PRD + Jira Tickets
     - Result snapshot created
 
 4. Goal System
-- Goal is generated once per session
-- Goal types:
+- Goal type:
     - Color-based (e.g. all red)
     - Shape-based (e.g. all triangles)
-- Goals never rotate or change mid-game
+- Goal changes after a fixed level duration (defined in GameParams)
 - Goal conflicts are forbidden by generator
 
 5. Grid & Item Rules
