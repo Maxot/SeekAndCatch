@@ -49,9 +49,13 @@ class SoundManager @Inject constructor(
     fun playSound(soundType: SoundType) {
         CoroutineScope(Dispatchers.Default).launch {
             if (settingsProvider.isSoundEnabled()) {
-                soundMap[soundType]?.let { soundId ->
-                    soundPool.play(soundId, 0.25f, 0.25f, 1, 0, 1f)
-                } ?: run {
+                val soundId = soundMap[soundType]
+                if (soundId != null) {
+                    val streamId = soundPool.play(soundId, 0.25f, 0.25f, 1, 0, 1f)
+                    if (streamId == 0) {
+                        android.util.Log.w("SoundManager", "Failed to play sound: $soundType")
+                    }
+                } else {
                     android.util.Log.w("SoundManager", "Sound not loaded: $soundType")
                 }
             }
