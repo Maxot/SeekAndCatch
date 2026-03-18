@@ -134,6 +134,18 @@ private fun GameResultScreenBody(
                 )
                 Spacer(modifier = Modifier.height(20.dp))
             }
+            uiState.rank?.let { rank ->
+                Text(
+                    text = stringResource(
+                        id = R.string.feature_gameplay_label_rank,
+                        rank
+                    ),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+            }
             PixelButton(
                 onClick = { onRestart() },
             ) {

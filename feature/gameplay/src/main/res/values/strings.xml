@@ -31,4 +31,5 @@
     <string name="feature_gameplay_coefficient_title">Coefficient</string>
     <string name="feature_gameplay_loading">Loading…</string>
     <string name="feature_gameplay_press_to_start">Press to start</string>
+    <string name="feature_gameplay_label_rank">Leaderboard Rank: %1$d</string>
 </resources>
