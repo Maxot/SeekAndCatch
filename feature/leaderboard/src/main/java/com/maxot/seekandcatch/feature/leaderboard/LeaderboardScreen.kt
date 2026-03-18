@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Tab
@@ -45,7 +43,6 @@ import com.maxot.seekandcatch.core.designsystem.theme.bronze
 import com.maxot.seekandcatch.core.designsystem.theme.gold
 import com.maxot.seekandcatch.core.designsystem.theme.red
 import com.maxot.seekandcatch.core.designsystem.theme.silver
-import kotlinx.coroutines.launch
 
 @Composable
 fun LeaderBoardScreen(
@@ -69,28 +66,16 @@ private fun LeaderBoardScreenContent(
     val modes: List<GameMode?> = listOf<GameMode?>(null) + GameMode.entries.filter { it != GameMode.DROP }
     val difficulties: List<GameDifficulty?> = listOf<GameDifficulty?>(null) + GameDifficulty.entries
 
-    val pagerState = rememberPagerState(pageCount = { modes.size })
-    val coroutineScope = rememberCoroutineScope()
-
-    // Keep pager in sync with selectedMode from state
-    LaunchedEffect(leaderboardUiState) {
-        if (leaderboardUiState is LeaderboardUiState.Successful) {
-            val state = leaderboardUiState
-            val index = modes.indexOf(state.selectedMode).coerceAtLeast(0)
-            if (index != pagerState.currentPage) {
-                pagerState.scrollToPage(index)
-            }
-        }
-    }
-
     Column(modifier = Modifier.fillMaxSize()) {
+        val selectedMode = (leaderboardUiState as? LeaderboardUiState.Successful)?.selectedMode
+        val selectedIndex = modes.indexOf(selectedMode).coerceAtLeast(0)
+
         // Mode tabs
-        TabRow(selectedTabIndex = pagerState.currentPage) {
+        TabRow(selectedTabIndex = selectedIndex) {
             modes.forEachIndexed { index, mode ->
                 Tab(
-                    selected = pagerState.currentPage == index,
+                    selected = selectedIndex == index,
                     onClick = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(index) }
                         onSelectMode(mode)
                     },
                     text = { Text(text = mode?.name ?: "ALL") }
@@ -119,14 +104,11 @@ private fun LeaderBoardScreenContent(
             }
         }
 
-        // Pager pages by mode
-        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
-            val mode = modes[page]
-            LaunchedEffect(mode) {
-                onSelectMode(mode)
-            }
-            LeaderBoardPageContent(leaderboardUiState = leaderboardUiState)
-        }
+        // Content
+        LeaderBoardPageContent(
+            leaderboardUiState = leaderboardUiState,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
