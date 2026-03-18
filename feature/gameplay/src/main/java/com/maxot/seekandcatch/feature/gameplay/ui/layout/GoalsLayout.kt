@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.maxot.seekandcatch.core.designsystem.theme.LocalColorblindMode
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
@@ -55,8 +56,25 @@ fun GoalsLayout(
                         Modifier
                             .size(50.dp)
                             .padding(4.dp)
-                            .background(goal.getGoal())
-                    )
+                            .background(goal.getGoal()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (LocalColorblindMode.current) {
+                            val colorCode = when (goal.getGoal()) {
+                                Color.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
+                                Color.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
+                                Color.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
+                                Color.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
+                                else -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_unknown)
+                            }
+                            Text(
+                                text = colorCode,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.Black,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                            )
+                        }
+                    }
                     Text(
                         text = "color",
                         style = textStyle

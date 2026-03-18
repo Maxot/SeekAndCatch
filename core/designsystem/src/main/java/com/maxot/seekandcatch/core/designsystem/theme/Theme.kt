@@ -249,8 +249,14 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+val LocalColorblindMode = androidx.compose.runtime.staticCompositionLocalOf { false }
+
 @Composable
-fun SeekAndCatchTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun SeekAndCatchTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    isColorblindModeEnabled: Boolean = false,
+    content: @Composable () -> Unit
+) {
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val colors = when {
 //        dynamicColor && darkTheme -> dynamicDarkColorScheme(LocalContext.current)
@@ -258,10 +264,12 @@ fun SeekAndCatchTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Comp
         darkTheme -> darkScheme
         else -> lightScheme
     }
-    MaterialTheme(
-        colorScheme = colors,
-        typography = appTypography,
-        shapes = Shapes,
-        content = content
-    )
+    androidx.compose.runtime.CompositionLocalProvider(LocalColorblindMode provides isColorblindModeEnabled) {
+        MaterialTheme(
+            colorScheme = colors,
+            typography = appTypography,
+            shapes = Shapes,
+            content = content
+        )
+    }
 }

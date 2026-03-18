@@ -30,7 +30,7 @@ class MainViewModel
 
     val uiState: StateFlow<MainActivityUiState> =
         settingsRepository.userConfig.map {
-            MainActivityUiState.Success(UserConfig(darkThemeConfig = it.darkThemeConfig))
+            MainActivityUiState.Success(it)
         }.stateIn(
             viewModelScope,
             started = SharingStarted.Lazily,

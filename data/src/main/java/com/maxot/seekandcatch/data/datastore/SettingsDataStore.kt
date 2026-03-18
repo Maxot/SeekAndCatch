@@ -31,6 +31,7 @@ class SettingsDataStore
     private val difficultyKey = stringPreferencesKey(SETTINGS_DIFFICULTY_KEY)
     private val gameModeKey = stringPreferencesKey(SETTINGS_GAME_MODE_KEY)
     private val darkThemeKey = booleanPreferencesKey(SETTINGS_DARK_THEME_KEY)
+    private val colorblindModeKey = booleanPreferencesKey(SETTINGS_COLORBLIND_MODE_KEY)
 
     val userConfig: Flow<UserConfig> = dataStore.data.map { preferences ->
         val isDarkTheme = preferences[darkThemeKey] ?: true
@@ -38,7 +39,11 @@ class SettingsDataStore
             true -> DarkThemeConfig.DARK
             false -> DarkThemeConfig.LIGHT
         }
-        UserConfig(darkThemeConfig = darkThemeConfig)
+        val isColorblindModeEnabled = preferences[colorblindModeKey] ?: false
+        UserConfig(
+            darkThemeConfig = darkThemeConfig,
+            isColorblindModeEnabled = isColorblindModeEnabled
+        )
     }
 
     val soundStateFlow: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -65,6 +70,10 @@ class SettingsDataStore
                 GameMode.FLOW
             }
         } ?: GameMode.FLOW
+    }
+
+    val colorblindModeFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[colorblindModeKey] ?: false
     }
 
     suspend fun setSoundState(newState: Boolean) {
@@ -103,6 +112,12 @@ class SettingsDataStore
         }
     }
 
+    suspend fun setColorblindModeEnabled(enabled: Boolean) {
+        dataStore.edit { settings ->
+            settings[colorblindModeKey] = enabled
+        }
+    }
+
 
     companion object {
         const val SETTINGS_DATA_STORE_NAME = "Settings"
@@ -112,5 +127,6 @@ class SettingsDataStore
         const val SETTINGS_DIFFICULTY_KEY = "Difficulty_key"
         const val SETTINGS_GAME_MODE_KEY = "Game_mode_key"
         const val SETTINGS_DARK_THEME_KEY = "Dark_theme_key"
+        const val SETTINGS_COLORBLIND_MODE_KEY = "Colorblind_mode_key"
     }
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.maxot.seekandcatch.core.designsystem.theme.LocalColorblindMode
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
@@ -146,6 +147,22 @@ fun ColoredFigureLayout(
                 Figure.FigureType.CIRCLE -> drawCircleFigure(sizePx, color)
                 Figure.FigureType.TRIANGLE -> drawTriangleFigure(sizePx, color)
             }
+        }
+
+        if (LocalColorblindMode.current) {
+            val colorCode = when (figure.color) {
+                Color.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
+                Color.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
+                Color.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
+                Color.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
+                else -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_unknown)
+            }
+            Text(
+                text = colorCode,
+                style = MaterialTheme.typography.headlineLarge,
+                color = Color.Black,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
         }
 
         if (figure.pointsReceived != null) {

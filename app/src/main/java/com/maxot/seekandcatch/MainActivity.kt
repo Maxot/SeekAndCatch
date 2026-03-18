@@ -39,7 +39,10 @@ class MainActivity : AppCompatActivity() {
             val appState = SeekAndCatchAppState(navController, coroutineScope, audioManager)
             val uiState = viewModel.uiState.collectAsState()
 
-            SeekAndCatchTheme(darkTheme = isDarkTheme(uiState.value)) {
+            SeekAndCatchTheme(
+                darkTheme = isDarkTheme(uiState.value),
+                isColorblindModeEnabled = isColorblindModeEnabled(uiState.value)
+            ) {
                 enableEdgeToEdge()
                 appState.ObserveMusicByDestination()
                 SeekAndCatchApp(
@@ -61,6 +64,13 @@ private fun isDarkTheme(uiState: MainActivityUiState): Boolean =
             DarkThemeConfig.LIGHT -> false
             DarkThemeConfig.DARK -> true
         }
+    }
+
+@Composable
+private fun isColorblindModeEnabled(uiState: MainActivityUiState): Boolean =
+    when (uiState) {
+        MainActivityUiState.Loading -> false
+        is MainActivityUiState.Success -> uiState.userConfig.isColorblindModeEnabled
     }
 
 class MusicController @Inject constructor(
