@@ -54,6 +54,7 @@ import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
+import com.maxot.seekandcatch.feature.gameplay.shake
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
@@ -74,6 +75,7 @@ fun FlowGameScreen(
 
     val gameMode = viewModel.selectedGameMode.collectAsStateWithLifecycle()
     val flowGameUiState by viewModel.flowGameUiState.collectAsStateWithLifecycle()
+    val isGameOverAnimating = remember { mutableStateOf(false) }
 
     val showPauseDialog = remember { mutableStateOf(false) }
 
@@ -84,7 +86,8 @@ fun FlowGameScreen(
         sendEvent = { flowGameUiEvent -> viewModel.onEvent(flowGameUiEvent) },
         toGameResultScreen = { toGameResultScreen(flowGameUiState.score) },
         showPauseDialog = showPauseDialog.value,
-        updatePauseDialogVisibility = { showPauseDialog.value = it }
+        updatePauseDialogVisibility = { showPauseDialog.value = it },
+        isGameOverAnimating = isGameOverAnimating.value
     )
 
     LaunchedEffect(key1 = true) {
@@ -125,11 +128,12 @@ fun FlowGameScreen(
 
     if (flowGameUiState.isFinished) {
         LaunchedEffect(key1 = true) {
-            coroutineScope.launch {
-                delay(1)
-                toGameResultScreen(flowGameUiState.score)
-            }
+            isGameOverAnimating.value = true
+            delay(1000)
+            toGameResultScreen(flowGameUiState.score)
         }
+    } else if (flowGameUiState.isActive || flowGameUiState.isReady) {
+        isGameOverAnimating.value = false
     }
 
     BackHandler {
@@ -157,7 +161,8 @@ private fun FlowGameScreenContent(
     sendEvent: (FlowGameUiEvent) -> Unit,
     toGameResultScreen: (Int) -> Unit = {},
     showPauseDialog: Boolean = false,
-    updatePauseDialogVisibility: (Boolean) -> Unit = {}
+    updatePauseDialogVisibility: (Boolean) -> Unit = {},
+    isGameOverAnimating: Boolean = false
 ) {
     val density = LocalDensity.current
     val flowGameScreenContentDesc = stringResource(id = R.string.flow_game_screen_content_desc)
@@ -216,6 +221,7 @@ private fun FlowGameScreenContent(
                 )
 
                 FlowGameFieldLayout(
+                    modifier = Modifier.shake(enabled = isGameOverAnimating),
                     gridWidth = flowGameUiState.rowWidth,
                     spacerHeight = spacerHeight,
                     figures = flowGameUiState.figures,
@@ -228,7 +234,8 @@ private fun FlowGameScreenContent(
                         )
                     },
                     onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
-                    reverseLayout = flowGameUiState.isReverseScrolling
+                    reverseLayout = flowGameUiState.isReverseScrolling,
+                    isGameOver = isGameOverAnimating
                 )
             }
         }

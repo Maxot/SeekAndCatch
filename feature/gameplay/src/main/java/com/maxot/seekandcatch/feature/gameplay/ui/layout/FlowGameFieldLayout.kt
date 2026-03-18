@@ -29,7 +29,8 @@ fun FlowGameFieldLayout(
     gridState: LazyGridState,
     onItemHeightMeasured: (height: Int) -> Unit = { },
     onItemClick: (id: Int) -> Unit,
-    reverseLayout: Boolean = false
+    reverseLayout: Boolean = false,
+    isGameOver: Boolean = false
 ) {
     val gameFieldLayoutContentDesc = stringResource(id = R.string.game_field_layout_content_desc)
 
@@ -62,6 +63,7 @@ fun FlowGameFieldLayout(
                     },
                 figure = figure,
                 onItemClick = { onItemClick(figure.id) },
+                isGameOver = isGameOver
             )
         }
         // Add spacer for one row to reach scrolling to empty space
