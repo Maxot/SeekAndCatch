@@ -1,6 +1,7 @@
 package com.maxot.seekandcatch.feature.gameplay.ui.layout
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -20,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
@@ -38,6 +41,8 @@ import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.getShapeForFigure
 import com.maxot.seekandcatch.feature.gameplay.R
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 // Used for test
 val AlphaKey = SemanticsPropertyKey<Float>("Alpha")
@@ -52,6 +57,8 @@ fun ColoredFigureLayout(
     size: Dp? = null,
     figure: Figure,
     onItemClick: () -> Unit = {},
+    isGameOver: Boolean = false,
+    gameOverAnimDuration: Int = 800
 ) {
     val coloredFigureContentDesc =
         stringResource(id = R.string.colored_figure_content_desc, figure.id)
@@ -67,9 +74,42 @@ fun ColoredFigureLayout(
     var heightInPx: Float = 0f
 
     val alpha by animateFloatAsState(
-        if (figure.isActive) 1f else 0f, label = "AlphaAnimation"
+        if (figure.isActive || isGameOver) 1f else 0f, label = "AlphaAnimation"
     )
     val alphaScore = remember { Animatable(1f) }
+
+    val gameOverAlpha = remember { Animatable(1f) }
+    val gameOverTranslation = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
+    val gameOverRotation = remember { Animatable(0f) }
+    val gameOverScale = remember { Animatable(1f) }
+
+    LaunchedEffect(isGameOver) {
+        if (isGameOver) {
+            launch {
+                gameOverAlpha.animateTo(0f, tween(gameOverAnimDuration))
+            }
+            launch {
+                val angle = Random.nextFloat() * 2 * Math.PI
+                val distance = 1000f
+                gameOverTranslation.animateTo(
+                    Offset(
+                        Math.cos(angle).toFloat() * distance,
+                        Math.sin(angle).toFloat() * distance
+                    ),
+                    tween(gameOverAnimDuration)
+                )
+            }
+            launch {
+                gameOverRotation.animateTo(
+                    (Random.nextFloat() * 720 - 360),
+                    tween(gameOverAnimDuration)
+                )
+            }
+            launch {
+                gameOverScale.animateTo(0.2f, tween(gameOverAnimDuration))
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -80,10 +120,18 @@ fun ColoredFigureLayout(
             }
             .padding(10.dp)
             .run { size?.let { size(size) } ?: aspectRatio(1f) }
+            .graphicsLayer {
+                translationX = gameOverTranslation.value.x
+                translationY = gameOverTranslation.value.y
+                rotationZ = gameOverRotation.value
+                scaleX = gameOverScale.value
+                scaleY = gameOverScale.value
+                this.alpha = if (isGameOver) gameOverAlpha.value else 1f
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                enabled = figure.isActive
+                enabled = figure.isActive && !isGameOver
             ) {
                 onItemClick()
             }

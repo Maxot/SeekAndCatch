@@ -25,6 +25,7 @@ fun FlashGameFieldLayout(
     figuresByCell: Map<Int, Figure>,
     visibleCells: Set<Int>,
     onCellClick: (Int) -> Unit,
+    isGameOver: Boolean = false,
 ) {
     // Track which visible cells were clicked so they hide immediately
     val (hiddenIds, setHiddenIds) = remember { mutableStateOf<Set<Int>>(emptySet()) }
@@ -55,7 +56,8 @@ fun FlashGameFieldLayout(
                             setHiddenIds(hiddenIds + id)
                             onCellClick(id)
                         }
-                    }
+                    },
+                    isGameOver = isGameOver
                 )
             } else {
                 Box {}

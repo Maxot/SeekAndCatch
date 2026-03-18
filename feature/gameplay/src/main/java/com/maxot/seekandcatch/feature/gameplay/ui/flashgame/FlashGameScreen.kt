@@ -37,6 +37,9 @@ import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiSta
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlashGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameInfoPanel
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.maxot.seekandcatch.feature.gameplay.shake
 import kotlinx.coroutines.delay
 
 @Composable
@@ -45,19 +48,25 @@ fun FlashGameScreen(
     toGameResultScreen: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isGameOverAnimating = remember { mutableStateOf(false) }
 
     FlashGameScreenContent(
         uiState = uiState,
         onStart = { viewModel.startGame() },
         onPause = { viewModel.pauseGame() },
         onResume = { viewModel.resumeGame() },
-        onFinish = { viewModel.finishGame(); toGameResultScreen(uiState.score) },
-        onCellClick = { id -> viewModel.onCellClick(id) }
+        onFinish = { viewModel.finishGame() },
+        onCellClick = { id -> viewModel.onCellClick(id) },
+        isGameOverAnimating = isGameOverAnimating.value
     )
 
-    LaunchedEffect(uiState.isFinished) {
+    LaunchedEffect(uiState.isFinished, uiState.isActive, uiState.isReady) {
         if (uiState.isFinished) {
+            isGameOverAnimating.value = true
+            delay(1000)
             toGameResultScreen(uiState.score)
+        } else if (uiState.isActive || uiState.isReady) {
+            isGameOverAnimating.value = false
         }
     }
 }
@@ -70,6 +79,7 @@ private fun FlashGameScreenContent(
     onResume: () -> Unit,
     onFinish: () -> Unit,
     onCellClick: (Int) -> Unit,
+    isGameOverAnimating: Boolean = false,
 ) {
     val contentDesc = stringResource(id = R.string.flow_game_screen_content_desc)
 
@@ -97,7 +107,7 @@ private fun FlashGameScreenContent(
                     text = stringResource(id = R.string.feature_gameplay_loading),
                     style = MaterialTheme.typography.titleLarge
                 )
-            } else if (uiState.isReady && !uiState.isActive && !uiState.isPaused) {
+            } else if (uiState.isReady && !uiState.isActive && !uiState.isPaused && !uiState.isFinished) {
                 // Show goals and countdown before start
                 GameInfoPanel(
                     maxLifeCount = 5,
@@ -132,12 +142,15 @@ private fun FlashGameScreenContent(
                     gameDuration = uiState.gameDuration,
                 )
                 FlashGameFieldLayout(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .shake(enabled = isGameOverAnimating),
                     gridWidth = uiState.gridWidth,
                     gridSize = uiState.gridSize,
                     figuresByCell = uiState.figuresByCell,
                     visibleCells = uiState.visibleCells,
-                    onCellClick = onCellClick
+                    onCellClick = onCellClick,
+                    isGameOver = isGameOverAnimating
                 )
             }
         }

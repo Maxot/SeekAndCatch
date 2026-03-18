@@ -9,7 +9,7 @@ sealed class FlashGameState {
     data object Started : FlashGameState()
     data class Resumed(val data: FlashGameData) : FlashGameState()
     data object Paused : FlashGameState()
-    data class Finished(val score: Int) : FlashGameState()
+    data class Finished(val score: Int, val lastData: FlashGameData? = null) : FlashGameState()
 }
 
 /**
