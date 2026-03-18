@@ -23,6 +23,8 @@ class FlowGameEngine(
     override fun initGame(gameParams: GameParams) {
         super.initGame(gameParams)
         firstVisibleItemIndex = 0
+        itemsPassedWithoutMissing = 0
+        lastGoalRotationTime = 0L
         _gameData.update { it.copy(isReverseScrolling = Random.nextBoolean()) }
     }
 
@@ -143,6 +145,7 @@ class FlowGameEngine(
     }
     
     override fun onTimeTick() {
+        super.onTimeTick()
         updateScrollDuration()
     }
 }
