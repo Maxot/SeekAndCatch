@@ -11,6 +11,7 @@ package com.maxot.seekandcatch.core.common.model
  * @param maxLifeCount the maximal count of possible mistake.
  * @param lifeCount the default count of possible mistake
  * @param itemsPassedWithoutMissToGetLife the required number of items passed without a single miss to gain one more life.
+ * @param goalRotationIntervalMillis interval in milliseconds to rotate goals. 0 means no rotation.
  */
 data class GameParams(
     val itemsCount: Int = 1000,
@@ -21,5 +22,6 @@ data class GameParams(
     val rowWidth: Int = 4,
     val maxLifeCount: Int = 5,
     val lifeCount: Int = 3,
-    val itemsPassedWithoutMissToGetLife: Int = 30
+    val itemsPassedWithoutMissToGetLife: Int = 30,
+    val goalRotationIntervalMillis: Long = 0L
 )
