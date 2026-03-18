@@ -48,7 +48,7 @@ class FlashGameUseCase @Inject constructor(
             is GameEngineState.Created -> FlashGameState.Created(state.goalSuitableFigures)
             GameEngineState.Started -> FlashGameState.Resumed(mapToFlashGameData(data))
             GameEngineState.Paused -> FlashGameState.Paused
-            is GameEngineState.Finished -> FlashGameState.Finished(state.score)
+            is GameEngineState.Finished -> FlashGameState.Finished(state.score, mapToFlashGameData(data))
         }
     }
 

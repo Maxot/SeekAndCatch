@@ -117,12 +117,32 @@ class FlashGameViewModel @Inject constructor(
                         )
                     }
 
-                    is FlashGameState.Finished -> _uiState.update {
-                        it.copy(
-                            isActive = false,
-                            isPaused = false,
-                            isFinished = true
-                        )
+                    is FlashGameState.Finished -> {
+                        audioManager.onGameOver()
+                        val lastData = state.lastData
+                        _uiState.update { currentState ->
+                            val base = if (lastData != null) {
+                                currentState.copy(
+                                    gridSize = lastData.gridSize,
+                                    gridWidth = kotlin.math.sqrt(lastData.gridSize.toDouble()).toInt()
+                                        .coerceAtLeast(1),
+                                    visibleCells = lastData.visibleCells,
+                                    score = lastData.score,
+                                    lifeCount = lastData.lifeCount,
+                                    coefficient = lastData.coefficient,
+                                    gameDuration = lastData.gameDuration,
+                                    goals = lastData.goals,
+                                    goalSuitableFigures = lastData.goalSuitableFigures,
+                                    figuresByCell = lastData.figuresByCell,
+                                )
+                            } else currentState
+
+                            base.copy(
+                                isActive = false,
+                                isPaused = false,
+                                isFinished = true
+                            )
+                        }
                     }
                 }
             }
@@ -133,7 +153,7 @@ class FlashGameViewModel @Inject constructor(
         viewModelScope.launch {
             selectedGameDifficulty.collect { diff ->
                 diff?.let {
-                    _uiState.update { it.copy(isFinished = false) }
+                    _uiState.update { it.copy(isFinished = false, score = 0) }
                     audioManager.onGameStart()
                     gameUseCase.initGame(it.gameParams)
                     return@collect
