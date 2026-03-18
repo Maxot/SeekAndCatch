@@ -87,6 +87,29 @@ class GameResultViewModel
                 autoSubmitScore()
             }
         }
+
+        // Calculate rank
+        viewModelScope.launch {
+            combine(
+                settingsRepository.observeGameMode(),
+                settingsRepository.observeDifficulty(),
+                leaderboardRepository.observeRecords()
+            ) { mode, difficulty, records ->
+                val sortedRecords = records.asSequence()
+                    .filter { it.gameMode == mode && it.difficulty == difficulty }
+                    .sortedByDescending { it.score }
+                    .toList()
+                
+                val currentScore = _uiState.value.lastScore
+                val userId = authRepository.getUserId()
+                
+                // Find rank based on current score or user's best score in that context
+                val rank = sortedRecords.indexOfFirst { it.userId == userId } + 1
+                if (rank > 0) rank else null
+            }.collectLatest { rank ->
+                _uiState.update { it.copy(rank = rank) }
+            }
+        }
     }
 
     fun onEvent(event: GameResultEvent) {

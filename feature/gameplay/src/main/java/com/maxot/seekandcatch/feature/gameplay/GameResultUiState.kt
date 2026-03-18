@@ -13,4 +13,5 @@ data class GameResultUiState(
     val gameDifficulty: GameDifficulty? = null,
     val hasPlayedNewBestSound: Boolean = false,
     val isNewBest: Boolean = false,
+    val rank: Int? = null,
 )
