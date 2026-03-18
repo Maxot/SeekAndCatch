@@ -7,5 +7,12 @@
     <string name="feature_settings_ok">OK</string>
     <string name="feature_settings_dialog_content_description">Settings Dialog</string>
     <string name="feature_settings_top_app_bar_action_icon_content_desc">Settings</string>
+    <string name="feature_settings_colorblind_title">Colorblind \nMode</string>
+    <string name="feature_settings_dark_theme_title">Dark Theme</string>
+    <string name="color_red">R</string>
+    <string name="color_blue">B</string>
+    <string name="color_green">G</string>
+    <string name="color_yellow">Y</string>
+    <string name="color_unknown">?</string>
 
 </resources>

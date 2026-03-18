@@ -44,4 +44,10 @@ class SettingsRepositoryImpl
         settingsDataStore.setDarkTheme(darkTheme)
     }
 
+    override suspend fun setColorblindModeEnabled(enabled: Boolean) {
+        settingsDataStore.setColorblindModeEnabled(enabled)
+    }
+
+    override fun observeColorblindModeEnabled(): Flow<Boolean> = settingsDataStore.colorblindModeFlow
+
 }

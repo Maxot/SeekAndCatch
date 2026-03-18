@@ -1,7 +1,6 @@
 package com.maxot.seekandcatch.feature.settings.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,11 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,6 +55,7 @@ fun SettingsDialog(
     val allSupportedLocales by remember { mutableStateOf(viewModel.allSupportedLocales) }
     val selectedLocale by remember { mutableStateOf(viewModel.selectedLocale) }
     val darkTheme by viewModel.darkTheme.collectAsState()
+    val isColorblindModeEnabled by viewModel.colorblindMode.collectAsState(false)
 
     SettingsDialog(
         modifier = modifier,
@@ -68,11 +64,13 @@ fun SettingsDialog(
         isSoundEnabled = isSoundEnabled,
         isMusicEnabled = isMusicEnabled,
         isVibrationEnabled = isVibrationEnabled,
+        isColorblindModeEnabled = isColorblindModeEnabled,
         onDismiss = onDismiss,
         onConfirmation = onDismiss,
         onSoundStateChanged = viewModel::setSoundState,
         onMusicStateChanged = viewModel::setMusicState,
         onVibrationStateChanged = viewModel::setVibrationState,
+        onColorblindModeChanged = viewModel::setColorblindModeEnabled,
         onLocaleChanged = viewModel::updateSelectedLocale,
         darkTheme = darkTheme,
         onDarkThemeChanged = {
@@ -90,11 +88,13 @@ private fun SettingsDialog(
     isSoundEnabled: Boolean,
     isMusicEnabled: Boolean,
     isVibrationEnabled: Boolean,
+    isColorblindModeEnabled: Boolean,
     onDismiss: () -> Unit,
     onConfirmation: () -> Unit,
-    onSoundStateChanged: (soundEnabled: Boolean) -> Unit,
-    onMusicStateChanged: (soundEnabled: Boolean) -> Unit,
-    onVibrationStateChanged: (soundEnabled: Boolean) -> Unit,
+    onSoundStateChanged: (Boolean) -> Unit,
+    onMusicStateChanged: (Boolean) -> Unit,
+    onVibrationStateChanged: (Boolean) -> Unit,
+    onColorblindModeChanged: (Boolean) -> Unit,
     onLocaleChanged: (String) -> Unit,
     darkTheme: Boolean,
     onDarkThemeChanged: (Boolean) -> Unit
@@ -127,10 +127,12 @@ private fun SettingsDialog(
                         isSoundEnabled = isSoundEnabled,
                         isMusicEnabled = isMusicEnabled,
                         isVibrationEnabled = isVibrationEnabled,
+                        isColorblindModeEnabled = isColorblindModeEnabled,
                         darkTheme = darkTheme,
                         onSoundStateChanged = onSoundStateChanged,
                         onMusicStateChanged = onMusicStateChanged,
                         onVibrationStateChanged = onVibrationStateChanged,
+                        onColorblindModeChanged = onColorblindModeChanged,
                         onLocaleChanged = onLocaleChanged,
                         onDarkThemeChanged = onDarkThemeChanged
                     )
@@ -162,12 +164,14 @@ private fun SettingsPanel(
     isSoundEnabled: Boolean,
     isMusicEnabled: Boolean,
     isVibrationEnabled: Boolean,
+    isColorblindModeEnabled: Boolean,
     darkTheme: Boolean,
     allSupportedLocales: List<String>,
     selectedLocale: String,
     onSoundStateChanged: (Boolean) -> Unit,
     onMusicStateChanged: (Boolean) -> Unit,
     onVibrationStateChanged: (Boolean) -> Unit,
+    onColorblindModeChanged: (Boolean) -> Unit,
     onDarkThemeChanged: (Boolean) -> Unit,
     onLocaleChanged: (String) -> Unit
 ) {
@@ -186,9 +190,16 @@ private fun SettingsPanel(
 
             PixelSettingRow(
                 icon = ImageVector.vectorResource(SaCIcons.SoundsRes),
-                label = "Dark Theme",
+                label = stringResource(id = R.string.feature_settings_dark_theme_title),
                 checked = darkTheme,
                 onCheckedChange = onDarkThemeChanged
+            )
+
+            PixelSettingRow(
+                icon = ImageVector.vectorResource(SaCIcons.SettingsRes),
+                label = stringResource(id = R.string.feature_settings_colorblind_title),
+                checked = isColorblindModeEnabled,
+                onCheckedChange = onColorblindModeChanged
             )
 
             PixelSettingRow(
@@ -305,12 +316,14 @@ private fun SettingsDialogPreview() {
                 isSoundEnabled = true,
                 isMusicEnabled = false,
                 isVibrationEnabled = true,
+                isColorblindModeEnabled = false,
                 darkTheme = false,
                 onDismiss = {},
                 onConfirmation = {},
                 onSoundStateChanged = {},
                 onMusicStateChanged = {},
                 onVibrationStateChanged = {},
+                onColorblindModeChanged = {},
                 onLocaleChanged = {},
                 onDarkThemeChanged = {}
             )

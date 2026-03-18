@@ -34,4 +34,8 @@ interface SettingsRepository {
 
     suspend fun setDarkTheme(darkTheme: Boolean)
 
+    suspend fun setColorblindModeEnabled(enabled: Boolean)
+
+    fun observeColorblindModeEnabled(): Flow<Boolean>
+
 }
