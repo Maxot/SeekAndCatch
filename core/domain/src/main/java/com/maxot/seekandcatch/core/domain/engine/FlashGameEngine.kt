@@ -22,7 +22,7 @@ class FlashGameEngine(
     private val clickedSuitableCells = mutableSetOf<Int>()
 
     override fun initGame(gameParams: GameParams) {
-        super.initGame(gameParams)
+        this.gameParams = gameParams
         itemsPassedWithoutMissing = 0
         stopTimeTracking()
         clickedSuitableCells.clear()
@@ -94,6 +94,9 @@ class FlashGameEngine(
                     continue
                 }
 
+                delay(current.spawnPeriodMillis)
+                if (_gameState.value !is GameEngineState.Started) break
+
                 val targetCount = visibleAtOnce.coerceIn(1, gridCount)
                 val newlyVisible = mutableSetOf<Int>()
                 while (newlyVisible.size < targetCount) {
@@ -109,8 +112,6 @@ class FlashGameEngine(
 
                 clickedSuitableCells.clear()
                 _gameData.update { it.copy(visibleCells = emptySet()) }
-
-                delay(current.spawnPeriodMillis)
             }
         }
     }
@@ -156,8 +157,7 @@ class FlashGameEngine(
             clickedSuitableCells.add(index)
             handleCorrectTap(figure, index)
         } else {
-            itemsPassedWithoutMissing = 0
-            decreaseLifeCount()
+            handleWrongTap()
         }
     }
 
@@ -169,7 +169,15 @@ class FlashGameEngine(
         _gameData.update { current ->
             val updatedFigures = current.figures.toMutableList()
             updatedFigures[index] = figure.copy(pointsReceived = pointsAdded)
+            
+            // Streak-based coefficient increase: every 5 correct taps
+//            val newCoefficient = if (itemsPassedWithoutMissing % 5 == 0) {
+//                current.coefficient + (gameParams?.coefficientStep ?: 0f)
+//            } else {
+//                current.coefficient
+//            }
             val newCoefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
+            
             current.copy(
                 figures = updatedFigures,
                 score = current.score + pointsAdded,
@@ -180,7 +188,6 @@ class FlashGameEngine(
         gameParams?.let { params ->
             if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
                 increaseLifeCount()
-                itemsPassedWithoutMissing = 0
             }
         }
 
