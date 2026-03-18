@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.CombinedVibration
 import android.os.VibrationEffect
+import android.os.Vibrator
 import android.os.VibratorManager
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,13 +29,17 @@ class VibrationManager
 
     suspend fun vibrate(duration: Long = 250) {
         if (settingsRepository.observeVibrationState().first()) {
-            val vibrationEffect = VibrationEffect.createOneShot(duration, 1)
-            val combinedVibration = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                CombinedVibration.createParallel(vibrationEffect)
+            val vibrationEffect = VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val combinedVibration = CombinedVibration.createParallel(vibrationEffect)
+                vibratorManager.vibrate(combinedVibration)
             } else {
-                TODO("VERSION.SDK_INT < S")
+                @Suppress("DEPRECATION")
+                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (vibrator.hasVibrator()) {
+                    vibrator.vibrate(vibrationEffect)
+                }
             }
-            vibratorManager.vibrate(combinedVibration)
         }
     }
 }
