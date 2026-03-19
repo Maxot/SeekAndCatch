@@ -110,6 +110,7 @@ private fun FlashGameScreenContent(
             } else if (uiState.isReady && !uiState.isActive && !uiState.isPaused && !uiState.isFinished) {
                 // Show goals and countdown before start
                 GameInfoPanel(
+                    modifier = Modifier.shake(enabled = uiState.isLifeWasted),
                     maxLifeCount = 5,
                     lifeCount = uiState.lifeCount,
                     goals = uiState.goals,
@@ -133,6 +134,7 @@ private fun FlashGameScreenContent(
                 }
             } else {
                 GameInfoPanel(
+                    modifier = Modifier.shake(enabled = uiState.isLifeWasted),
                     maxLifeCount = 5,
                     lifeCount = uiState.lifeCount,
                     goals = uiState.goals,
