@@ -118,6 +118,9 @@ class FlashGameViewModel @Inject constructor(
                     }
 
                     is FlashGameState.Finished -> {
+                        viewModelScope.launch {
+                            vibrationManager.vibrateError()
+                        }
                         audioManager.onGameOver()
                         val lastData = state.lastData
                         _uiState.update { currentState ->
@@ -201,12 +204,15 @@ class FlashGameViewModel @Inject constructor(
 
     private fun updateLifeWastedValue() {
         viewModelScope.launch {
-            vibrationManager.vibrate()
+            vibrationManager.vibrateError()
         }
         visualFeedbackManager.triggerLifeWasted(viewModelScope)
     }
 
     fun onCellClick(id: Int) {
+        viewModelScope.launch {
+            vibrationManager.vibrateCorrect()
+        }
         audioManager.onCorrectTap()
         gameUseCase.onEvent(FlashGameEvent.OnCellClick(id))
     }

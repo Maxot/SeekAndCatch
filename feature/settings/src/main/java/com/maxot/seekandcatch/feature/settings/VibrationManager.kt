@@ -27,19 +27,51 @@ class VibrationManager
         }
     }
 
-    suspend fun vibrate(duration: Long = 250) {
+    suspend fun vibrateCorrect() {
+        vibrateEffect(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+            } else {
+                VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE)
+            }
+        )
+    }
+
+    suspend fun vibrateError() {
+        val pattern = longArrayOf(0, 100, 50, 100) // Double pulse
+        vibrateEffect(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                VibrationEffect.createWaveform(pattern, -1)
+            } else {
+                null // Fallback to deprecated vibrate if needed, but here we use createOneShot if waveform not available
+            }
+        , pattern)
+    }
+
+    private suspend fun vibrateEffect(effect: VibrationEffect?, pattern: LongArray? = null) {
         if (settingsRepository.observeVibrationState().first()) {
-            val vibrationEffect = VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val combinedVibration = CombinedVibration.createParallel(vibrationEffect)
+                val combinedVibration = if (effect != null) {
+                    CombinedVibration.createParallel(effect)
+                } else {
+                    return
+                }
                 vibratorManager.vibrate(combinedVibration)
             } else {
                 @Suppress("DEPRECATION")
                 val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                 if (vibrator.hasVibrator()) {
-                    vibrator.vibrate(vibrationEffect)
+                    if (effect != null) {
+                        vibrator.vibrate(effect)
+                    } else if (pattern != null) {
+                        vibrator.vibrate(pattern, -1)
+                    }
                 }
             }
         }
+    }
+
+    suspend fun vibrate(duration: Long = 250) {
+        vibrateEffect(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 }

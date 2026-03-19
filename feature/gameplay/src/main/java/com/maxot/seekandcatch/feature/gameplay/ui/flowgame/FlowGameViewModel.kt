@@ -147,6 +147,9 @@ class FlowGameViewModel
                     }
 
                     is FlowGameState.Finished -> {
+                        viewModelScope.launch {
+                            vibrationManager.vibrateError()
+                        }
                         audioManager.onGameOver()
                         _flowGameUiState.update {
                             it.copy(
@@ -208,7 +211,7 @@ class FlowGameViewModel
 
     private fun updateLifeWastedValue() {
         viewModelScope.launch {
-            vibrationManager.vibrate()
+            vibrationManager.vibrateError()
         }
         visualFeedbackManager.triggerLifeWasted(viewModelScope)
     }
@@ -246,6 +249,7 @@ class FlowGameViewModel
 
     private fun onItemClick(id: Int) {
         viewModelScope.launch {
+            vibrationManager.vibrateCorrect()
             audioManager.onCorrectTap()
             gameUseCase.onEvent(FlowGameEvent.OnItemClick(id))
         }
