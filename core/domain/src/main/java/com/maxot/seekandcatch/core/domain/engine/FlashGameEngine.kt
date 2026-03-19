@@ -24,6 +24,7 @@ class FlashGameEngine(
     override fun initGame(gameParams: GameParams) {
         this.gameParams = gameParams
         itemsPassedWithoutMissing = 0
+        lastGoalRotationTime = 0L
         stopTimeTracking()
         clickedSuitableCells.clear()
         _gameState.value = GameEngineState.Idle
@@ -44,6 +45,10 @@ class FlashGameEngine(
 
             visibleAtOnce = maxOf(1, gridWidth - 1)
 
+            val initialCoefficient = 1f
+            val baseFlashMillis = gameParams.rowDuration * 2L
+            val baseSpawnPeriodMillis = (gameParams.rowDuration * 1.5f).toLong()
+
             val initialData = GameEngineData(
                 goals = goals,
                 figures = allFigures,
@@ -51,13 +56,15 @@ class FlashGameEngine(
                 maxLifeCount = gameParams.maxLifeCount.coerceAtLeast(1),
                 lifeCount = gameParams.lifeCount,
                 score = 0,
-                coefficient = 1f,
+                coefficient = initialCoefficient,
                 rowWidth = gridWidth,
-                flashMillis = gameParams.rowDuration.toLong().coerceAtLeast(1000L),
-                spawnPeriodMillis = (gameParams.rowDuration * 0.75f).toLong().coerceAtLeast(200L)
             )
-            _gameData.value = initialData
-            _gameState.value = GameEngineState.Created(initialData.goalSuitableFigures)
+            val dataWithDurations = initialData.copy(
+                flashMillis = calculateFlashDuration(baseFlashMillis, initialData),
+                spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, initialData)
+            )
+            _gameData.value = dataWithDurations
+            _gameState.value = GameEngineState.Created(dataWithDurations.goalSuitableFigures)
         }
     }
 
@@ -165,30 +172,30 @@ class FlashGameEngine(
         itemsPassedWithoutMissing++
 
         val pointsAdded = calculatePoints()
+        val params = gameParams ?: return
 
         _gameData.update { current ->
             val updatedFigures = current.figures.toMutableList()
             updatedFigures[index] = figure.copy(pointsReceived = pointsAdded)
             
-            // Streak-based coefficient increase: every 5 correct taps
-//            val newCoefficient = if (itemsPassedWithoutMissing % 5 == 0) {
-//                current.coefficient + (gameParams?.coefficientStep ?: 0f)
-//            } else {
-//                current.coefficient
-//            }
-            val newCoefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
+            val newCoefficient = current.coefficient + (params.coefficientStep ?: 0f)
             
-            current.copy(
+            val baseFlashMillis = params.rowDuration * 2L
+            val baseSpawnPeriodMillis = (params.rowDuration * 1.5f).toLong()
+
+            val updated = current.copy(
                 figures = updatedFigures,
                 score = current.score + pointsAdded,
-                coefficient = newCoefficient
+                coefficient = newCoefficient,
+            )
+            updated.copy(
+                flashMillis = calculateFlashDuration(baseFlashMillis, updated),
+                spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, updated)
             )
         }
 
-        gameParams?.let { params ->
-            if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
-                increaseLifeCount()
-            }
+        if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
+            increaseLifeCount()
         }
 
         // Clear points after delay
@@ -203,5 +210,58 @@ class FlashGameEngine(
                 } else current
             }
         }
+    }
+    override fun decreaseCoefficient() {
+        val params = gameParams ?: return
+        _gameData.update { current ->
+            val newCoefficient = (current.coefficient / 2f).coerceAtLeast(1f)
+            
+            val baseFlashMillis = params.rowDuration * 2L
+            val baseSpawnPeriodMillis = (params.rowDuration * 1.5f).toLong()
+
+            val updated = current.copy(
+                coefficient = newCoefficient,
+            )
+            updated.copy(
+                flashMillis = calculateFlashDuration(baseFlashMillis, updated),
+                spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, updated)
+            )
+        }
+    }
+
+    private fun updateDurations() {
+        val params = gameParams ?: return
+        _gameData.update { current ->
+            val baseFlashMillis = params.rowDuration * 2L
+            val baseSpawnPeriodMillis = (params.rowDuration * 1.5f).toLong()
+            current.copy(
+                flashMillis = calculateFlashDuration(baseFlashMillis, current),
+                spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, current)
+            )
+        }
+    }
+
+    override fun onTimeTick() {
+        super.onTimeTick()
+        updateDurations()
+    }
+
+    private fun calculateFlashDuration(base: Long, data: GameEngineData): Long {
+        return (base * calculateDurationPercentage(data)).toLong().coerceAtLeast(MIN_FLASH_MILLIS)
+    }
+
+    private fun calculateSpawnDuration(base: Long, data: GameEngineData): Long {
+        return (base * calculateDurationPercentage(data)).toLong().coerceAtLeast(MIN_SPAWN_PERIOD_MILLIS)
+    }
+
+    private fun calculateDurationPercentage(data: GameEngineData): Float {
+        val coefPercentage = (data.coefficient * data.coefficient / 100f)
+        val timePercentage = (((data.gameDuration / 1000 / 30) * 5) / 100f)
+        return (1f - coefPercentage - timePercentage).coerceAtLeast(0.35f)
+    }
+
+    companion object {
+        private const val MIN_FLASH_MILLIS = 300L
+        private const val MIN_SPAWN_PERIOD_MILLIS = 300L
     }
 }

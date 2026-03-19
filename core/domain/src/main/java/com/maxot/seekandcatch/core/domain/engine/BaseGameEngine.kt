@@ -205,7 +205,7 @@ abstract class BaseGameEngine(
         }
     }
 
-    protected fun decreaseCoefficient() {
+    protected open fun decreaseCoefficient() {
         _gameData.update {
             val newCoef = (it.coefficient / 2f).coerceAtLeast(1f)
             it.copy(coefficient = newCoef)
