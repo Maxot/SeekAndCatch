@@ -206,6 +206,7 @@ private fun FlowGameScreenContent(
             Column {
                 GameInfoPanel(
                     modifier = Modifier
+                        .shake(enabled = flowGameUiState.isLifeWasted)
                         .onGloballyPositioned {
                             gameInfoPanelSize = with(density) {
                                 it.size.height.toDp() // Height of GameInfoPanel

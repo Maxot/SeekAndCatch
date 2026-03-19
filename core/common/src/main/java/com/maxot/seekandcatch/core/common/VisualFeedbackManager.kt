@@ -22,7 +22,7 @@ class VisualFeedbackManager @Inject constructor() {
         feedbackJob?.cancel()
         feedbackJob = scope.launch {
             _isLifeWasted.value = true
-            delay(1000)
+            delay(300)
             _isLifeWasted.value = false
         }
     }
