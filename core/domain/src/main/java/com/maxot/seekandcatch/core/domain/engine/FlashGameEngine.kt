@@ -45,8 +45,8 @@ class FlashGameEngine(
             visibleAtOnce = maxOf(1, gridWidth - 1)
 
             val initialCoefficient = 1f
-            val baseFlashMillis = gameParams.rowDuration * 2L
-            val baseSpawnPeriodMillis = (gameParams.rowDuration * 1.5f).toLong()
+            val baseFlashMillis = (gameParams.rowDuration * 2L * 1.2f).toLong()
+            val baseSpawnPeriodMillis = (gameParams.rowDuration * 1.2f * 1.5f).toLong()
 
             val initialData = GameEngineData(
                 goals = goals,
@@ -178,8 +178,8 @@ class FlashGameEngine(
             
             val newCoefficient = current.coefficient + (params.coefficientStep ?: 0f)
             
-            val baseFlashMillis = params.rowDuration * 2L
-            val baseSpawnPeriodMillis = (params.rowDuration * 1.5f).toLong()
+            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
+            val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
 
             val updated = current.copy(
                 figures = updatedFigures,
@@ -215,8 +215,8 @@ class FlashGameEngine(
         _gameData.update { current ->
             val newCoefficient = (current.coefficient / 2f).coerceAtLeast(1f)
             
-            val baseFlashMillis = params.rowDuration * 2L
-            val baseSpawnPeriodMillis = (params.rowDuration * 1.5f).toLong()
+            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
+            val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
 
             val updated = current.copy(
                 coefficient = newCoefficient,
@@ -232,8 +232,8 @@ class FlashGameEngine(
     private fun updateDurations() {
         val params = gameParams ?: return
         _gameData.update { current ->
-            val baseFlashMillis = params.rowDuration * 2L
-            val baseSpawnPeriodMillis = (params.rowDuration * 1.5f).toLong()
+            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
+            val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
             current.copy(
                 flashMillis = calculateFlashDuration(baseFlashMillis, current),
                 spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, current)
@@ -247,11 +247,11 @@ class FlashGameEngine(
     }
 
     private fun calculateFlashDuration(base: Long, data: GameEngineData): Long {
-        return (base * calculateDurationPercentage(data)).toLong().coerceAtLeast(MIN_FLASH_MILLIS)
+        return (base / data.coefficient).toLong().coerceAtLeast(MIN_FLASH_MILLIS)
     }
 
     private fun calculateSpawnDuration(base: Long, data: GameEngineData): Long {
-        return (base * calculateDurationPercentage(data)).toLong().coerceAtLeast(MIN_SPAWN_PERIOD_MILLIS)
+        return (base / data.coefficient).toLong().coerceAtLeast(MIN_SPAWN_PERIOD_MILLIS)
     }
 
     private fun calculateDurationPercentage(data: GameEngineData): Float {
