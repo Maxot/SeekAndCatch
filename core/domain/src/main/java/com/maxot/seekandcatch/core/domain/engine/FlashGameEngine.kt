@@ -24,7 +24,6 @@ class FlashGameEngine(
     override fun initGame(gameParams: GameParams) {
         this.gameParams = gameParams
         itemsPassedWithoutMissing = 0
-        lastGoalRotationTime = 0L
         stopTimeTracking()
         clickedSuitableCells.clear()
         _gameState.value = GameEngineState.Idle

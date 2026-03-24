@@ -44,7 +44,6 @@ Derived from: Codebase + PRD + Jira Tickets
 - Goal type:
     - Color-based (e.g. all red)
     - Shape-based (e.g. all triangles)
-- Goal changes after a fixed level duration (defined in GameParams)
 - Goal conflicts are forbidden by generator
 
 5. Grid & Item Rules

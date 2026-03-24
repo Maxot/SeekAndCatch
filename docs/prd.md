@@ -66,7 +66,6 @@ Color-based (e.g. all red items)
 Shape-based (e.g. all triangles)
 Goals never conflict
 Only one active goal at a time
-Goal changes after a fixed level duration
 
 6.3 Correct Tap
 Increases score

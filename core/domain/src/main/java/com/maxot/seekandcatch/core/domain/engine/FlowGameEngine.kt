@@ -24,7 +24,6 @@ class FlowGameEngine(
         super.initGame(gameParams)
         firstVisibleItemIndex = 0
         itemsPassedWithoutMissing = 0
-        lastGoalRotationTime = 0L
         _gameData.update { it.copy(isReverseScrolling = Random.nextBoolean()) }
     }
 
