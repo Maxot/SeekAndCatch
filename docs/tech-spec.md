@@ -94,8 +94,7 @@ This section overrides existing inconsistent behavior
 - Influences speed(scroll for flow, set changes for flash)
 
 7.2 Increase Logic
-- Increased by correct tap
-- Increment value configurable (coefficientStep)
+- Increased by correct tap by coefficientStep.
 
 7.3 Decrease Logic
 - Missed correct item: `newCoefficient = max(1.0, current / 2)`

@@ -130,15 +130,9 @@ abstract class BaseGameEngine(
             val updatedFigures = current.figures.map {
                 if (it.id == figure.id) it.copy(isActive = false, pointsReceived = pointsAdded) else it
             }
-            
-            // Streak-based coefficient increase: every 1 correct taps
-//            val newCoefficient = if (itemsPassedWithoutMissing % 5 == 0) {
-//                current.coefficient + (gameParams?.coefficientStep ?: 0f)
-//            } else {
-//                current.coefficient
-//            }
+
             val newCoefficient = current.coefficient + (gameParams?.coefficientStep ?: 0f)
-            
+
             current.copy(
                 figures = updatedFigures,
                 score = current.score + pointsAdded,
@@ -149,9 +143,7 @@ abstract class BaseGameEngine(
         gameParams?.let { params ->
             if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
                 increaseLifeCount()
-                // Do NOT reset itemsPassedWithoutMissing here if it's used for coefficient too, 
-                // or use a separate counter. Tech spec says "streak of correct taps".
-                // Let's assume the life recovery also works on the same streak.
+                itemsPassedWithoutMissing = 0
             }
         }
     }
@@ -175,11 +167,12 @@ abstract class BaseGameEngine(
     protected fun decreaseLifeCount() {
         _gameData.update {
             val newLifeCount = it.lifeCount - 1
-            if (newLifeCount <= 0) {
+            if (newLifeCount == 0) {
                 finishGame()
             }
             it.copy(lifeCount = newLifeCount.coerceAtLeast(0))
         }
+        itemsPassedWithoutMissing = 0
     }
 
     protected open fun decreaseCoefficient() {
@@ -187,6 +180,7 @@ abstract class BaseGameEngine(
             val newCoef = (it.coefficient / 2f).coerceAtLeast(1f)
             it.copy(coefficient = newCoef)
         }
+        itemsPassedWithoutMissing = 0
     }
 
     protected fun isItemFitForGoals(goals: Set<Goal<Any>>, item: Figure): Boolean {

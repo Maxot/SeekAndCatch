@@ -78,7 +78,6 @@ class FlowGameEngine(
         if (endIndex < figures.size) {
             val missedItemsCount = getMissedItemsCount(startIndex, endIndex)
             repeat(missedItemsCount) {
-                itemsPassedWithoutMissing = 0
                 if (_gameData.value.coefficient > 1f) {
                     decreaseCoefficient()
                 } else {

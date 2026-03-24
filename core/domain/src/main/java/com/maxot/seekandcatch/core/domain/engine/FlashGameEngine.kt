@@ -134,7 +134,6 @@ class FlashGameEngine(
         }
 
         repeat(missedCount) {
-            itemsPassedWithoutMissing = 0
             if (_gameData.value.coefficient > 1f) {
                 decreaseCoefficient()
             } else {
@@ -195,6 +194,7 @@ class FlashGameEngine(
 
         if (itemsPassedWithoutMissing >= params.itemsPassedWithoutMissToGetLife) {
             increaseLifeCount()
+            itemsPassedWithoutMissing = 0
         }
 
         // Clear points after delay
@@ -226,6 +226,7 @@ class FlashGameEngine(
                 spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, updated)
             )
         }
+        itemsPassedWithoutMissing = 0
     }
 
     private fun updateDurations() {
