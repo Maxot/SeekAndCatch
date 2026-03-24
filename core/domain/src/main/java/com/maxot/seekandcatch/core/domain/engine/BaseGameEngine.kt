@@ -31,12 +31,10 @@ abstract class BaseGameEngine(
     protected var timeJob: Job? = null
 
     protected var itemsPassedWithoutMissing = 0
-    protected var lastGoalRotationTime = 0L
 
     override fun initGame(gameParams: GameParams) {
         this.gameParams = gameParams
         itemsPassedWithoutMissing = 0
-        lastGoalRotationTime = 0L
         stopTimeTracking()
         _gameData.value = GameEngineData()
         _gameState.value = GameEngineState.Idle
@@ -105,27 +103,6 @@ abstract class BaseGameEngine(
     }
 
     protected open fun onTimeTick() {
-        val interval = gameParams?.goalRotationIntervalMillis ?: 0L
-        if (interval > 0) {
-            val currentTime = _gameData.value.gameDuration
-            if (currentTime - lastGoalRotationTime >= interval) {
-//                rotateGoal()
-                lastGoalRotationTime = currentTime
-            }
-        }
-    }
-
-    protected fun rotateGoal() {
-        coroutineScope.launch {
-            val newGoal = goalsRepository.getRandomGoal()
-            val newGoalSuitableFigures = figuresRepository.getFigureSuitableForGoal(newGoal)
-            _gameData.update { current ->
-                current.copy(
-                    goals = setOf(newGoal),
-                    goalSuitableFigures = newGoalSuitableFigures
-                )
-            }
-        }
     }
 
     override fun onItemClick(itemId: Int) {

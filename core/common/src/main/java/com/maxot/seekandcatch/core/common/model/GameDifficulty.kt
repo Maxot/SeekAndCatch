@@ -14,8 +14,7 @@ enum class GameDifficulty(val gameParams: GameParams) {
             rowDuration = 700,
             lifeCount = 5,
             maxLifeCount = 5,
-            itemsPassedWithoutMissToGetLife = 25,
-            goalRotationIntervalMillis = 30_000L
+            itemsPassedWithoutMissToGetLife = 25
         )
     ),
     NORMAL(
@@ -27,8 +26,7 @@ enum class GameDifficulty(val gameParams: GameParams) {
             rowDuration = 700,
             lifeCount = 3,
             maxLifeCount = 5,
-            itemsPassedWithoutMissToGetLife = 50,
-            goalRotationIntervalMillis = 20_000L
+            itemsPassedWithoutMissToGetLife = 50
         )
     ),
     HARD(
@@ -40,8 +38,7 @@ enum class GameDifficulty(val gameParams: GameParams) {
             rowDuration = 700,
             lifeCount = 1,
             maxLifeCount = 5,
-            itemsPassedWithoutMissToGetLife = 100,
-            goalRotationIntervalMillis = 15_000L
+            itemsPassedWithoutMissToGetLife = 100
         )
     )
 }
