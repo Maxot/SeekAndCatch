@@ -10,13 +10,38 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.update
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class BaseGameEngineTest {
+@RunWith(Parameterized::class)
+class BaseGameEngineTest(
+    private val scoringParams: ScoringParams
+) {
+
+    data class ScoringParams(
+        val difficulty: String,
+        val basePoints: Int,
+        val coefficient: Float,
+        val expectedPoints: Int
+    )
+
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun data() = listOf(
+            arrayOf(ScoringParams("Default", 10, 1.0f, 10)),
+            arrayOf(ScoringParams("Easy-x1.5", 10, 1.5f, 15)),
+            arrayOf(ScoringParams("Normal-x1", 15, 1.0f, 15)),
+            arrayOf(ScoringParams("Normal-x2.3", 15, 2.3f, 34)), // 15 * 2.3 = 34.5 -> 34
+            arrayOf(ScoringParams("Hard-x5.0", 20, 5.0f, 100))
+        )
+    }
 
     private lateinit var engine: TestGameEngine
     private val figuresRepository = FakeFiguresRepository()
@@ -42,6 +67,35 @@ class BaseGameEngineTest {
         itemsPassedWithoutMissToGetLife = 2
     )
 
+    @Test
+    fun scoringLogic_parameterized() {
+        val customParams = gameParams.copy(scorePoint = scoringParams.basePoints)
+        engine.initGame(customParams)
+        testScope.testScheduler.advanceUntilIdle()
+        
+        // Manually set coefficient by clicking (starting from 1.0, step is 0.5)
+        // Or just trigger a custom method to set it if we want exact values from params
+        // For simplicity, let's add a setter to TestGameEngine
+        engine.setCoefficient(scoringParams.coefficient)
+        
+        engine.startGame()
+        engine.onItemClick(0) // Correct tap
+        
+        assertEquals(scoringParams.expectedPoints, engine.gameData.value.score)
+    }
+
+    @Before
+    fun setup() {
+        figuresRepository.setRandomFigures(testFigures)
+        goalsRepository.setRandomGoal(testGoal)
+        engine = TestGameEngine(testScope, figuresRepository, goalsRepository)
+        engine.initGame(gameParams)
+        testScope.testScheduler.advanceUntilIdle()
+        
+        // Ensure goals are set for the engine (sometimes FakeGoalsRepository might need it)
+        engine.setGoals(setOf(testGoal))
+    }
+
     class TestGameEngine(
         scope: TestScope,
         figuresRepo: FakeFiguresRepository,
@@ -52,15 +106,12 @@ class BaseGameEngineTest {
         
         fun triggerDecreaseLife() = decreaseLifeCount()
         fun triggerDecreaseCoef() = decreaseCoefficient()
-    }
-
-    @Before
-    fun setup() {
-        figuresRepository.setRandomFigures(testFigures)
-        goalsRepository.setRandomGoal(testGoal)
-        engine = TestGameEngine(testScope, figuresRepository, goalsRepository)
-        engine.initGame(gameParams)
-        testScope.testScheduler.advanceUntilIdle()
+        fun setCoefficient(value: Float) {
+            _gameData.update { it.copy(coefficient = value) }
+        }
+        fun setGoals(goals: Set<Goal<Any>>) {
+            _gameData.update { it.copy(goals = goals) }
+        }
     }
 
     @Test
@@ -88,18 +139,16 @@ class BaseGameEngineTest {
     }
 
     @Test
-    fun correctTap_increasesScoreAndCoefficientOnEveryTap() {
+    fun multipleCorrectTaps_increasesScoreAndCoefficientConsistently() {
+        if (scoringParams.difficulty != "Default") return
         engine.startGame()
-        engine.onItemClick(0) // 0 is CIRCLE, which matches testGoal
+        engine.onItemClick(0) // coef 1.5, score 10
+        engine.onItemClick(1) // coef 2.0, score 10 + 10*1.5 = 25
+        engine.onItemClick(2) // coef 2.5, score 25 + 10*2.0 = 45
         
-        val data1 = engine.gameData.value
-        assertEquals(10, data1.score)
-        assertEquals(1.5f, data1.coefficient, 0.01f) // Increased by 0.5 on first tap
-
-        engine.onItemClick(1)
-        val data2 = engine.gameData.value
-        assertEquals(25, data2.score) // 10 + (10 * 1.5) = 25
-        assertEquals(2.0f, data2.coefficient, 0.01f) // Increased by another 0.5
+        val data = engine.gameData.value
+        assertEquals(45, data.score)
+        assertEquals(2.5f, data.coefficient, 0.01f)
     }
 
     @Test
@@ -118,10 +167,24 @@ class BaseGameEngineTest {
 
     @Test
     fun lifeReachesZero_finishesGame() {
+        if (scoringParams.difficulty != "Default") return
         engine.triggerDecreaseLife() // 3 -> 2
         engine.triggerDecreaseLife() // 2 -> 1
         engine.triggerDecreaseLife() // 1 -> 0, finishes
         
+        assertTrue(engine.gameState.value is GameEngineState.Finished)
+    }
+
+    @Test
+    fun decreaseLifeCount_exactlyAtZero_finishesGame() {
+        if (scoringParams.difficulty != "Default") return
+        val customParams = gameParams.copy(lifeCount = 1)
+        engine.initGame(customParams)
+        engine.setGoals(setOf(testGoal))
+        testScope.testScheduler.advanceUntilIdle()
+        
+        engine.triggerDecreaseLife() // 1 -> 0
+        assertEquals(0, engine.gameData.value.lifeCount)
         assertTrue(engine.gameState.value is GameEngineState.Finished)
     }
 
@@ -136,7 +199,37 @@ class BaseGameEngineTest {
     }
 
     @Test
+    fun lifeRecovery_exactlyAtThreshold() {
+        if (scoringParams.difficulty != "Default") return
+        val customParams = gameParams.copy(lifeCount = 2, maxLifeCount = 5, itemsPassedWithoutMissToGetLife = 3)
+        engine.initGame(customParams)
+        engine.setGoals(setOf(testGoal))
+        testScope.testScheduler.advanceUntilIdle()
+        engine.startGame()
+        
+        engine.onItemClick(0)
+        engine.onItemClick(1)
+        assertEquals(2, engine.gameData.value.lifeCount)
+        
+        engine.onItemClick(2) // 3rd correct tap
+        assertEquals(3, engine.gameData.value.lifeCount)
+    }
+
+    @Test
+    fun multipleCorrectTaps_inSingleFrame_consistentScore() {
+        if (scoringParams.difficulty != "Default") return
+        engine.startGame()
+        // Simulate two taps "simultaneously" (one after another in test)
+        engine.onItemClick(0) // coef 1.0 -> 1.5, score 0 -> 10
+        engine.onItemClick(1) // coef 1.5 -> 2.0, score 10 -> 10 + (10 * 1.5) = 25
+        
+        assertEquals(2.0f, engine.gameData.value.coefficient, 0.01f)
+        assertEquals(25, engine.gameData.value.score)
+    }
+
+    @Test
     fun lifeRecovery_afterEnoughCorrectTaps() {
+        if (scoringParams.difficulty != "Default") return
         engine.startGame()
         engine.triggerDecreaseLife()
         assertEquals(2, engine.gameData.value.lifeCount)
@@ -145,6 +238,19 @@ class BaseGameEngineTest {
         engine.onItemClick(1) // itemsPassedWithoutMissToGetLife = 2
         
         assertEquals(3, engine.gameData.value.lifeCount)
+    }
+
+    @Test
+    fun lifeRecovery_clampedAtMaxLife() {
+        if (scoringParams.difficulty != "Default") return
+        val customParams = gameParams.copy(lifeCount = 5, maxLifeCount = 5, itemsPassedWithoutMissToGetLife = 1)
+        engine.initGame(customParams)
+        engine.setGoals(setOf(testGoal))
+        testScope.testScheduler.advanceUntilIdle()
+        engine.startGame()
+        
+        engine.onItemClick(0)
+        assertEquals(5, engine.gameData.value.lifeCount)
     }
 
     @Test
