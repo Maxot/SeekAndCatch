@@ -69,8 +69,7 @@ Only one active goal at a time
 
 6.3 Correct Tap
 Increases score
-Increases coefficient based on straight correct tap count
-Required number of consecutive correct taps depends on difficulty
+Increases coefficient by the coefficient step with each correct tap.
 Speed scales proportionally to coefficient
 There is no upper limit on coefficient.
 
