@@ -7,4 +7,5 @@ sealed class FlashGameEvent {
     data object FinishGame : FlashGameEvent()
     data class OnCellClick(val cellId: Int) : FlashGameEvent()
     data class Tick(val millis: Long) : FlashGameEvent()
+    data object ResetGame : FlashGameEvent()
 }

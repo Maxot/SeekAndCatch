@@ -10,14 +10,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object GameEngineModule {
 
     @Provides
-    @Singleton
     fun provideFlowGameEngine(
         @ApplicationScope coroutineScope: CoroutineScope,
         figuresRepository: FiguresRepository,
@@ -27,7 +25,6 @@ object GameEngineModule {
     }
 
     @Provides
-    @Singleton
     fun provideFlashGameEngine(
         @ApplicationScope coroutineScope: CoroutineScope,
         figuresRepository: FiguresRepository,

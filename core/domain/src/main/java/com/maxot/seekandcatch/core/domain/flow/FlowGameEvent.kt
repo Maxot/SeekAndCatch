@@ -10,5 +10,5 @@ sealed class FlowGameEvent {
     data class ItemHeightMeasured(val height: Int) : FlowGameEvent()
     data object UpdateScrollDuration : FlowGameEvent()
     data object UpdatePixelsToScroll : FlowGameEvent()
-
+    data object ResetGame : FlowGameEvent()
 }

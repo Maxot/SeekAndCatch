@@ -96,6 +96,19 @@ class BaseGameEngineTest(
         engine.setGoals(setOf(testGoal))
     }
 
+    @Test
+    fun `reset clears game engine data and state`() = runTest {
+        val gameParams = GameParams(itemsCount = 10, percentOfSuitableItem = 0.5f)
+        engine.initGame(gameParams)
+        
+        testScope.testScheduler.advanceUntilIdle()
+        
+        engine.reset()
+        
+        assertEquals(GameEngineState.Idle, engine.gameState.value)
+        assertEquals(0, engine.gameData.value.score)
+    }
+
     class TestGameEngine(
         scope: TestScope,
         figuresRepo: FakeFiguresRepository,
