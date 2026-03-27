@@ -14,6 +14,7 @@ interface GameEngine {
     fun pauseGame()
     fun resumeGame()
     fun finishGame()
+    fun reset()
     fun onItemClick(itemId: Int)
     fun setFirstVisibleItemIndex(index: Int)
     fun setItemHeight(height: Int)

@@ -48,6 +48,7 @@ class FlowGameUseCase
 
     fun onEvent(event: FlowGameEvent) {
         when (event) {
+            FlowGameEvent.ResetGame -> flowGameEngine.reset()
             is FlowGameEvent.OnItemClick -> flowGameEngine.onItemClick(event.itemId)
             FlowGameEvent.UpdateScrollDuration -> { /* Handled by engine */ }
             FlowGameEvent.UpdatePixelsToScroll -> { /* Handled by engine */ }

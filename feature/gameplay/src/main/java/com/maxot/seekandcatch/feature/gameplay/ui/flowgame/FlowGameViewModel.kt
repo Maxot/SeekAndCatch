@@ -264,6 +264,7 @@ class FlowGameViewModel
         gameUseCase.onEvent(FlowGameEvent.ItemHeightMeasured(height))
 
     override fun onCleared() {
+        gameUseCase.onEvent(FlowGameEvent.ResetGame)
         super.onCleared()
         audioManager.release()
     }

@@ -19,6 +19,7 @@ class FlowGameEngine(
     private var firstVisibleItemIndex = 0
     private var itemHeightPx = 100
     private var gameJob: Job? = null
+    private var addItemsJob: Job? = null
 
     override fun initGame(gameParams: GameParams) {
         super.initGame(gameParams)
@@ -105,7 +106,8 @@ class FlowGameEngine(
         val data = _gameData.value
         if (data.goals.isEmpty()) return
         
-        coroutineScope.launch {
+        addItemsJob?.cancel()
+        addItemsJob = coroutineScope.launch {
             val newList = figuresRepository.getRandomFigures(
                 itemsCount = gameParams?.itemsCount ?: 1000,
                 startId = data.figures.size,
@@ -142,8 +144,12 @@ class FlowGameEngine(
         return rowCount * itemHeightPx.toFloat()
     }
     
-    override fun onTimeTick() {
-        super.onTimeTick()
-        updateScrollDuration()
+    override fun reset() {
+        super.reset()
+        gameJob?.cancel()
+        gameJob = null
+        addItemsJob?.cancel()
+        addItemsJob = null
+        firstVisibleItemIndex = 0
     }
 }

@@ -222,7 +222,7 @@ private fun FlowGameScreenContent(
                     gameDuration = flowGameUiState.gameDuration
                 )
 
-                if (flowGameUiState.isActive) {
+                if (flowGameUiState.isActive || isGameOverAnimating) {
                     FlowGameFieldLayout(
                         modifier = Modifier.shake(enabled = isGameOverAnimating),
                         gridWidth = flowGameUiState.rowWidth,

@@ -29,32 +29,34 @@ abstract class BaseGameEngine(
 
     protected var gameParams: GameParams? = null
     protected var timeJob: Job? = null
+    protected var initJob: Job? = null
 
     protected var itemsPassedWithoutMissing = 0
 
     override fun initGame(gameParams: GameParams) {
+        reset()
         this.gameParams = gameParams
-        itemsPassedWithoutMissing = 0
-        stopTimeTracking()
-        _gameData.value = GameEngineData()
-        _gameState.value = GameEngineState.Idle
-        coroutineScope.launch {
+        startInitJob(gameParams)
+    }
+
+    protected open fun startInitJob(params: GameParams) {
+        initJob = coroutineScope.launch {
             val goal = goalsRepository.getRandomGoal()
             val goals = setOf(goal)
             val figures = figuresRepository.getRandomFigures(
-                itemsCount = gameParams.itemsCount,
-                percentageOfSuitableGoalItems = gameParams.percentOfSuitableItem,
+                itemsCount = params.itemsCount,
+                percentageOfSuitableGoalItems = params.percentOfSuitableItem,
                 goal = goal
             )
             val initialData = GameEngineData(
                 goals = goals,
                 figures = figures,
                 goalSuitableFigures = figuresRepository.getFigureSuitableForGoal(goal),
-                maxLifeCount = gameParams.maxLifeCount,
-                lifeCount = gameParams.lifeCount,
+                maxLifeCount = params.maxLifeCount,
+                lifeCount = params.lifeCount,
                 score = 0,
                 coefficient = 1f,
-                rowWidth = gameParams.rowWidth
+                rowWidth = params.rowWidth
             )
             _gameData.value = initialData
             _gameState.value = GameEngineState.Created(initialData.goalSuitableFigures)
@@ -84,6 +86,15 @@ abstract class BaseGameEngine(
         val finalScore = _gameData.value.score
         _gameState.value = GameEngineState.Finished(finalScore)
         stopTimeTracking()
+    }
+    
+    override fun reset() {
+        stopTimeTracking()
+        initJob?.cancel()
+        initJob = null
+        _gameData.value = GameEngineData()
+        _gameState.value = GameEngineState.Idle
+        itemsPassedWithoutMissing = 0
     }
 
     protected fun startTimeTracking() {

@@ -21,39 +21,33 @@ class FlashGameEngine(
     private var visibleAtOnce: Int = 2
     private val clickedSuitableCells = mutableSetOf<Int>()
 
-    override fun initGame(gameParams: GameParams) {
-        this.gameParams = gameParams
-        itemsPassedWithoutMissing = 0
-        stopTimeTracking()
-        clickedSuitableCells.clear()
-        _gameState.value = GameEngineState.Idle
-        
-        coroutineScope.launch {
+    override fun startInitJob(params: GameParams) {
+        initJob = coroutineScope.launch {
             val goal = goalsRepository.getRandomGoal()
             val goals = setOf(goal)
             val suitable = figuresRepository.getFigureSuitableForGoal(goal)
             
-            val gridWidth = gameParams.rowWidth.coerceAtLeast(1)
+            val gridWidth = params.rowWidth.coerceAtLeast(1)
             val gridCount = gridWidth * gridWidth
 
             val allFigures = figuresRepository.getRandomFigures(
                 itemsCount = maxOf(32, gridCount),
-                percentageOfSuitableGoalItems = gameParams.percentOfSuitableItem,
+                percentageOfSuitableGoalItems = params.percentOfSuitableItem,
                 goal = goal
             ).take(gridCount) // We only need gridCount figures for the initial set
 
             visibleAtOnce = maxOf(1, gridWidth - 1)
 
             val initialCoefficient = 1f
-            val baseFlashMillis = (gameParams.rowDuration * 2L * 1.2f).toLong()
-            val baseSpawnPeriodMillis = (gameParams.rowDuration * 1.2f * 1.5f).toLong()
+            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
+            val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
 
             val initialData = GameEngineData(
                 goals = goals,
                 figures = allFigures,
                 goalSuitableFigures = suitable,
-                maxLifeCount = gameParams.maxLifeCount.coerceAtLeast(1),
-                lifeCount = gameParams.lifeCount,
+                maxLifeCount = params.maxLifeCount.coerceAtLeast(1),
+                lifeCount = params.lifeCount,
                 score = 0,
                 coefficient = initialCoefficient,
                 rowWidth = gridWidth,
@@ -252,6 +246,12 @@ class FlashGameEngine(
 
     private fun calculateSpawnDuration(base: Long, data: GameEngineData): Long {
         return (base / data.coefficient).toLong().coerceAtLeast(MIN_SPAWN_PERIOD_MILLIS)
+    }
+
+    override fun reset() {
+        super.reset()
+        stopFlashLoop()
+        clickedSuitableCells.clear()
     }
 
     private fun calculateDurationPercentage(data: GameEngineData): Float {

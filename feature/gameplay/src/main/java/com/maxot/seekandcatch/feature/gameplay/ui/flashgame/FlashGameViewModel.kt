@@ -218,6 +218,7 @@ class FlashGameViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        gameUseCase.onEvent(FlashGameEvent.ResetGame)
         super.onCleared()
         audioManager.release()
     }

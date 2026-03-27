@@ -33,6 +33,7 @@ class FlashGameUseCase @Inject constructor(
 
     fun onEvent(event: FlashGameEvent) {
         when (event) {
+            FlashGameEvent.ResetGame -> flashGameEngine.reset()
             is FlashGameEvent.OnCellClick -> flashGameEngine.onItemClick(event.cellId)
             FlashGameEvent.FinishGame -> flashGameEngine.finishGame()
             FlashGameEvent.PauseGame -> flashGameEngine.pauseGame()

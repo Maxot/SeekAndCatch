@@ -18,6 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -50,19 +53,26 @@ fun GameResultScreen(
         }
     }
 
+    var isRestartClicked by remember { mutableStateOf(false) }
+
     GameResultScreenBody(
         uiState = uiState,
         onContinue = {
-            viewModel.onEvent(GameResultEvent.ContinueClicked)
-            toMainScreen()
+            if (!isRestartClicked) {
+                viewModel.onEvent(GameResultEvent.ContinueClicked)
+                toMainScreen()
+            }
         },
         onRestart = {
-            viewModel.onEvent(GameResultEvent.RestartClicked)
-            uiState.gameMode?.let { 
-                if (it != com.maxot.seekandcatch.core.common.model.GameMode.DROP) {
-                    onRestart(it)
-                } else {
-                    toMainScreen()
+            if (!isRestartClicked) {
+                isRestartClicked = true
+                viewModel.onEvent(GameResultEvent.RestartClicked)
+                uiState.gameMode?.let {
+                    if (it != com.maxot.seekandcatch.core.common.model.GameMode.DROP) {
+                        onRestart(it)
+                    } else {
+                        toMainScreen()
+                    }
                 }
             }
         }
