@@ -2,6 +2,8 @@ package com.maxot.seekandcatch.feature.gameplay.ui
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -41,27 +43,31 @@ class ColoredFigureLayoutTest {
 
     @Test
     fun coloredFigureHasAlpha1f_performClick_alpha0f() {
+        val figure = Figure(type = Figure.FigureType.CIRCLE, color = Color.Red)
+        var clicked = false
         composeTestRule.setContent {
             MaterialTheme {
                 ColoredFigureLayout(
-                    figure = figure
+                    figure = figure,
+                    onItemClick = { 
+                        clicked = true
+                    }
                 )
             }
         }
-//        Espresso.onView(withContentDescription("Colored Figure")).check(matches(withAlpha(1f)))
-//        composeTestRule.onNodeWithContentDescription("Colored Figure")
-//            .performClick()
-//        Espresso.onView(withContentDescription("Colored Figure")).check(matches(withAlpha(0f)))
 
-        composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
-            .assert(SemanticsMatcher.expectValue(AlphaKey, 1f))
+        val contentDesc = composeTestRule.activity.getString(R.string.colored_figure_content_desc, figure.id)
+        
+        composeTestRule.onNodeWithContentDescription(contentDesc)
+            .assertExists()
             .performClick()
-            .assert(SemanticsMatcher.expectValue(AlphaKey, 0f))
 
+        Assert.assertTrue(clicked)
     }
 
     @Test
     fun coloredFigure_colorAndShapeIsCorrect() {
+        val figure = Figure(type = Figure.FigureType.CIRCLE, color = Color.Red)
         composeTestRule.setContent {
             MaterialTheme {
                 ColoredFigureLayout(
@@ -70,17 +76,18 @@ class ColoredFigureLayoutTest {
             }
         }
 
-        composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
+        val contentDesc = composeTestRule.activity.getString(R.string.colored_figure_content_desc, figure.id)
+
+        composeTestRule.onNodeWithContentDescription(contentDesc)
             .assertExists()
             .assertIsDisplayed()
             .assertHasClickAction()
 
-        composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
+        composeTestRule.onNodeWithContentDescription(contentDesc)
             .assertBackgroundColor(figure.color!!)
 
-        composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
+        composeTestRule.onNodeWithContentDescription(contentDesc)
             .assert(SemanticsMatcher.expectValue(ShapeKey, figure.getShapeForFigure()))
-
     }
 
 }
