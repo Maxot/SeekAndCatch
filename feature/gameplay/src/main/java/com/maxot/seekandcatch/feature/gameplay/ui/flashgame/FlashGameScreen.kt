@@ -64,7 +64,10 @@ fun FlashGameScreen(
         onResume = { viewModel.resumeGame() },
         onFinish = { viewModel.finishGame() },
         onCellClick = { id -> viewModel.onCellClick(id) },
-        isGameOverAnimating = isGameOverAnimating.value
+        isGameOverAnimating = isGameOverAnimating.value,
+        onSoundToggle = { viewModel.toggleSound(it) },
+        onMusicToggle = { viewModel.toggleMusic(it) },
+        onVibrationToggle = { viewModel.toggleVibration(it) }
     )
 
     LaunchedEffect(uiState.isFinished, uiState.isActive, uiState.isReady) {
@@ -87,6 +90,9 @@ private fun FlashGameScreenContent(
     onFinish: () -> Unit,
     onCellClick: (Int) -> Unit,
     isGameOverAnimating: Boolean = false,
+    onSoundToggle: (Boolean) -> Unit = {},
+    onMusicToggle: (Boolean) -> Unit = {},
+    onVibrationToggle: (Boolean) -> Unit = {},
 ) {
     val contentDesc = stringResource(id = R.string.flow_game_screen_content_desc)
 
@@ -182,7 +188,13 @@ private fun FlashGameScreenContent(
                 onFinish()
             },
             dialogTitle = stringResource(id = R.string.title_pause_dialog),
-            dialogText = stringResource(id = R.string.text_pause_dialog)
+            dialogText = stringResource(id = R.string.text_pause_dialog),
+            isSoundEnabled = uiState.isSoundEnabled,
+            isMusicEnabled = uiState.isMusicEnabled,
+            isVibrationEnabled = uiState.isVibrationEnabled,
+            onSoundToggle = onSoundToggle,
+            onMusicToggle = onMusicToggle,
+            onVibrationToggle = onVibrationToggle
         )
     }
 }

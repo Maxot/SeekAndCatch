@@ -19,5 +19,8 @@ data class FlashGameUiState(
     val goals: Set<Goal<Any>> = emptySet(),
     val goalSuitableFigures: Set<Figure> = emptySet(),
     val figuresByCell: Map<Int, Figure> = emptyMap(),
-    val isLifeWasted: Boolean = false
+    val isLifeWasted: Boolean = false,
+    val isSoundEnabled: Boolean = true,
+    val isMusicEnabled: Boolean = true,
+    val isVibrationEnabled: Boolean = true
 )
