@@ -36,6 +36,9 @@ fun GameInfoPanel(
     score: Int,
     coefficient: Float,
     gameDuration: Long,
+    showScoreAndTime: Boolean = true,
+    showCoefficient: Boolean = true,
+    showLives: Boolean = true,
 ) {
     PixelBorderBox(modifier = modifier.padding(6.dp)) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -44,34 +47,43 @@ fun GameInfoPanel(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = stringResource(id = R.string.feature_gameplay_label_score, score),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Time: ${formatMilliseconds(gameDuration)}",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                if (showScoreAndTime) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = stringResource(id = R.string.feature_gameplay_label_score, score),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "Time: ${formatMilliseconds(gameDuration)}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                } else if (!showLives) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
 
-                Column(horizontalAlignment = Alignment.End) {
-                    Row(
-                        horizontalArrangement = Arrangement.End
+                if (showLives) {
+                    Column(
+                        modifier = if (!showScoreAndTime) Modifier.weight(1f) else Modifier,
+                        horizontalAlignment = Alignment.End
                     ) {
-                        repeat((maxLifeCount - lifeCount).coerceAtLeast(0)) {
-                            Icon(
-                                painter = painterResource(SaCIcons.UnselectedFavoriteRes),
-                                contentDescription = null,
-                                tint = null
-                            )
-                        }
-                        repeat(lifeCount.coerceAtLeast(0)) {
-                            Icon(
-                                painter = painterResource(SaCIcons.FavoriteRes),
-                                contentDescription = null,
-                                tint = null
-                            )
+                        Row(
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            repeat((maxLifeCount - lifeCount).coerceAtLeast(0)) {
+                                Icon(
+                                    painter = painterResource(SaCIcons.UnselectedFavoriteRes),
+                                    contentDescription = null,
+                                    tint = null
+                                )
+                            }
+                            repeat(lifeCount.coerceAtLeast(0)) {
+                                Icon(
+                                    painter = painterResource(SaCIcons.FavoriteRes),
+                                    contentDescription = null,
+                                    tint = null
+                                )
+                            }
                         }
                     }
                 }
@@ -84,13 +96,15 @@ fun GameInfoPanel(
                 goalsSuitableFigures = goalsSuitableFigures
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            if (showCoefficient) {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            CoefficientProgressLayout(
-                progress = coefficient,
-                currentCoefficient = coefficient.toInt(),
-                modifier = Modifier.fillMaxWidth()
-            )
+                CoefficientProgressLayout(
+                    progress = coefficient,
+                    currentCoefficient = coefficient.toInt(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
