@@ -60,6 +60,22 @@ class FlashGameViewModel @Inject constructor(
                 _uiState.update { it.copy(isLifeWasted = isWasted) }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.observeSoundState().collect { enabled ->
+                _uiState.update { it.copy(isSoundEnabled = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.observeMusicState().collect { enabled ->
+                _uiState.update { it.copy(isMusicEnabled = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.observeVibrationState().collect { enabled ->
+                _uiState.update { it.copy(isVibrationEnabled = enabled) }
+            }
+        }
     }
 
     private fun observeGameState() {
@@ -215,6 +231,24 @@ class FlashGameViewModel @Inject constructor(
         }
         audioManager.onCorrectTap()
         gameUseCase.onEvent(FlashGameEvent.OnCellClick(id))
+    }
+
+    fun toggleSound(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setSoundState(enabled)
+        }
+    }
+
+    fun toggleMusic(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setMusicState(enabled)
+        }
+    }
+
+    fun toggleVibration(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setVibrationState(enabled)
+        }
     }
 
     override fun onCleared() {

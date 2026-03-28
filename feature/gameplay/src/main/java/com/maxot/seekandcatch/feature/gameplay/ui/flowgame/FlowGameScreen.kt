@@ -122,7 +122,13 @@ fun FlowGameScreen(
                 viewModel.onEvent(FlowGameUiEvent.FinishGame)
             },
             dialogTitle = stringResource(id = R.string.title_pause_dialog),
-            dialogText = stringResource(id = R.string.text_pause_dialog)
+            dialogText = stringResource(id = R.string.text_pause_dialog),
+            isSoundEnabled = flowGameUiState.isSoundEnabled,
+            isMusicEnabled = flowGameUiState.isMusicEnabled,
+            isVibrationEnabled = flowGameUiState.isVibrationEnabled,
+            onSoundToggle = { viewModel.onEvent(FlowGameUiEvent.ToggleSound(it)) },
+            onMusicToggle = { viewModel.onEvent(FlowGameUiEvent.ToggleMusic(it)) },
+            onVibrationToggle = { viewModel.onEvent(FlowGameUiEvent.ToggleVibration(it)) }
         )
     }
 

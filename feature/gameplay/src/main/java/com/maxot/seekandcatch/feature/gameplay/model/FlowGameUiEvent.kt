@@ -10,4 +10,7 @@ sealed class FlowGameUiEvent {
     data object ResumeGame : FlowGameUiEvent()
     data object PauseGame : FlowGameUiEvent()
     data object FinishGame : FlowGameUiEvent()
+    data class ToggleSound(val enabled: Boolean) : FlowGameUiEvent()
+    data class ToggleMusic(val enabled: Boolean) : FlowGameUiEvent()
+    data class ToggleVibration(val enabled: Boolean) : FlowGameUiEvent()
 }

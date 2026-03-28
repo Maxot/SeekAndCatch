@@ -66,6 +66,22 @@ class FlowGameViewModel
                 _flowGameUiState.update { it.copy(isLifeWasted = isWasted) }
             }
         }
+
+        viewModelScope.launch {
+            settingsRepository.observeSoundState().collect { enabled ->
+                _flowGameUiState.update { it.copy(isSoundEnabled = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.observeMusicState().collect { enabled ->
+                _flowGameUiState.update { it.copy(isMusicEnabled = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.observeVibrationState().collect { enabled ->
+                _flowGameUiState.update { it.copy(isVibrationEnabled = enabled) }
+            }
+        }
     }
 
     fun onEvent(event: FlowGameUiEvent) {
@@ -79,6 +95,17 @@ class FlowGameViewModel
             FlowGameUiEvent.SetGameReadyToStart -> setGameReadyToStart()
             is FlowGameUiEvent.FirstVisibleItemIndexChanged -> onFirstVisibleItemIndexChanged(event.firstVisibleItemIndex)
             is FlowGameUiEvent.ItemHeightMeasured -> setItemHeight(event.height)
+            is FlowGameUiEvent.ToggleSound -> viewModelScope.launch {
+                settingsRepository.setSoundState(event.enabled)
+            }
+
+            is FlowGameUiEvent.ToggleMusic -> viewModelScope.launch {
+                settingsRepository.setMusicState(event.enabled)
+            }
+
+            is FlowGameUiEvent.ToggleVibration -> viewModelScope.launch {
+                settingsRepository.setVibrationState(event.enabled)
+            }
         }
 
     }
