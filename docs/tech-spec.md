@@ -138,6 +138,7 @@ Where:
 10.4 Visual Feedback
 - Shake: Triggered on health or coefficient loss.
 - Red Flash: Triggered on health or coefficient loss. Overlay on Game Info Panel.
+- Fragments: When a correct item is clicked, it breaks into multiple fragments that fly out from the center and fade.
 
 11. Result Screen
 11.1 Display
