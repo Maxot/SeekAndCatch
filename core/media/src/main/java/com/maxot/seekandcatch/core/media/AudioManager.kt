@@ -16,6 +16,10 @@ class AudioManager @Inject constructor(
         musicManager.play(musicType)
     }
 
+    fun onMusicSettingChanged(enabled: Boolean) {
+        musicManager.onMusicSettingChanged(enabled)
+    }
+
     fun pauseMusic() {
         musicManager.pauseMusic()
     }

@@ -32,35 +32,52 @@ class MusicManager
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    private fun initializePlayer(musicType: MusicType) {
+    fun play(musicType: MusicType) {
+        _currentMusicType = musicType
         scope.launch {
             if (settingsProvider.isMusicEnabled()) {
-                _currentMusicType = musicType
-                mediaPlayer = MediaPlayer.create(context, musicType.resId)?.apply {
-                    isLooping = true
-                    start()
+                if (mediaPlayer?.isPlaying == true && _currentMusicType == musicType) {
+                    return@launch
                 }
+                initializePlayer(musicType)
             }
         }
     }
 
-    fun play(musicType: MusicType) {
-        if (_currentMusicType == musicType) {
-            mediaPlayer?.let {
-                if (!it.isPlaying) it.start()
-                return
-            }
+    private fun initializePlayer(musicType: MusicType) {
+        _currentMusicType = musicType
+        if (mediaPlayer != null) {
+            stopMusicInternal()
         }
-        stopMusic()
-        initializePlayer(musicType)
+        mediaPlayer = MediaPlayer.create(context, musicType.resId)?.apply {
+            isLooping = true
+            start()
+        }
+    }
+
+    fun onMusicSettingChanged(enabled: Boolean) {
+        if (enabled) {
+            val type = _currentMusicType
+            if (type != null && mediaPlayer == null) {
+                initializePlayer(type)
+            }
+        } else {
+            stopMusicInternal()
+        }
     }
 
     fun pauseMusic() {
-        mediaPlayer?.takeIf { it.isPlaying }?.pause()
+        mediaPlayer?.let {
+            if (it.isPlaying) it.pause()
+        }
     }
 
     fun stopMusic() {
         _currentMusicType = null
+        stopMusicInternal()
+    }
+
+    private fun stopMusicInternal() {
         mediaPlayer?.let {
             try {
                 if (it.isPlaying) it.stop()
@@ -73,7 +90,18 @@ class MusicManager
     }
 
     fun resumeMusic() {
-        mediaPlayer?.start()
+        scope.launch {
+            if (settingsProvider.isMusicEnabled()) {
+                if (mediaPlayer != null) {
+                    mediaPlayer?.start()
+                } else {
+                    val type = _currentMusicType
+                    if (type != null) {
+                        initializePlayer(type)
+                    }
+                }
+            }
+        }
     }
 
     fun releaseMusic() {

@@ -7,6 +7,7 @@ import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.settings.SCLocaleManager
+import com.maxot.seekandcatch.feature.settings.VibrationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,8 @@ class SettingsViewModel
 @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val localeManager: SCLocaleManager,
-    private val audioManager: AudioManager
+    private val audioManager: AudioManager,
+    private val vibrationManager: VibrationManager
 ) : ViewModel() {
 
     val soundState = settingsRepository.observeSoundState()
@@ -52,6 +54,7 @@ class SettingsViewModel
     fun setMusicState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setMusicState(newState)
+            audioManager.onMusicSettingChanged(newState)
             audioManager.onButtonClick()
         }
     }
@@ -59,6 +62,9 @@ class SettingsViewModel
     fun setVibrationState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setVibrationState(newState)
+            if (newState) {
+                vibrationManager.vibrate(50)
+            }
             audioManager.onButtonClick()
         }
     }
