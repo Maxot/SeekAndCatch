@@ -1,8 +1,8 @@
 package com.maxot.seekandcatch.feature.gameplay.ui.flowgame
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
@@ -34,6 +36,7 @@ import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -44,6 +47,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -53,8 +57,9 @@ import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.R
-import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.flashRed
+import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
+import com.maxot.seekandcatch.feature.gameplay.moveAndScale
 import com.maxot.seekandcatch.feature.gameplay.shake
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
@@ -62,7 +67,6 @@ import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlowGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameInfoPanel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 const val TAG = "FlowGameScreen"
 
@@ -99,11 +103,7 @@ fun FlowGameScreen(
     }
 
     if (flowGameUiState.isReady && !flowGameUiState.isActive && !flowGameUiState.isPaused) {
-        ReadyToGameLayout(
-            goals = flowGameUiState.goals,
-            goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
-            setGameReadyToStart = { viewModel.onEvent(FlowGameUiEvent.SetGameReadyToStart) }
-        )
+        // We handle ReadyToGameLayout inside FlowGameScreenContent to manage shared coordinates
     }
 
     if (flowGameUiState.isPaused) {
@@ -153,7 +153,7 @@ fun FlowGameScreen(
 }
 
 @Composable
-private fun FlowGameScreenContent(
+internal fun FlowGameScreenContent(
     modifier: Modifier = Modifier,
     gridState: LazyGridState = rememberLazyGridState(),
     gameMode: GameMode = GameMode.FLOW,
@@ -189,6 +189,13 @@ private fun FlowGameScreenContent(
         }
     }
 
+    var targetGameInfoCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val infoPanelAlpha by animateFloatAsState(
+        targetValue = if (flowGameUiState.isActive || isGameOverAnimating) 1f else 0f,
+        animationSpec = tween(durationMillis = 500),
+        label = "infoPanelAlpha"
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = com.maxot.seekandcatch.core.designsystem.R.drawable.background),
@@ -196,6 +203,23 @@ private fun FlowGameScreenContent(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+
+        if (flowGameUiState.isReady && !flowGameUiState.isActive && !flowGameUiState.isPaused) {
+            ReadyToGameLayout(
+                modifier = Modifier.zIndex(2f),
+                goals = flowGameUiState.goals,
+                goalsSuitableFigures = flowGameUiState.goalSuitableFigures,
+                setGameReadyToStart = { sendEvent(FlowGameUiEvent.SetGameReadyToStart) },
+                targetCoordinates = targetGameInfoCoordinates,
+                isTransitioning = false, // FlowGameEngine might need a transition state, but for now we'll use a timer
+                maxLifeCount = flowGameUiState.maxLifeCount,
+                lifeCount = flowGameUiState.lifeCount,
+                score = flowGameUiState.score,
+                coefficient = flowGameUiState.coefficient,
+                gameDuration = flowGameUiState.gameDuration
+            )
+        }
+
         Box(
             modifier = Modifier
                 .semantics { contentDescription = flowGameScreenContentDesc }
@@ -206,9 +230,11 @@ private fun FlowGameScreenContent(
             Column {
                 GameInfoPanel(
                     modifier = Modifier
+                        .alpha(infoPanelAlpha)
                         .shake(enabled = flowGameUiState.isLifeWasted)
                         .flashRed(enabled = flowGameUiState.isLifeWasted)
                         .onGloballyPositioned {
+                            targetGameInfoCoordinates = it
                             gameInfoPanelSize = with(density) {
                                 it.size.height.toDp() // Height of GameInfoPanel
                             }
@@ -279,48 +305,78 @@ private fun ReadyToGameLayout(
     modifier: Modifier = Modifier,
     goals: Set<Goal<Any>>,
     goalsSuitableFigures: Set<Figure>,
-    setGameReadyToStart: () -> Unit
+    setGameReadyToStart: () -> Unit,
+    targetCoordinates: LayoutCoordinates? = null,
+    isTransitioning: Boolean = false,
+    maxLifeCount: Int = 5,
+    lifeCount: Int = 5,
+    score: Int = 0,
+    coefficient: Float = 0f,
+    gameDuration: Long = 0
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .then(modifier)
             .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        contentAlignment = Alignment.Center
     ) {
         var countDown by remember {
             mutableStateOf(3)
         }
+        var isTimerFinished by remember { mutableStateOf(false) }
 
         val text = if (countDown > 0) "$countDown" else "Go!"
 
-//        GoalsLayout(
-//            modifier = Modifier,
-//            goals = goals,
-//            textStyle = MaterialTheme.typography.displaySmall
-//        )
-        DetailedGoalsLayout(goalsSuitableFigures = goalsSuitableFigures)
-        Text(
-            modifier = Modifier.padding(top = 20.dp),
-            text = stringResource(R.string.feature_gameplay_click_on_items),
-            style = MaterialTheme.typography.displayLarge,
-            textAlign = TextAlign.Center
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            GameInfoPanel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .moveAndScale(
+                        targetCoordinates = targetCoordinates,
+                        isAtTarget = isTimerFinished,
+                        animationDuration = 500
+                    ),
+                maxLifeCount = maxLifeCount,
+                lifeCount = lifeCount,
+                goals = goals,
+                goalsSuitableFigures = goalsSuitableFigures,
+                score = score,
+                coefficient = coefficient,
+                gameDuration = gameDuration,
+                showScoreAndTime = isTimerFinished,
+                showCoefficient = isTimerFinished,
+                showLives = isTimerFinished
+            )
+            Text(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .alpha(if (isTimerFinished) 0f else 1f),
+                text = stringResource(R.string.feature_gameplay_click_on_items),
+                style = MaterialTheme.typography.displayLarge,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = text,
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .alpha(if (isTimerFinished) 0f else 1f),
+                style = MaterialTheme.typography.displayLarge
+            )
+        }
 
         LaunchedEffect(key1 = Unit) {
             repeat(3) {
                 delay(1_000)
                 countDown--
             }
+            isTimerFinished = true
             delay(500)
             setGameReadyToStart()
         }
-
-        Text(
-            text = text,
-            modifier = Modifier.padding(top = 20.dp),
-            style = MaterialTheme.typography.displayLarge
-        )
     }
 }
 
@@ -336,7 +392,12 @@ private fun ReadyToGameLayoutPreview() {
         ReadyToGameLayout(
             goals = setOf(),
             goalsSuitableFigures = setOf(),
-            setGameReadyToStart = {}
+            setGameReadyToStart = {},
+            maxLifeCount = 5,
+            lifeCount = 3,
+            score = 0,
+            coefficient = 0f,
+            gameDuration = 0
         )
     }
 }

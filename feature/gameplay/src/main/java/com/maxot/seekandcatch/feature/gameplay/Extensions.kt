@@ -2,17 +2,27 @@ package com.maxot.seekandcatch.feature.gameplay
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector2D
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.toSize
 import kotlin.random.Random
 
 fun Int.Companion.getRandomNumber(): Int {
@@ -67,6 +77,49 @@ fun Modifier.flashRed(
     this.graphicsLayer {
         clip = true
     }.background(color.value)
+}
+
+fun Modifier.moveAndScale(
+    targetCoordinates: LayoutCoordinates?,
+    isAtTarget: Boolean,
+    animationDuration: Int = 1000,
+    easing: Easing = LinearEasing
+): Modifier = composed {
+    var currentCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+
+    val translationX by animateFloatAsState(
+        targetValue = if (isAtTarget && targetCoordinates != null && currentCoordinates != null) {
+            targetCoordinates.positionInRoot().x - currentCoordinates!!.positionInRoot().x
+        } else 0f,
+        animationSpec = tween(durationMillis = animationDuration, easing = easing),
+        label = "translationX"
+    )
+
+    val translationY by animateFloatAsState(
+        targetValue = if (isAtTarget && targetCoordinates != null && currentCoordinates != null) {
+            targetCoordinates.positionInRoot().y - currentCoordinates!!.positionInRoot().y
+        } else 0f,
+        animationSpec = tween(durationMillis = animationDuration, easing = easing),
+        label = "translationY"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (isAtTarget && targetCoordinates != null && currentCoordinates != null && currentCoordinates!!.size.toSize().width > 0) {
+            targetCoordinates.size.toSize().width / currentCoordinates!!.size.toSize().width
+        } else 1f,
+        animationSpec = tween(durationMillis = animationDuration, easing = easing),
+        label = "scale"
+    )
+
+    this
+        .onGloballyPositioned { currentCoordinates = it }
+        .graphicsLayer {
+            this.translationX = translationX
+            this.translationY = translationY
+            this.scaleX = scale
+            this.scaleY = scale
+            this.transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
+        }
 }
 
 val Offset.Companion.VectorConverter: TwoWayConverter<Offset, AnimationVector2D>

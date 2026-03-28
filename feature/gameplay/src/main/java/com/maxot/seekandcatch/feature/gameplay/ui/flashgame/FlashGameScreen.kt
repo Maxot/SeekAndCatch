@@ -1,6 +1,7 @@
 package com.maxot.seekandcatch.feature.gameplay.ui.flashgame
 
-import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -28,12 +32,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.flashRed
+import com.maxot.seekandcatch.feature.gameplay.moveAndScale
 import com.maxot.seekandcatch.feature.gameplay.shake
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiState
@@ -83,9 +90,16 @@ private fun FlashGameScreenContent(
 ) {
     val contentDesc = stringResource(id = R.string.flow_game_screen_content_desc)
 
-    BackHandler(enabled = uiState.isActive) {
+    androidx.activity.compose.BackHandler(enabled = uiState.isActive) {
         onPause()
     }
+
+    var targetGameInfoCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val infoPanelAlpha by animateFloatAsState(
+        targetValue = if (uiState.isActive || isGameOverAnimating) 1f else 0f,
+        animationSpec = tween(durationMillis = 500),
+        label = "infoPanelAlpha"
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -94,6 +108,21 @@ private fun FlashGameScreenContent(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+
+        if (uiState.isReady && !uiState.isActive && !uiState.isPaused && !uiState.isFinished) {
+            ReadyToFlashGameLayout(
+                modifier = Modifier.zIndex(2f),
+                goals = uiState.goals,
+                goalsSuitableFigures = uiState.goalSuitableFigures,
+                onCountdownFinished = onStart,
+                targetCoordinates = targetGameInfoCoordinates,
+                maxLifeCount = 5,
+                lifeCount = uiState.lifeCount,
+                score = uiState.score,
+                coefficient = uiState.coefficient,
+                gameDuration = uiState.gameDuration
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -107,38 +136,15 @@ private fun FlashGameScreenContent(
                     text = stringResource(id = R.string.feature_gameplay_loading),
                     style = MaterialTheme.typography.titleLarge
                 )
-            } else if (uiState.isReady && !uiState.isActive && !uiState.isPaused && !uiState.isFinished) {
-                // Show goals and countdown before start
-                GameInfoPanel(
-                    modifier = Modifier
-                        .shake(enabled = uiState.isLifeWasted)
-                        .flashRed(enabled = uiState.isLifeWasted),
-                    maxLifeCount = 5,
-                    lifeCount = uiState.lifeCount,
-                    goals = uiState.goals,
-                    goalsSuitableFigures = uiState.goalSuitableFigures,
-                    score = uiState.score,
-                    coefficient = uiState.coefficient,
-                    gameDuration = uiState.gameDuration,
-                )
-
-                // Center the ready-to-start layout within the free space of the screen
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ReadyToFlashGameLayout(
-                        goalsSuitableFigures = uiState.goalSuitableFigures,
-                        onCountdownFinished = onStart
-                    )
-                }
             } else {
                 GameInfoPanel(
                     modifier = Modifier
+                        .alpha(infoPanelAlpha)
                         .shake(enabled = uiState.isLifeWasted)
-                        .flashRed(enabled = uiState.isLifeWasted),
+                        .flashRed(enabled = uiState.isLifeWasted)
+                        .onGloballyPositioned {
+                            targetGameInfoCoordinates = it
+                        },
                     maxLifeCount = 5,
                     lifeCount = uiState.lifeCount,
                     goals = uiState.goals,
@@ -146,18 +152,23 @@ private fun FlashGameScreenContent(
                     score = uiState.score,
                     coefficient = uiState.coefficient,
                     gameDuration = uiState.gameDuration,
+                    showScoreAndTime = uiState.isActive || isGameOverAnimating,
+                    showCoefficient = uiState.isActive || isGameOverAnimating
                 )
-                FlashGameFieldLayout(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .shake(enabled = isGameOverAnimating),
-                    gridWidth = uiState.gridWidth,
-                    gridSize = uiState.gridSize,
-                    figuresByCell = uiState.figuresByCell,
-                    visibleCells = uiState.visibleCells,
-                    onCellClick = onCellClick,
-                    isGameOver = isGameOverAnimating
-                )
+
+                if (uiState.isActive || isGameOverAnimating) {
+                    FlashGameFieldLayout(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .shake(enabled = isGameOverAnimating),
+                        gridWidth = uiState.gridWidth,
+                        gridSize = uiState.gridSize,
+                        figuresByCell = uiState.figuresByCell,
+                        visibleCells = uiState.visibleCells,
+                        onCellClick = onCellClick,
+                        isGameOver = isGameOverAnimating
+                    )
+                }
             }
         }
     }
@@ -205,25 +216,69 @@ private fun FlashGameCell(
 
 @Composable
 private fun ReadyToFlashGameLayout(
+    modifier: Modifier = Modifier,
+    goals: Set<Goal<Any>> = emptySet(),
     goalsSuitableFigures: Set<Figure>,
-    onCountdownFinished: () -> Unit
+    onCountdownFinished: () -> Unit,
+    targetCoordinates: LayoutCoordinates? = null,
+    maxLifeCount: Int = 5,
+    lifeCount: Int = 5,
+    score: Int = 0,
+    coefficient: Float = 1f,
+    gameDuration: Long = 0L
 ) {
-    var countDown by remember { mutableIntStateOf(3) }
-    val text = if (countDown > 0) "$countDown" else "Go!"
-
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier
+            .then(modifier)
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        DetailedGoalsLayout(
-            goalsSuitableFigures = goalsSuitableFigures
-        )
-        Text(
-            modifier = Modifier.padding(top = 20.dp),
-            text = stringResource(R.string.feature_gameplay_click_on_items),
-            style = MaterialTheme.typography.displayLarge,
-            textAlign = TextAlign.Center
-        )
+        var countDown by remember { mutableIntStateOf(3) }
+        var isTimerFinished by remember { mutableStateOf(false) }
+
+        val text = if (countDown > 0) "$countDown" else "Go!"
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            GameInfoPanel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .moveAndScale(
+                        targetCoordinates = targetCoordinates,
+                        isAtTarget = isTimerFinished,
+                        animationDuration = 500
+                    ),
+                maxLifeCount = maxLifeCount,
+                lifeCount = lifeCount,
+                goals = goals,
+                goalsSuitableFigures = goalsSuitableFigures,
+                score = score,
+                coefficient = coefficient,
+                gameDuration = gameDuration,
+                showScoreAndTime = isTimerFinished,
+                showCoefficient = isTimerFinished,
+                showLives = isTimerFinished
+            )
+
+            Text(
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .alpha(if (isTimerFinished) 0f else 1f),
+                text = stringResource(R.string.feature_gameplay_click_on_items),
+                style = MaterialTheme.typography.displayLarge,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = text,
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .alpha(if (isTimerFinished) 0f else 1f),
+                style = MaterialTheme.typography.displayLarge
+            )
+        }
 
         LaunchedEffect(key1 = Unit) {
             delay(1_000)
@@ -232,15 +287,10 @@ private fun ReadyToFlashGameLayout(
                 delay(1_000)
             }
             countDown--
+            isTimerFinished = true
             delay(500)
             onCountdownFinished()
         }
-
-        Text(
-            text = text,
-            modifier = Modifier.padding(top = 20.dp),
-            style = MaterialTheme.typography.displayLarge
-        )
     }
 }
 
