@@ -38,6 +38,11 @@ local.properties
 # Gradle cache
 .gradle
 
+# Build outputs
+build_output*.txt
+.output.txt
+app/release/
+
 # Sandbox stuff
 _sandbox
 
