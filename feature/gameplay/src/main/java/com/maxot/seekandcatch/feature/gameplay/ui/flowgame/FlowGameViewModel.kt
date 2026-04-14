@@ -137,6 +137,7 @@ class FlowGameViewModel
                                 pixelsToScroll = gameState.data.pixelsToScroll,
                                 rowWidth = gameState.data.rowWidth,
                                 isReverseScrolling = gameState.data.isReverseScrolling,
+                                isLifeWasted = gameState.data.isLifeWasted,
                                 isActive = true,
                                 isLoading = false,
                                 isPaused = false,

@@ -27,5 +27,6 @@ data class FlashGameData(
     val coefficient: Float = 1f,
     val gameDuration: Long = 0L,
     val flashMillis: Long = 1200L, // how long a figure is visible
-    val spawnPeriodMillis: Long = 900L // how often new figures appear
+    val spawnPeriodMillis: Long = 900L, // how often new figures appear
+    val isLifeWasted: Boolean = false,
 )

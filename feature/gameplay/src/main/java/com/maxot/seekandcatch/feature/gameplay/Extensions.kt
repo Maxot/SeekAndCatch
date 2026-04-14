@@ -3,12 +3,15 @@ package com.maxot.seekandcatch.feature.gameplay
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import kotlin.random.Random
 
@@ -50,6 +53,20 @@ fun Modifier.shake(
         translationX = shakeOffset.value.x
         translationY = shakeOffset.value.y
     }
+}
+
+fun Modifier.flashRed(
+    enabled: Boolean
+): Modifier = composed {
+    val color = animateColorAsState(
+        targetValue = if (enabled) Color.Red.copy(alpha = 0.5f) else Color.Transparent,
+        animationSpec = tween(durationMillis = 250),
+        label = "FlashRed"
+    )
+
+    this.graphicsLayer {
+        clip = true
+    }.background(color.value)
 }
 
 val Offset.Companion.VectorConverter: TwoWayConverter<Offset, AnimationVector2D>

@@ -92,7 +92,6 @@ abstract class BaseGameEngine(
             while (true) {
                 delay(1000)
                 _gameData.update { it.copy(gameDuration = it.gameDuration + 1000) }
-                onTimeTick()
             }
         }
     }
@@ -178,7 +177,11 @@ abstract class BaseGameEngine(
     protected open fun decreaseCoefficient() {
         _gameData.update {
             val newCoef = (it.coefficient / 2f).coerceAtLeast(1f)
-            it.copy(coefficient = newCoef)
+            it.copy(coefficient = newCoef, isLifeWasted = true)
+        }
+        coroutineScope.launch {
+            delay(500)
+            _gameData.update { it.copy(isLifeWasted = false) }
         }
         itemsPassedWithoutMissing = 0
     }

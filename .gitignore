@@ -43,3 +43,7 @@ _sandbox
 
 # Android Studio captures folder
 captures/
+# Android Release artifacts and Baseline Profiles
+**/release/
+*.dm
+output-metadata.json

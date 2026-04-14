@@ -9,7 +9,7 @@ plugins {
 val versionMajor = 1
 val versionMinor = 0
 val versionPatch = 0
-val versionBuild = 2
+val versionBuild = 3
 
 android {
     namespace = "com.maxot.seekandcatch"

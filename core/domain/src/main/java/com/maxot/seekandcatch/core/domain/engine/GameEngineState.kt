@@ -27,4 +27,5 @@ data class GameEngineData(
     val flashMillis: Long = 1200L,
     val spawnPeriodMillis: Long = 900L,
     val isReverseScrolling: Boolean = false,
+    val isLifeWasted: Boolean = false,
 )

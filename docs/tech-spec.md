@@ -132,8 +132,12 @@ Where:
 
 10.3 Vibration
 - Correct tap (light)
-- Wrong tap / Game over (strong)
+- Wrong tap / Game over / Health/Coefficient loss (strong)
 - Patterns configurable
+
+10.4 Visual Feedback
+- Shake: Triggered on health or coefficient loss.
+- Red Flash: Triggered on health or coefficient loss. Overlay on Game Info Panel.
 
 11. Result Screen
 11.1 Display
