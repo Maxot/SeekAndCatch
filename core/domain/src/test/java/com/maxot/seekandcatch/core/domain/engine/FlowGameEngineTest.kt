@@ -55,6 +55,7 @@ class FlowGameEngineTest {
     @Test
     fun scroll_processesPassedItems_andDecreasesLifeIfMissed() {
         engine.startGame()
+        testScope.testScheduler.advanceUntilIdle()
         // Row width is 4. Items 0, 1, 2, 3 are in the first row.
         // Item 0 is CIRCLE (suitable), 1 is TRIANGLE, 2 is CIRCLE (suitable), 3 is TRIANGLE.
         // If we scroll past them without clicking, life should decrease twice.
@@ -66,6 +67,59 @@ class FlowGameEngineTest {
         // Suitable items in row 0: id 0 and id 2. Both missed.
         // LifeCount started at 3. 3 -> 2 -> 1.
         assertEquals(1, engine.gameData.value.lifeCount)
+    }
+
+    @Test
+    fun scroll_missedItem_decreasesCoefficientFirst() {
+        engine.startGame()
+        testScope.testScheduler.advanceUntilIdle()
+        // Increase coefficient first
+        engine.onItemClick(0) // coef 1.5
+        assertEquals(1.5f, engine.gameData.value.coefficient, 0.01f)
+        
+        // Now miss an item in row 1 (indices 4-7). Suitable is id 4 (even), id 6 (even).
+        // Let's miss id 4. Row 1 is indices 4-7.
+        // To process row 1, we need firstVisibleItemIndex to be at least rowWidth * 2 + 2 * rowWidth = 16
+        engine.setFirstVisibleItemIndex(16)
+        
+        // Row 1 has id 4 (CIRCLE, matches) and id 6 (CIRCLE, matches).
+        // Both are missed.
+        // First miss: coef 1.5 -> 1.0 (clamped).
+        // Second miss: coef is 1.0, so HP 3 -> 2.
+        assertEquals(1.0f, engine.gameData.value.coefficient, 0.01f)
+        assertEquals(2, engine.gameData.value.lifeCount)
+    }
+
+    @Test
+    fun scroll_missedItem_hpReachesZero_gameOver() {
+        val customParams = gameParams.copy(lifeCount = 1)
+        engine.initGame(customParams)
+        testScope.testScheduler.advanceUntilIdle()
+        engine.startGame()
+        
+        // Row 0 has 2 suitable items (0, 2).
+        // Miss them.
+        engine.setFirstVisibleItemIndex(12)
+        
+        // First miss: HP 1 -> 0, Game Over.
+        // Second miss: engine is finished, no more changes.
+        assertEquals(0, engine.gameData.value.lifeCount)
+        assertTrue(engine.gameState.value is GameEngineState.Finished)
+    }
+
+    @Test
+    fun flow_lifeRecovery_atThreshold() {
+        val customParams = gameParams.copy(lifeCount = 2, maxLifeCount = 5, itemsPassedWithoutMissToGetLife = 2)
+        engine.initGame(customParams)
+        testScope.testScheduler.advanceUntilIdle()
+        engine.startGame()
+        
+        // Item 0 is CIRCLE (suitable), Item 2 is CIRCLE (suitable)
+        engine.onItemClick(0)
+        assertEquals(2, engine.gameData.value.lifeCount)
+        
+        engine.onItemClick(2) // 2nd correct tap, matches threshold
+        assertEquals(3, engine.gameData.value.lifeCount)
     }
 
     @Test

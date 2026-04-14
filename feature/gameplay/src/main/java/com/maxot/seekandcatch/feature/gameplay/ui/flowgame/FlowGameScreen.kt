@@ -54,6 +54,7 @@ import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
+import com.maxot.seekandcatch.feature.gameplay.flashRed
 import com.maxot.seekandcatch.feature.gameplay.shake
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
@@ -93,7 +94,6 @@ fun FlowGameScreen(
     LaunchedEffect(key1 = true) {
         snapshotFlow { gridState.firstVisibleItemIndex }
             .collect {
-                Log.d(TAG, "firstVisibleItemIndex: ${gridState.firstVisibleItemIndex}")
                 viewModel.onEvent(FlowGameUiEvent.FirstVisibleItemIndexChanged(gridState.firstVisibleItemIndex))
             }
     }
@@ -207,6 +207,7 @@ private fun FlowGameScreenContent(
                 GameInfoPanel(
                     modifier = Modifier
                         .shake(enabled = flowGameUiState.isLifeWasted)
+                        .flashRed(enabled = flowGameUiState.isLifeWasted)
                         .onGloballyPositioned {
                             gameInfoPanelSize = with(density) {
                                 it.size.height.toDp() // Height of GameInfoPanel
@@ -221,23 +222,25 @@ private fun FlowGameScreenContent(
                     gameDuration = flowGameUiState.gameDuration
                 )
 
-                FlowGameFieldLayout(
-                    modifier = Modifier.shake(enabled = isGameOverAnimating),
-                    gridWidth = flowGameUiState.rowWidth,
-                    spacerHeight = spacerHeight,
-                    figures = flowGameUiState.figures,
-                    gridState = gridState,
-                    onItemHeightMeasured = { height ->
-                        sendEvent(
-                            FlowGameUiEvent.ItemHeightMeasured(
-                                height
+                if (flowGameUiState.isActive) {
+                    FlowGameFieldLayout(
+                        modifier = Modifier.shake(enabled = isGameOverAnimating),
+                        gridWidth = flowGameUiState.rowWidth,
+                        spacerHeight = spacerHeight,
+                        figures = flowGameUiState.figures,
+                        gridState = gridState,
+                        onItemHeightMeasured = { height ->
+                            sendEvent(
+                                FlowGameUiEvent.ItemHeightMeasured(
+                                    height
+                                )
                             )
-                        )
-                    },
-                    onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
-                    reverseLayout = flowGameUiState.isReverseScrolling,
-                    isGameOver = isGameOverAnimating
-                )
+                        },
+                        onItemClick = { id -> sendEvent(FlowGameUiEvent.OnItemClick(id)) },
+                        reverseLayout = flowGameUiState.isReverseScrolling,
+                        isGameOver = isGameOverAnimating
+                    )
+                }
             }
         }
 

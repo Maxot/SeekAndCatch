@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,14 +33,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.flashRed
+import com.maxot.seekandcatch.feature.gameplay.shake
 import com.maxot.seekandcatch.feature.gameplay.ui.PauseDialog
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiState
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlashGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameInfoPanel
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import com.maxot.seekandcatch.feature.gameplay.shake
 import kotlinx.coroutines.delay
 
 @Composable
@@ -110,7 +110,9 @@ private fun FlashGameScreenContent(
             } else if (uiState.isReady && !uiState.isActive && !uiState.isPaused && !uiState.isFinished) {
                 // Show goals and countdown before start
                 GameInfoPanel(
-                    modifier = Modifier.shake(enabled = uiState.isLifeWasted),
+                    modifier = Modifier
+                        .shake(enabled = uiState.isLifeWasted)
+                        .flashRed(enabled = uiState.isLifeWasted),
                     maxLifeCount = 5,
                     lifeCount = uiState.lifeCount,
                     goals = uiState.goals,
@@ -134,7 +136,9 @@ private fun FlashGameScreenContent(
                 }
             } else {
                 GameInfoPanel(
-                    modifier = Modifier.shake(enabled = uiState.isLifeWasted),
+                    modifier = Modifier
+                        .shake(enabled = uiState.isLifeWasted)
+                        .flashRed(enabled = uiState.isLifeWasted),
                     maxLifeCount = 5,
                     lifeCount = uiState.lifeCount,
                     goals = uiState.goals,

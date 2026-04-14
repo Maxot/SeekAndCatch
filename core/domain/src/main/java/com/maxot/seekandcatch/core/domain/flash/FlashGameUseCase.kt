@@ -65,7 +65,8 @@ class FlashGameUseCase @Inject constructor(
             coefficient = data.coefficient,
             gameDuration = data.gameDuration,
             flashMillis = data.flashMillis,
-            spawnPeriodMillis = data.spawnPeriodMillis
+            spawnPeriodMillis = data.spawnPeriodMillis,
+            isLifeWasted = data.isLifeWasted
         )
     }
 

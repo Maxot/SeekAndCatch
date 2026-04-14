@@ -29,7 +29,6 @@ class ColorsRepositoryImpl
             accountDataStore.setSelectedColors(colors)
         } catch (e: Exception) {
             // Handle the exception as needed
-            println("Error setting selected colors: ${e.message}")
         }
     }
 
@@ -38,8 +37,6 @@ class ColorsRepositoryImpl
         return try {
             selectedColors.first().random()
         } catch (e: Exception) {
-            // Handle the exception as needed
-            println("Error getting random selected color: ${e.message}")
             // Return a default color or handle as needed
             Color.White
         }

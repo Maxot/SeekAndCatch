@@ -20,7 +20,6 @@ class UserFirestoreDataSource @Inject constructor() : UserDataSource {
     override suspend fun saveUser(user: User) {
         try {
             usersCollection.document(user.id).set(user).await()
-            Log.d(TAG, "User successfully saved: ${user.id}")
         } catch (e: Exception) {
             Log.e(TAG, "Error saving user", e)
         }

@@ -40,9 +40,6 @@ class LeaderboardFirestoreDataSource
         if (userId.isNotEmpty()) {
             val userDocument = leaderboardCollection.document(userId)
             userDocument.set(recordMap)
-                .addOnSuccessListener {
-                    Log.d(TAG, "DocumentSnapshot successfully written!")
-                }
                 .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
         } else {
             // This case should be rare now as we auto-register on app start
@@ -50,7 +47,6 @@ class LeaderboardFirestoreDataSource
                 .add(recordMap)
                 .addOnSuccessListener { documentReference ->
                     onSuccessful(documentReference.id)
-                    Log.d(TAG, "DocumentSnapshot successfully written!")
                 }
                 .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
         }
