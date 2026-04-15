@@ -120,6 +120,7 @@ class FlashGameViewModel @Inject constructor(
                                 goals = d.goals,
                                 goalSuitableFigures = d.goalSuitableFigures,
                                 figuresByCell = d.figuresByCell,
+                                isLifeWasted = d.isLifeWasted || it.isLifeWasted
                             )
                         }
                         processLifeCountChanges(state.data.lifeCount)

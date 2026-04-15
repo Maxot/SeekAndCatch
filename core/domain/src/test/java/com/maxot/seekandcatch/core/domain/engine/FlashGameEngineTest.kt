@@ -61,17 +61,17 @@ class FlashGameEngineTest {
         // baseSpawnPeriodMillis = (rowDuration * 1.5f * 1.5f).toLong() = 2250
         // baseFlashMillis = (rowDuration * 2L * 1.5f).toLong() = 3000
         
-        // Wait for first loop to START (after first spawnPeriodMillis delay)
-        advanceTimeBy(3010) 
+        // Wait for first spawn delay to pass (2250ms)
+        advanceTimeBy(2251) 
         
         val visibleCells = engine.gameData.value.visibleCells
         assertTrue("visibleCells should not be empty after spawnPeriod. Current: $visibleCells", visibleCells.isNotEmpty())
         
-        // Wait for flash to end (3000ms delay)
+        // Wait for flash delay to pass (3000ms)
         advanceTimeBy(3001)
         assertTrue("visibleCells should be empty after flash ends", engine.gameData.value.visibleCells.isEmpty())
         
-        // Wait for next flash (next 2250ms delay)
+        // Wait for next spawn period to pass (2250ms)
         advanceTimeBy(2251)
         assertTrue("visibleCells should not be empty for second flash. Current: ${engine.gameData.value.visibleCells}", engine.gameData.value.visibleCells.isNotEmpty())
     }
@@ -120,31 +120,32 @@ class FlashGameEngineTest {
     fun durations_clampedToMinimum() = testScope.runTest {
         engine.startGame()
         
-        // Initial coefficient is 1.0. Step is 0.5.
-        // Directly call decreaseCoefficient to test duration updates if needed,
-        // OR better, just test that the formula is applied correctly when coefficient changes.
-        
-        // Simulate some correct taps by manually updating gameData if onItemClick is failing in test loop
-        // But handleCorrectTap is what we want to test.
-        
-        // Let's try to manually advance and check visibleCells more carefully.
-        repeat(10) {
-            advanceTimeBy(4000) // baseSpawn is 2250, so 4000 should definitely trigger it
-            val currentData = engine.gameData.value
-            val visibleIndices = currentData.visibleCells
+        repeat(20) {
+            // Wait for spawn. baseSpawnPeriod is 2250 (1000 * 1.5 * 1.5).
+            advanceTimeBy(2500)
+            testScope.testScheduler.advanceUntilIdle()
             
+            val visibleIndices = engine.gameData.value.visibleCells.toSet()
             visibleIndices.forEach { index ->
-                if (index % 2 == 0) {
+                if (engine.gameData.value.figures[index].type == Figure.FigureType.CIRCLE) {
                     engine.onItemClick(index)
                 }
             }
-            advanceTimeBy(4000) // baseFlash is 3000, so 4000 should clear it
+            
+            // Allow flash to end. baseFlash is 3000 (1000 * 2 * 1.5). 
+            advanceTimeBy(3500)
+            testScope.testScheduler.advanceUntilIdle()
         }
 
         val finalData = engine.gameData.value
         assertTrue("Coefficient should be high: ${finalData.coefficient}", finalData.coefficient > 1.0f)
-        val expectedFlash = (gameParams.rowDuration * 2L * 1.5f / finalData.coefficient).toLong().coerceAtLeast(300L)
-        val expectedSpawn = (gameParams.rowDuration * 1.5f * 1.5f / finalData.coefficient).toLong().coerceAtLeast(300L)
+        
+        val baseFlashMillis = (gameParams.rowDuration * 2L * 1.5f).toLong()
+        val baseSpawnPeriodMillis = (gameParams.rowDuration * 1.5f * 1.5f).toLong()
+        
+        val expectedFlash = (baseFlashMillis / finalData.coefficient).toLong().coerceAtLeast(300L)
+        val expectedSpawn = (baseSpawnPeriodMillis / finalData.coefficient).toLong().coerceAtLeast(300L)
+        
         assertEquals("flashMillis should be updated by formula", expectedFlash, finalData.flashMillis)
         assertEquals("spawnPeriodMillis should be updated by formula", expectedSpawn, finalData.spawnPeriodMillis)
     }
@@ -152,7 +153,7 @@ class FlashGameEngineTest {
     @Test
     fun flash_multipleTapsInOneCycle() = testScope.runTest {
         engine.startGame()
-        advanceTimeBy(3010)
+        advanceTimeBy(3000)
         
         val visibleIndices = engine.gameData.value.visibleCells
         val suitableIndices = visibleIndices.filter { index ->
@@ -173,7 +174,7 @@ class FlashGameEngineTest {
     @Test
     fun flash_wrongTap_gameOver() = testScope.runTest {
         engine.startGame()
-        advanceTimeBy(3010)
+        advanceTimeBy(3000)
         
         val visibleIndices = engine.gameData.value.visibleCells
         val wrongIndex = visibleIndices.find { index ->
@@ -191,7 +192,6 @@ class FlashGameEngineTest {
         engine.startGame()
         
         // 1. Increase coefficient
-        // Wait for first flash
         advanceTimeBy(3010)
         val currentDataBefore = engine.gameData.value
         val visibleIndices = currentDataBefore.visibleCells
@@ -206,8 +206,6 @@ class FlashGameEngineTest {
         assertTrue("Coefficient should be > 1. Current: ${midData.coefficient}", midData.coefficient > 1.0f)
 
         // 2. Trigger a miss to decrease coefficient
-        // Wait for current flash to end and NEXT spawn period to pass
-        // Total time should be enough to complete at least one more cycle without clicking
         advanceTimeBy(10000) 
         
         val finalData = engine.gameData.value

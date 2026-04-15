@@ -19,7 +19,6 @@ class FlashGameEngine(
 
     private var flashJob: Job? = null
     private var visibleAtOnce: Int = 2
-    private val clickedSuitableCells = mutableSetOf<Int>()
 
     override fun startInitJob(params: GameParams) {
         initJob = coroutineScope.launch {
@@ -97,42 +96,50 @@ class FlashGameEngine(
                 delay(current.spawnPeriodMillis)
                 if (_gameState.value !is GameEngineState.Started) break
 
-                val targetCount = visibleAtOnce.coerceIn(1, gridCount)
+                // Only pick figures that haven't been correctly clicked yet (isActive)
+                val activeIndices = _gameData.value.figures.indices.filter { 
+                    _gameData.value.figures[it].isActive 
+                }
+                
+                if (activeIndices.isEmpty()) {
+                    finishGame()
+                    break
+                }
+                
+                val targetCount = minOf(visibleAtOnce, activeIndices.size)
                 val newlyVisible = mutableSetOf<Int>()
                 while (newlyVisible.size < targetCount) {
-                    newlyVisible.add(Random.nextInt(0, gridCount))
+                    newlyVisible.add(activeIndices[Random.nextInt(0, activeIndices.size)])
                 }
 
                 _gameData.update { it.copy(visibleCells = newlyVisible) }
 
-                delay(current.flashMillis)
+                delay(_gameData.value.flashMillis)
 
-                // Process missed items before hiding
-                handleMissedItems(newlyVisible)
-
-                clickedSuitableCells.clear()
-                _gameData.update { it.copy(visibleCells = emptySet()) }
+                var snapshotClicked = emptySet<Int>()
+                _gameData.update {
+                    snapshotClicked = it.clickedSuitableCells
+                    it.copy(visibleCells = emptySet(), clickedSuitableCells = emptySet())
+                }
+                // Process missed items AFTER hiding to prevent Correct + Penalty race
+                handleMissedItems(newlyVisible, snapshotClicked)
             }
         }
     }
 
-    private fun handleMissedItems(visibleIndices: Set<Int>) {
+    private fun handleMissedItems(visibleIndices: Set<Int>, clickedIndices: Set<Int>) {
         val current = _gameData.value
         val figures = current.figures
         var missedCount = 0
         visibleIndices.forEach { index ->
             val figure = figures.getOrNull(index)
-            if (figure != null && isItemFitForGoals(current.goals, figure) && !clickedSuitableCells.contains(index)) {
+            if (figure != null && figure.isActive && isItemFitForGoals(current.goals, figure) && !clickedIndices.contains(index)) {
                 missedCount++
             }
         }
 
         repeat(missedCount) {
-            if (_gameData.value.coefficient > 1f) {
-                decreaseCoefficient()
-            } else {
-                decreaseLifeCount()
-            }
+            decreaseCoefficient()
         }
     }
 
@@ -144,19 +151,36 @@ class FlashGameEngine(
     override fun onItemClick(itemId: Int) {
         if (_gameState.value !is GameEngineState.Started) return
 
-        val currentData = _gameData.value
-        val figures = currentData.figures
-        // In Flash mode, itemId is actually the index in the grid/figures list
-        val index = itemId 
-        if (index !in currentData.visibleCells) return
+        var figureToHandle: Figure? = null
+        var indexToHandle: Int = -1
+        var isWrongTap = false
 
-        val figure = figures.getOrNull(index) ?: return
-        
-        if (isItemFitForGoals(currentData.goals, figure)) {
-            clickedSuitableCells.add(index)
-            handleCorrectTap(figure, index)
-        } else {
+        _gameData.update { currentData ->
+            val index = itemId
+            if (index !in currentData.visibleCells || currentData.clickedSuitableCells.contains(index)) {
+                return@update currentData
+            }
+
+            val figure = currentData.figures.getOrNull(index) ?: return@update currentData
+            if (!figure.isActive) return@update currentData
+            
+            if (isItemFitForGoals(currentData.goals, figure)) {
+                figureToHandle = figure
+                indexToHandle = index
+                currentData.copy(clickedSuitableCells = currentData.clickedSuitableCells + index)
+            } else {
+                isWrongTap = true
+                currentData
+            }
+        }
+
+        if (isWrongTap) {
             handleWrongTap()
+            return
+        }
+
+        figureToHandle?.let {
+            handleCorrectTap(it, indexToHandle)
         }
     }
 
@@ -168,7 +192,7 @@ class FlashGameEngine(
 
         _gameData.update { current ->
             val updatedFigures = current.figures.toMutableList()
-            updatedFigures[index] = figure.copy(pointsReceived = pointsAdded)
+            updatedFigures[index] = figure.copy(isActive = false, pointsReceived = pointsAdded)
             
             val newCoefficient = current.coefficient + (params.coefficientStep ?: 0f)
             
@@ -206,6 +230,7 @@ class FlashGameEngine(
     }
     override fun decreaseCoefficient() {
         val params = gameParams ?: return
+        var shouldDecreaseLife = false
         _gameData.update { current ->
             val newCoefficient = (current.coefficient / 2f).coerceAtLeast(1f)
             
@@ -214,11 +239,24 @@ class FlashGameEngine(
 
             val updated = current.copy(
                 coefficient = newCoefficient,
+                isLifeWasted = true
             )
-            updated.copy(
+            val finalData = updated.copy(
                 flashMillis = calculateFlashDuration(baseFlashMillis, updated),
                 spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, updated)
             )
+            if (finalData.coefficient <= 1.0f && current.coefficient <= 1.0f) {
+                shouldDecreaseLife = true
+            }
+            finalData
+        }
+        if (shouldDecreaseLife) {
+            decreaseLifeCount()
+        } else {
+            coroutineScope.launch {
+                delay(500)
+                _gameData.update { it.copy(isLifeWasted = false) }
+            }
         }
         itemsPassedWithoutMissing = 0
     }
@@ -251,7 +289,6 @@ class FlashGameEngine(
     override fun reset() {
         super.reset()
         stopFlashLoop()
-        clickedSuitableCells.clear()
     }
 
     private fun calculateDurationPercentage(data: GameEngineData): Float {

@@ -67,7 +67,8 @@ class FlashGameUseCase @Inject constructor(
             gameDuration = data.gameDuration,
             flashMillis = data.flashMillis,
             spawnPeriodMillis = data.spawnPeriodMillis,
-            isLifeWasted = data.isLifeWasted
+            isLifeWasted = data.isLifeWasted,
+            clickedSuitableCells = data.clickedSuitableCells
         )
     }
 
