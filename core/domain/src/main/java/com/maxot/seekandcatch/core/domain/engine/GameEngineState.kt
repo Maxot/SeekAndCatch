@@ -28,4 +28,5 @@ data class GameEngineData(
     val spawnPeriodMillis: Long = 900L,
     val isReverseScrolling: Boolean = false,
     val isLifeWasted: Boolean = false,
+    val clickedSuitableCells: Set<Int> = emptySet(),
 )

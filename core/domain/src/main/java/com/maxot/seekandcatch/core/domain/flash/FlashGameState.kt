@@ -29,4 +29,5 @@ data class FlashGameData(
     val flashMillis: Long = 1200L, // how long a figure is visible
     val spawnPeriodMillis: Long = 900L, // how often new figures appear
     val isLifeWasted: Boolean = false,
+    val clickedSuitableCells: Set<Int> = emptySet(),
 )

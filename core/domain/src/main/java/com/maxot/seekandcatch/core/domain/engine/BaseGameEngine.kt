@@ -180,7 +180,11 @@ abstract class BaseGameEngine(
             if (newLifeCount == 0) {
                 finishGame()
             }
-            it.copy(lifeCount = newLifeCount.coerceAtLeast(0))
+            it.copy(lifeCount = newLifeCount.coerceAtLeast(0), isLifeWasted = true)
+        }
+        coroutineScope.launch {
+            delay(500)
+            _gameData.update { it.copy(isLifeWasted = false) }
         }
         itemsPassedWithoutMissing = 0
     }
