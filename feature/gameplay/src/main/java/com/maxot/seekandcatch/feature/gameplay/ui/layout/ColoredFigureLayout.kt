@@ -98,7 +98,7 @@ fun ColoredFigureLayout(
     val gameOverRotation = remember { Animatable(0f) }
     val gameOverScale = remember { Animatable(1f) }
 
-    val breakingProgress = remember { Animatable(0f) }
+    val breakingProgress = remember(figure.id) { Animatable(0f) }
     val fragments = remember(figure.id, size) {
         val count = 20
         List(count) { i ->
@@ -125,9 +125,11 @@ fun ColoredFigureLayout(
         }
     }
 
-    LaunchedEffect(figure.pointsReceived) {
+    LaunchedEffect(figure.id, figure.pointsReceived) {
         if (figure.pointsReceived != null) {
             breakingProgress.animateTo(1f, tween(1000))
+        } else {
+            breakingProgress.snapTo(0f)
         }
     }
 

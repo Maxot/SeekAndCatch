@@ -18,6 +18,7 @@ sealed class FlashGameState {
 data class FlashGameData(
     val goals: Set<Goal<Any>> = emptySet(),
     val gridSize: Int = 16, // cells
+    val gridWidth: Int = 4,
     val visibleCells: Set<Int> = emptySet(), // indices of currently visible figures
     val figuresByCell: Map<Int, Figure> = emptyMap(), // what figure is shown in a cell when visible
     val goalSuitableFigures: Set<Figure> = emptySet(),

@@ -43,7 +43,7 @@ fun FlashGameFieldLayout(
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
         val cells = (0 until gridSize).toList()
-        items(cells) { id ->
+        items(cells, key = { it }) { id ->
             val isCurrentlyVisible = visibleCells.contains(id)
             val visible = isCurrentlyVisible && !hiddenIds.contains(id)
             val base = figuresByCell[id]
