@@ -110,8 +110,7 @@ class FlashGameViewModel @Inject constructor(
                                 isActive = true,
                                 isPaused = false,
                                 gridSize = d.gridSize,
-                                gridWidth = kotlin.math.sqrt(d.gridSize.toDouble()).toInt()
-                                    .coerceAtLeast(1),
+                                gridWidth = d.gridWidth,
                                 visibleCells = d.visibleCells,
                                 score = d.score,
                                 lifeCount = d.lifeCount,
@@ -144,8 +143,7 @@ class FlashGameViewModel @Inject constructor(
                             val base = if (lastData != null) {
                                 currentState.copy(
                                     gridSize = lastData.gridSize,
-                                    gridWidth = kotlin.math.sqrt(lastData.gridSize.toDouble()).toInt()
-                                        .coerceAtLeast(1),
+                                    gridWidth = lastData.gridWidth,
                                     visibleCells = lastData.visibleCells,
                                     score = lastData.score,
                                     lifeCount = lastData.lifeCount,

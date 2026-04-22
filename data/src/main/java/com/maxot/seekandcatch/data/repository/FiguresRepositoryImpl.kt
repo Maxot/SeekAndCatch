@@ -13,20 +13,26 @@ class FiguresRepositoryImpl
     private val colorsRepository: ColorsRepository,
     @ApplicationScope private val coroutineScope: CoroutineScope
 ) : FiguresRepository {
-    private val availableColors = mutableSetOf<Color>()
+    private var availableColors = setOf<Color>(
+        Color.Red,
+        Color.Blue,
+        Color.Yellow,
+        Color.Green
+    )
 
     init {
         coroutineScope.launch {
             colorsRepository.selectedColors.collect {
-                availableColors.clear()
-                availableColors.addAll(it)
+                if (it.isNotEmpty()) {
+                    availableColors = it
+                }
             }
         }
     }
 
     override fun getRandomFigure(id: Int): Figure {
         val figureType = Figure.FigureType.entries.random()
-        val color = availableColors.random()
+        val color = availableColors.randomOrNull() ?: Color.Red
         return Figure(id = id, type = figureType, color = color)
     }
 

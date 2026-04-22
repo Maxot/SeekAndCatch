@@ -2,6 +2,7 @@ package com.maxot.seekandcatch.core.domain.engine
 
 import com.maxot.seekandcatch.core.common.model.GameParams
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 import com.maxot.seekandcatch.data.repository.GoalsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +20,7 @@ class FlashGameEngine(
 
     private var flashJob: Job? = null
     private var visibleAtOnce: Int = 2
+    private var nextFigureId: Int = 1000
 
     override fun startInitJob(params: GameParams) {
         initJob = coroutineScope.launch {
@@ -102,17 +104,56 @@ class FlashGameEngine(
                 }
                 
                 if (activeIndices.isEmpty()) {
-                    finishGame()
-                    break
+                    delay(100)
+                    continue
                 }
                 
+                var suitableIndices = activeIndices.filter { 
+                    isItemFitForGoals(_gameData.value.goals, _gameData.value.figures[it])
+                }
+                
+                var forceGeneratedFigure: Figure? = null
+                var indexToMakeSuitable: Int = -1
+                
+                if (suitableIndices.isEmpty()) {
+                    // Force generate a suitable item at a random active index
+                    indexToMakeSuitable = activeIndices.random()
+                    val goal = _gameData.value.goals.random()
+                    forceGeneratedFigure = figuresRepository.getRandomFigures(
+                        itemsCount = 1,
+                        startId = nextFigureId++,
+                        percentageOfSuitableGoalItems = 1f,
+                        goal = goal
+                    ).first().copy(isActive = true)
+                    suitableIndices = listOf(indexToMakeSuitable)
+                }
+
                 val targetCount = minOf(visibleAtOnce, activeIndices.size)
                 val newlyVisible = mutableSetOf<Int>()
+                
+                // Guaranteed at least one suitable item
+                newlyVisible.add(suitableIndices[Random.nextInt(0, suitableIndices.size)])
+                
                 while (newlyVisible.size < targetCount) {
                     newlyVisible.add(activeIndices[Random.nextInt(0, activeIndices.size)])
                 }
 
-                _gameData.update { it.copy(visibleCells = newlyVisible) }
+                // Atomic update for figures and visible cells
+                var figuresAtFlashStart = emptyList<Figure>()
+                var goalsAtFlashStart = emptySet<Goal<Any>>()
+
+                _gameData.update { current ->
+                    val updatedFigures = if (forceGeneratedFigure != null) {
+                        val list = current.figures.toMutableList()
+                        list[indexToMakeSuitable] = forceGeneratedFigure
+                        list
+                    } else {
+                        current.figures
+                    }
+                    figuresAtFlashStart = updatedFigures.toList()
+                    goalsAtFlashStart = current.goals
+                    current.copy(figures = updatedFigures, visibleCells = newlyVisible)
+                }
 
                 delay(_gameData.value.flashMillis)
 
@@ -121,19 +162,22 @@ class FlashGameEngine(
                     snapshotClicked = it.clickedSuitableCells
                     it.copy(visibleCells = emptySet(), clickedSuitableCells = emptySet())
                 }
-                // Process missed items AFTER hiding to prevent Correct + Penalty race
-                handleMissedItems(newlyVisible, snapshotClicked)
+                // Process missed items using the figures that were actually shown
+                handleMissedItems(newlyVisible, snapshotClicked, figuresAtFlashStart, goalsAtFlashStart)
             }
         }
     }
 
-    private fun handleMissedItems(visibleIndices: Set<Int>, clickedIndices: Set<Int>) {
-        val current = _gameData.value
-        val figures = current.figures
+    private fun handleMissedItems(
+        visibleIndices: Set<Int>,
+        clickedIndices: Set<Int>,
+        figuresAtFlashStart: List<Figure>,
+        goalsAtFlashStart: Set<Goal<Any>>
+    ) {
         var missedCount = 0
         visibleIndices.forEach { index ->
-            val figure = figures.getOrNull(index)
-            if (figure != null && figure.isActive && isItemFitForGoals(current.goals, figure) && !clickedIndices.contains(index)) {
+            val figure = figuresAtFlashStart.getOrNull(index)
+            if (figure != null && figure.isActive && isItemFitForGoals(goalsAtFlashStart, figure) && !clickedIndices.contains(index)) {
                 missedCount++
             }
         }
@@ -192,7 +236,16 @@ class FlashGameEngine(
 
         _gameData.update { current ->
             val updatedFigures = current.figures.toMutableList()
-            updatedFigures[index] = figure.copy(isActive = false, pointsReceived = pointsAdded)
+            
+            // Replace with a new figure instead of marking as inactive to keep the game infinite
+            val newFigure = figuresRepository.getRandomFigures(
+                itemsCount = 1,
+                startId = nextFigureId++,
+                percentageOfSuitableGoalItems = params.percentOfSuitableItem,
+                goal = current.goals.first()
+            ).first()
+            
+            updatedFigures[index] = newFigure.copy(isActive = true, pointsReceived = pointsAdded)
             
             val newCoefficient = current.coefficient + (params.coefficientStep ?: 0f)
             

@@ -24,8 +24,8 @@ class OnItemClickTest {
 
     private val testGoal = Goal.Shaped(Figure.FigureType.CIRCLE)
     private val testFigures = listOf(
-        Figure(id = 100, type = Figure.FigureType.CIRCLE, color = Color.Red),
-        Figure(id = 101, type = Figure.FigureType.TRIANGLE, color = Color.Blue)
+        Figure(id = 0, type = Figure.FigureType.CIRCLE, color = Color.Red),
+        Figure(id = 1, type = Figure.FigureType.TRIANGLE, color = Color.Blue)
     )
 
     class TestGameEngine(
@@ -53,7 +53,7 @@ class OnItemClickTest {
     @Test
     fun onItemClick_worksInStartedState() {
         engine.startGame()
-        engine.onItemClick(100) // Correct tap
+        engine.onItemClick(0) // Correct tap
         // Streak is 10 by default, so coefficient doesn't change
         assertEquals(10, engine.gameData.value.score)
     }
@@ -61,7 +61,7 @@ class OnItemClickTest {
     @Test
     fun onItemClick_ignoredInCreatedState() {
         engine.setState(GameEngineState.Created(emptySet()))
-        engine.onItemClick(100)
+        engine.onItemClick(0)
         assertEquals(0, engine.gameData.value.score)
     }
 
@@ -69,10 +69,10 @@ class OnItemClickTest {
     fun onItemClick_ignoresInactiveFigure() {
         engine.startGame()
         // Manually deactivate figure
-        engine.onItemClick(100)
+        engine.onItemClick(0)
         assertEquals(10, engine.gameData.value.score)
         
-        engine.onItemClick(100) // Try clicking again
+        engine.onItemClick(0) // Try clicking again
         assertEquals(10, engine.gameData.value.score) // Score should not increase
     }
 }

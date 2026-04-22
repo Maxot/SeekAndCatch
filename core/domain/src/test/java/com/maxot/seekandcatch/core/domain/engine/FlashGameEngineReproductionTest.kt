@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.core.common.model.GameParams
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.model.isFitForGoal
 import com.maxot.seekandcatch.data.test.repository.FakeFiguresRepository
 import com.maxot.seekandcatch.data.test.repository.FakeGoalsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -85,8 +86,8 @@ class FlashGameEngineReproductionTest {
     }
 
     @Test
-    fun reproduceFalseMiss_whenNoSuitableItemsAreFlashed() = testScope.runTest {
-        // Goal is CIRCLE. Let's make all figures TRIANGLES
+    fun gameShouldNotFinish_whenNoSuitableItemsExist() = testScope.runTest {
+        // Goal is CIRCLE. Let's make all figures TRIANGLES (none are suitable)
         val nonSuitableFigures = (0 until 4).map { id ->
             Figure(id = id, type = Figure.FigureType.TRIANGLE, color = Color.Red)
         }
@@ -99,70 +100,63 @@ class FlashGameEngineReproductionTest {
 
         engine.startGame()
 
-        advanceTimeBy(1800) // First Spawn
+        advanceTimeBy(1800) // First Spawn attempts
         runCurrent()
 
-        val visibleCells = engine.gameData.value.visibleCells.toSet()
-        assertEquals("Should have 1 visible cell", 1, visibleCells.size)
+        // It should NOT have finished. It should have generated a suitable item.
+        assertTrue("Game should NOT be finished", 
+            engine.gameState.value is GameEngineState.Started)
         
-        // Verify that the visible figure is NOT suitable
-        visibleCells.forEach { index ->
-            val figure = engine.gameData.value.figures[index]
-            assertEquals("Figure at index $index should be TRIANGLE", Figure.FigureType.TRIANGLE, figure.type)
-        }
-
-        // Advance time to finish the flash
-        advanceTimeBy(2400) 
-        runCurrent()
-
-        // No suitable items were flashed, so no penalty should occur.
-        assertEquals("Life count should be 3", 3, engine.gameData.value.lifeCount)
-        assertEquals("Coefficient should be 1.0", 1.0f, engine.gameData.value.coefficient, 0.01f)
-        assertEquals("isLifeWasted should be false", false, engine.gameData.value.isLifeWasted)
+        val visibleCells = engine.gameData.value.visibleCells
+        assertTrue("Visible cells should not be empty", visibleCells.isNotEmpty())
         
-        // Second flash cycle - let's make it a MIX of suitable and non-suitable
-        // Note: we can't change figuresRepository on the fly easily because FlashGameEngine has its own copy in GameEngineData
-        
-        advanceTimeBy(1800) // Second Spawn
-        runCurrent()
-        
-        advanceTimeBy(2400) // Second flash end
-        runCurrent()
-
-        assertEquals("Life count should still be 3", 3, engine.gameData.value.lifeCount)
-        assertEquals("Coefficient should still be 1.0", 1.0f, engine.gameData.value.coefficient, 0.01f)
-        assertEquals("isLifeWasted should still be false", false, engine.gameData.value.isLifeWasted)
-
-        engine.finishGame()
+        val figures = engine.gameData.value.figures
+        val goals = engine.gameData.value.goals
+        val hasSuitable = visibleCells.any { index -> figures[index].isFitForGoal(goals.first()) }
+        assertTrue("Should have at least one suitable item in visible cells", hasSuitable)
     }
 
+
     @Test
-    fun fixFalseMiss_whenAlreadyClickedItemsAreCleared() = testScope.runTest {
-        // All 4 figures are circles (suitable)
-        figuresRepository.setRandomFigures(testFigures.take(4))
+    fun eachFlashCycle_shouldContainAtLeastOneSuitableItem() = testScope.runTest {
+        val mixedFigures = listOf(
+            Figure(id = 0, type = Figure.FigureType.CIRCLE, color = Color.Red), // Suitable
+            Figure(id = 1, type = Figure.FigureType.SQUARE, color = Color.Red), // Unsuitable
+            Figure(id = 2, type = Figure.FigureType.SQUARE, color = Color.Red), // Unsuitable
+            Figure(id = 3, type = Figure.FigureType.SQUARE, color = Color.Red)  // Unsuitable
+        )
+        figuresRepository.setRandomFigures(mixedFigures)
+        
+        // 100 lives to avoid dying from misses
+        val manyLivesParams = gameParams.copy(maxLifeCount = 100, lifeCount = 100)
+        
         engine = FlashGameEngine(testScope, figuresRepository, goalsRepository)
-        engine.initGame(gameParams)
+        engine.initGame(manyLivesParams)
         testScope.testScheduler.advanceUntilIdle()
 
         engine.startGame()
-
-        // Click all items as they appear
-        repeat(4) {
-            advanceTimeBy(1801) // Spawn
+        
+        repeat(10) {
+            advanceTimeBy(1801) // Wait for spawn
             runCurrent()
             
-            val visible = engine.gameData.value.visibleCells
-            if (visible.isNotEmpty()) {
-                engine.onItemClick(visible.first())
+            val currentData = engine.gameData.value
+            val visibleIndices = currentData.visibleCells
+            val figures = currentData.figures
+            val goals = currentData.goals
+            
+            assertTrue("Iteration $it: Visible cells should not be empty", visibleIndices.isNotEmpty())
+
+            val suitableVisible = visibleIndices.filter { index ->
+                val figure = figures[index]
+                goals.any { figure.isFitForGoal(it) }
             }
             
-            advanceTimeBy(2400) // End flash
+            assertTrue("Iteration $it: Should have at least one suitable visible item, but got: $visibleIndices", 
+                suitableVisible.isNotEmpty())
+            
+            advanceTimeBy(2399) // Wait until almost end of flash
             runCurrent()
         }
-        
-        // After 4 correct clicks, life count should still be 3.
-        // If there were false misses, life count would have dropped.
-        assertEquals("Life count should still be 3 after clearing all items", 3, engine.gameData.value.lifeCount)
-        assertEquals("Game should be finished when all items are cleared", GameEngineState.Finished(engine.gameData.value.score), engine.gameState.value)
     }
 }

@@ -3,6 +3,7 @@ package com.maxot.seekandcatch.data.test.repository
 import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.model.isFitForGoal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 
 class FakeFiguresRepository() : FiguresRepository {
@@ -21,8 +22,27 @@ class FakeFiguresRepository() : FiguresRepository {
         percentageOfSuitableGoalItems: Float,
         goal: Goal<Any>
     ): List<Figure> {
-        return randomFigures
+        if (randomFigures.isNotEmpty()) {
+            return (0 until itemsCount).map { i ->
+                val base = randomFigures[i % randomFigures.size]
+                val isSuitable = (i < itemsCount * percentageOfSuitableGoalItems)
+                if (isSuitable) {
+                    // Force suitable
+                    base.copy(id = startId + i, type = goal.toFigureType() ?: base.type, color = goal.toColor() ?: base.color)
+                } else {
+                    // Force unsuitable (simplified: just change type if it was suitable)
+                    val newFigure = base.copy(id = startId + i)
+                    if (newFigure.isFitForGoal(goal)) {
+                        newFigure.copy(type = if (goal is Goal.Shaped) Figure.FigureType.SQUARE else Figure.FigureType.TRIANGLE)
+                    } else newFigure
+                }
+            }
+        }
+        return emptyList()
     }
+
+    private fun Goal<Any>.toFigureType(): Figure.FigureType? = (this as? Goal.Shaped)?.getGoal()
+    private fun Goal<Any>.toColor(): Color? = (this as? Goal.Colored)?.getGoal()
 
     /**
      * A test-only API to allow controlling the list of figures from tests.

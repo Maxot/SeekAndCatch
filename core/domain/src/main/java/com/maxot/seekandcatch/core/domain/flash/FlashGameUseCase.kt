@@ -57,6 +57,7 @@ class FlashGameUseCase @Inject constructor(
         return FlashGameData(
             goals = data.goals,
             gridSize = data.figures.size,
+            gridWidth = data.rowWidth,
             visibleCells = data.visibleCells,
             figuresByCell = data.figures.withIndex().associate { it.index to it.value },
             goalSuitableFigures = data.goalSuitableFigures,
