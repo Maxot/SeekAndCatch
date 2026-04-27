@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 val versionMajor = 1
@@ -97,6 +98,7 @@ dependencies {
     implementation(libs.androidx.splashscreen)
 
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
     implementation(libs.hilt.android)
     implementation(libs.androidx.appcompat)
 
