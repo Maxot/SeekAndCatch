@@ -17,6 +17,9 @@ build/
 # Local configuration file (sdk path, etc)
 local.properties
 
+# Firebase config — contains API keys, never commit
+google-services.json
+
 # Eclipse project files
 .classpath
 .project
