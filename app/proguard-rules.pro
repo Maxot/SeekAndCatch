@@ -1,21 +1,15 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.kts.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep Firestore model classes — deserialized via reflection, require no-arg constructors and field names
+-keep class com.maxot.seekandcatch.core.common.model.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep attributes required by Firebase (generic type info + annotations for Firestore)
+-keepattributes Signature
+-keepattributes *Annotation*
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Firebase Auth — reCAPTCHA dependency used by firebase-auth 22.x for anonymous sign-in
+-keep class com.google.android.recaptcha.** { *; }
+-dontwarn com.google.android.recaptcha.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Crashlytics — preserve source file names and line numbers in stack traces
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+-keep public class * extends java.lang.Exception
