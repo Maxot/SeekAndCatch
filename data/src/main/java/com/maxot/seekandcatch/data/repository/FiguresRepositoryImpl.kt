@@ -1,8 +1,8 @@
 package com.maxot.seekandcatch.data.repository
 
-import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.Goal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -13,18 +13,13 @@ class FiguresRepositoryImpl
     private val colorsRepository: ColorsRepository,
     @ApplicationScope private val coroutineScope: CoroutineScope
 ) : FiguresRepository {
-    private var availableColors = setOf<Color>(
-        Color.Red,
-        Color.Blue,
-        Color.Yellow,
-        Color.Green
-    )
+    private var availableColors = mutableSetOf<FigureColor>()
 
     init {
         coroutineScope.launch {
             colorsRepository.selectedColors.collect {
                 if (it.isNotEmpty()) {
-                    availableColors = it
+                    availableColors = it.toMutableSet()
                 }
             }
         }
@@ -32,7 +27,7 @@ class FiguresRepositoryImpl
 
     override fun getRandomFigure(id: Int): Figure {
         val figureType = Figure.FigureType.entries.random()
-        val color = availableColors.randomOrNull() ?: Color.Red
+        val color = availableColors.randomOrNull() ?: FigureColor.Red
         return Figure(id = id, type = figureType, color = color)
     }
 
@@ -144,5 +139,4 @@ class FiguresRepositoryImpl
         }
         return figures
     }
-
 }

@@ -1,31 +1,23 @@
 package com.maxot.seekandcatch.data.model
 
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
-import com.maxot.seekandcatch.core.designsystem.RoundedTriangleShape
-
 /**
  * Represent an object(figure) that is main block of the game and used in game process.
  */
 data class Figure(
     val id: Int = 0,
     val type: FigureType,
-    val color: Color? = null,
+    val color: FigureColor? = null,
     var isActive: Boolean = true,
     var pointsReceived: Int? = null
 ) {
     companion object {
         fun getRandomFigure(
             id: Int = 0,
-            availableColors: Set<Color> = setOf(
-                Color.Red,
-                Color.Blue,
-                Color.Green,
-                Color.Yellow
+            availableColors: Set<FigureColor> = setOf(
+                FigureColor.Red,
+                FigureColor.Blue,
+                FigureColor.Green,
+                FigureColor.Yellow
             )
         ): Figure {
             val figureType = FigureType.entries.random()
@@ -43,24 +35,6 @@ data class Figure(
             fun getRandomFigureType(): FigureType {
                 return FigureType.entries.random()
             }
-        }
-    }
-
-}
-
-
-fun Figure.getShapeForFigure(): Shape {
-    return when (this.type) {
-        Figure.FigureType.TRIANGLE -> {
-            RoundedTriangleShape()
-        }
-
-        Figure.FigureType.CIRCLE -> {
-            CircleShape
-        }
-
-        Figure.FigureType.SQUARE -> {
-            RoundedCornerShape(corner = CornerSize(10.dp))
         }
     }
 }

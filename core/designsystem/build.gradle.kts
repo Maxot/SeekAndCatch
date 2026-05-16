@@ -28,7 +28,6 @@ dependencies {
     implementation(project(":core:common"))
 
     implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.graphics.shapes)
 
     implementation(platform(libs.androidx.compose.bom))
 

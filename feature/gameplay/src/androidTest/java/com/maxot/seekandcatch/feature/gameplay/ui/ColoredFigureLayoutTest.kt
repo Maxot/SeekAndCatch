@@ -15,7 +15,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.getShapeForFigure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.AlphaKey
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
@@ -32,7 +33,7 @@ class ColoredFigureLayoutTest {
 
     private lateinit var coloredFigureContentDesc: String
 
-    private val figure = Figure(type = Figure.FigureType.CIRCLE, color = Color.Red)
+    private val figure = Figure(type = Figure.FigureType.CIRCLE, color = FigureColor.Red)
 
     @Before
     fun setup() {
@@ -43,13 +44,13 @@ class ColoredFigureLayoutTest {
 
     @Test
     fun coloredFigureHasAlpha1f_performClick_alpha0f() {
-        val figure = Figure(type = Figure.FigureType.CIRCLE, color = Color.Red)
+        val figure = Figure(type = Figure.FigureType.CIRCLE, color = FigureColor.Red)
         var clicked = false
         composeTestRule.setContent {
             MaterialTheme {
                 ColoredFigureLayout(
                     figure = figure,
-                    onItemClick = { 
+                    onItemClick = {
                         clicked = true
                     }
                 )
@@ -57,7 +58,7 @@ class ColoredFigureLayoutTest {
         }
 
         val contentDesc = composeTestRule.activity.getString(R.string.colored_figure_content_desc, figure.id)
-        
+
         composeTestRule.onNodeWithContentDescription(contentDesc)
             .assertExists()
             .performClick()
@@ -67,7 +68,7 @@ class ColoredFigureLayoutTest {
 
     @Test
     fun coloredFigure_colorAndShapeIsCorrect() {
-        val figure = Figure(type = Figure.FigureType.CIRCLE, color = Color.Red)
+        val figure = Figure(type = Figure.FigureType.CIRCLE, color = FigureColor.Red)
         composeTestRule.setContent {
             MaterialTheme {
                 ColoredFigureLayout(
@@ -83,8 +84,8 @@ class ColoredFigureLayoutTest {
             .assertIsDisplayed()
             .assertHasClickAction()
 
-        composeTestRule.onNodeWithContentDescription(contentDesc)
-            .assertBackgroundColor(figure.color!!)
+        composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
+            .assertBackgroundColor(figure.color!!.toComposeColor())
 
         composeTestRule.onNodeWithContentDescription(contentDesc)
             .assert(SemanticsMatcher.expectValue(ShapeKey, figure.getShapeForFigure()))

@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.core.domain
 
-import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.core.common.model.GameParams
 import com.maxot.seekandcatch.core.domain.flow.FlowGameEvent
 import com.maxot.seekandcatch.core.domain.flow.FlowGameData
@@ -32,7 +31,7 @@ class FlowGameUseCaseTest {
     private val flowGameEngine = mock<FlowGameEngine>()
     private val testScope = TestScope()
     private val useCase = FlowGameUseCase(testScope, flowGameEngine)
-    
+
     private val gameParam = GameParams(
         itemsCount = 10,
         percentOfSuitableItem = 0.5f,
@@ -66,7 +65,7 @@ class FlowGameUseCaseTest {
         useCase.onEvent(FlowGameEvent.OnItemClick(5))
         verify(flowGameEngine).onItemClick(5)
     }
-    
+
     @Test
     fun initGame_callsEngineInit() {
         useCase.initGame(gameParam)

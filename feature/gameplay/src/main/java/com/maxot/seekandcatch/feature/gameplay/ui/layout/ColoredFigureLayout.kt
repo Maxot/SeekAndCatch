@@ -43,8 +43,10 @@ import com.maxot.seekandcatch.core.designsystem.component.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure
 import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.getShapeForFigure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.ui.getShapeForFigure
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -80,7 +82,7 @@ fun ColoredFigureLayout(
 
     val shape: Shape = figure.getShapeForFigure()
 
-    val color: Color = figure.color ?: Color.LightGray
+    val color: Color = figure.color?.toComposeColor() ?: Color.LightGray
     val secondColor: Color = Color.White
 
     val interactionSource = remember {
@@ -105,11 +107,8 @@ fun ColoredFigureLayout(
             val angle = Random.nextFloat() * 2 * Math.PI
             val speed = 200f + Random.nextFloat() * 600f
             val vx = (Math.cos(angle) * speed).toFloat()
-            val vy = (Math.sin(angle) * speed).toFloat() - 200f // Upward boost
-            
-            // Random initial position within a square roughly the size of the figure
-            // We don't have exact size in Px here yet, but we can use a relative 0-1 range
-            // and scale it later in Canvas. Or just assume a reasonable default.
+            val vy = (Math.sin(angle) * speed).toFloat() - 200f
+
             val initialX = (Random.nextFloat() - 0.5f) * 60f
             val initialY = (Random.nextFloat() - 0.5f) * 60f
 
@@ -203,14 +202,12 @@ fun ColoredFigureLayout(
             } else if (breakingProgress.value < 1f) {
                 fragments.forEach { fragment ->
                     val progress = breakingProgress.value
-                    val time = progress * 1.0f // normalized time for physics
-                    
-                    // Simple physics: s = ut + 0.5at^2
-                    // Gravity a = 1500 px/s^2 (downward)
+                    val time = progress * 1.0f
+
                     val gravity = 2000f
                     val currentX = fragment.initialOffset.x + fragment.velocity.x * time
                     val currentY = fragment.initialOffset.y + fragment.velocity.y * time + 0.5f * gravity * time * time
-                    
+
                     val currentRotation = fragment.rotationSpeed * time
                     val currentAlpha = (1f - progress * 1.2f).coerceIn(0f, 1f)
 
@@ -228,10 +225,10 @@ fun ColoredFigureLayout(
 
         if (LocalColorblindMode.current) {
             val colorCode = when (figure.color) {
-                Color.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
-                Color.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
-                Color.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
-                Color.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
+                FigureColor.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
+                FigureColor.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
+                FigureColor.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
+                FigureColor.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
                 else -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_unknown)
             }
             Text(
@@ -258,15 +255,15 @@ fun ColoredFigureLayout(
 
 private fun DrawScope.drawFragment(type: Int, fragmentSize: Float, color: Color) {
     when (type) {
-        0 -> { // Square
+        0 -> {
             drawRect(color = color, size = Size(fragmentSize, fragmentSize))
         }
 
-        2 -> { // Circle
+        2 -> {
             drawCircle(color = color, radius = fragmentSize / 2f)
         }
 
-        1 -> { // Triangle
+        1 -> {
             val path = androidx.compose.ui.graphics.Path().apply {
                 moveTo(fragmentSize / 2, 0f)
                 lineTo(fragmentSize, fragmentSize)
@@ -282,7 +279,7 @@ private fun DrawScope.drawFragment(type: Int, fragmentSize: Float, color: Color)
 @Composable
 fun ColoredFigureLayoutActivePreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = Color.Red))
+        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = FigureColor.Red))
     }
 }
 
@@ -293,7 +290,7 @@ fun ColoredFigureLayoutNotActivePreview() {
         ColoredFigureLayout(
             figure = Figure(
                 type = Figure.FigureType.TRIANGLE,
-                color = Color.Red,
+                color = FigureColor.Red,
                 isActive = false
             )
         )
@@ -309,7 +306,7 @@ fun SquareFigurePreview() {
             modifier = Modifier.size(96.dp),
             figure = Figure(
                 type = Figure.FigureType.SQUARE,
-                color = Color.Blue,
+                color = FigureColor.Blue,
                 isActive = true
             )
         )
@@ -324,7 +321,7 @@ fun CircleFigurePreview() {
             modifier = Modifier.size(96.dp),
             figure = Figure(
                 type = Figure.FigureType.CIRCLE,
-                color = Color.Green,
+                color = FigureColor.Green,
                 isActive = true
             )
         )
@@ -339,7 +336,7 @@ fun TriangleFigurePreview() {
             modifier = Modifier.size(96.dp),
             figure = Figure(
                 type = Figure.FigureType.TRIANGLE,
-                color = Color.Red,
+                color = FigureColor.Red,
                 isActive = true
             )
         )

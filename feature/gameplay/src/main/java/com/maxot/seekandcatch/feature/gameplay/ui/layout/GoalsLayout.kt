@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.LocalColorblindMode
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable
@@ -56,15 +58,15 @@ fun GoalsLayout(
                         Modifier
                             .size(50.dp)
                             .padding(4.dp)
-                            .background(goal.getGoal()),
+                            .background(goal.getGoal().toComposeColor()),
                         contentAlignment = Alignment.Center
                     ) {
                         if (LocalColorblindMode.current) {
                             val colorCode = when (goal.getGoal()) {
-                                Color.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
-                                Color.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
-                                Color.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
-                                Color.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
+                                FigureColor.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
+                                FigureColor.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
+                                FigureColor.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
+                                FigureColor.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
                                 else -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_unknown)
                             }
                             Text(
@@ -132,7 +134,7 @@ fun DetailedGoalsLayout(
 @Composable
 fun GoalsLayoutPreview() {
     SeekAndCatchTheme {
-        GoalsLayout(goals = setOf(Goal.Colored(Color.Red)))
+        GoalsLayout(goals = setOf(Goal.Colored(FigureColor.Red)))
     }
 }
 

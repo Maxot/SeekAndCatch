@@ -30,6 +30,9 @@ import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
+import com.maxot.seekandcatch.data.model.toFigureColor
 import com.maxot.seekandcatch.feature.account.AccountViewModel
 import com.maxot.seekandcatch.feature.account.R
 import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenEvent
@@ -44,14 +47,14 @@ fun AccountScreen(
 
     AccountScreenContent(
         modifier = modifier,
-        user = uiState.value.user ?: User("unknow user"),
+        user = uiState.value.user ?: User("unknown user"),
         onUserNameChanged = {
             viewModel.onEvent(AccountScreenEvent.ChangeName(it))
         },
-        availableColors = uiState.value.availableColors,
-        selectedColors = uiState.value.selectedColors,
+        availableColors = uiState.value.availableColors.map { it.toComposeColor() }.toSet(),
+        selectedColors = uiState.value.selectedColors.map { it.toComposeColor() }.toSet(),
         onSelectedColorsChanged = {
-            viewModel.onEvent(AccountScreenEvent.ChangeSelectedColors(it))
+            viewModel.onEvent(AccountScreenEvent.ChangeSelectedColors(it.map { c -> c.toFigureColor() }.toSet()))
         }
     )
 }
@@ -131,13 +134,11 @@ private fun ColorsField(
                             currentlySelectedColor[currentColorIndex] = newColor
 
                             onSelectedColorsChanged(currentlySelectedColor.toSet())
-
                         }
                     }
                 }
             }
         }
-
     }
 }
 
@@ -180,10 +181,8 @@ private fun StyleField(
                         }
                     }
                 }
-
             }
         }
-
     }
 }
 
