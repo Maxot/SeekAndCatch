@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.LocalColorblindMode
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable
@@ -41,30 +43,24 @@ fun GoalsLayout(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = stringResource(id = R.string.label_goal),
-            style = textStyle
-        )
+        Text(text = stringResource(id = R.string.label_goal), style = textStyle)
         goals.forEach { goal ->
             when (goal) {
                 is Goal.Colored -> {
-                    Text(
-                        text = stringResource(id = R.string.label_list_of_goal),
-                        style = textStyle
-                    )
+                    Text(text = stringResource(id = R.string.label_list_of_goal), style = textStyle)
                     Box(
                         Modifier
                             .size(50.dp)
                             .padding(4.dp)
-                            .background(goal.getGoal()),
+                            .background(goal.getGoal().toComposeColor()),
                         contentAlignment = Alignment.Center
                     ) {
                         if (LocalColorblindMode.current) {
                             val colorCode = when (goal.getGoal()) {
-                                Color.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
-                                Color.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
-                                Color.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
-                                Color.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
+                                FigureColor.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
+                                FigureColor.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
+                                FigureColor.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
+                                FigureColor.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
                                 else -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_unknown)
                             }
                             Text(
@@ -75,17 +71,11 @@ fun GoalsLayout(
                             )
                         }
                     }
-                    Text(
-                        text = "color",
-                        style = textStyle
-                    )
+                    Text(text = "color", style = textStyle)
                 }
 
                 is Goal.Shaped -> {
-                    Text(
-                        text = stringResource(id = R.string.label_list_of_goal),
-                        style = textStyle
-                    )
+                    Text(text = stringResource(id = R.string.label_list_of_goal), style = textStyle)
                     ColoredFigureLayout(
                         modifier = Modifier
                             .focusable(false)
@@ -93,10 +83,7 @@ fun GoalsLayout(
                         figure = Figure(type = goal.getGoal()),
                         size = 50.dp
                     )
-                    Text(
-                        text = "shape",
-                        style = textStyle
-                    )
+                    Text(text = "shape", style = textStyle)
                 }
             }
         }
@@ -118,10 +105,7 @@ fun DetailedGoalsLayout(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = stringResource(id = R.string.label_goal),
-            style = textStyle
-        )
+        Text(text = stringResource(id = R.string.label_goal), style = textStyle)
         goalsSuitableFigures.forEach { figure ->
             ColoredFigureLayout(figure = figure, size = 50.dp)
         }
@@ -132,7 +116,7 @@ fun DetailedGoalsLayout(
 @Composable
 fun GoalsLayoutPreview() {
     SeekAndCatchTheme {
-        GoalsLayout(goals = setOf(Goal.Colored(Color.Red)))
+        GoalsLayout(goals = setOf(Goal.Colored(FigureColor.Red)))
     }
 }
 

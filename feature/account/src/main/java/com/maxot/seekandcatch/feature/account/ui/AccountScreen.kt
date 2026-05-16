@@ -30,6 +30,9 @@ import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
+import com.maxot.seekandcatch.data.model.toFigureColor
 import com.maxot.seekandcatch.feature.account.AccountViewModel
 import com.maxot.seekandcatch.feature.account.R
 import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenEvent
@@ -44,14 +47,14 @@ fun AccountScreen(
 
     AccountScreenContent(
         modifier = modifier,
-        user = uiState.value.user ?: User("unknow user"),
+        user = uiState.value.user ?: User("unknown user"),
         onUserNameChanged = {
             viewModel.onEvent(AccountScreenEvent.ChangeName(it))
         },
-        availableColors = uiState.value.availableColors,
-        selectedColors = uiState.value.selectedColors,
+        availableColors = uiState.value.availableColors.map { it.toComposeColor() }.toSet(),
+        selectedColors = uiState.value.selectedColors.map { it.toComposeColor() }.toSet(),
         onSelectedColorsChanged = {
-            viewModel.onEvent(AccountScreenEvent.ChangeSelectedColors(it))
+            viewModel.onEvent(AccountScreenEvent.ChangeSelectedColors(it.map { c -> c.toFigureColor() }.toSet()))
         }
     )
 }
@@ -83,9 +86,7 @@ private fun AccountScreenContent(
             onUserNameChanged = onUserNameChanged
         )
 
-        StyleField(
-            modifier = Modifier.padding(5.dp),
-        )
+        StyleField(modifier = Modifier.padding(5.dp))
         ColorsField(
             modifier = Modifier.padding(5.dp),
             availableColors = availableColors,
@@ -111,13 +112,9 @@ private fun ColorsField(
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
                 text = stringResource(R.string.feature_account_selected_colors),
-                modifier = Modifier
-                    .padding(5.dp)
+                modifier = Modifier.padding(5.dp)
             )
-            Row(
-                modifier = Modifier
-                    .padding(5.dp),
-            ) {
+            Row(modifier = Modifier.padding(5.dp)) {
                 selectedColors.forEach { color ->
                     key(color.value) {
                         val possibleColors = availableColors - selectedColors + color
@@ -129,22 +126,17 @@ private fun ColorsField(
                             val currentlySelectedColor = selectedColors.toMutableList()
                             val currentColorIndex = currentlySelectedColor.indexOf(color)
                             currentlySelectedColor[currentColorIndex] = newColor
-
                             onSelectedColorsChanged(currentlySelectedColor.toSet())
-
                         }
                     }
                 }
             }
         }
-
     }
 }
 
 @Composable
-private fun StyleField(
-    modifier: Modifier = Modifier
-) {
+private fun StyleField(modifier: Modifier = Modifier) {
     PixelBorderBox(
         modifier = Modifier
             .then(modifier)
@@ -154,8 +146,7 @@ private fun StyleField(
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
                 text = stringResource(R.string.feature_account_selected_style),
-                modifier = Modifier
-                    .padding(5.dp)
+                modifier = Modifier.padding(5.dp)
             )
             Row(
                 modifier = Modifier
@@ -168,22 +159,16 @@ private fun StyleField(
                     Box {
                         Canvas(modifier = Modifier.size(50.dp)) {
                             val sizePx = this.size.minDimension
-
                             when (it) {
                                 Figure.FigureType.SQUARE -> drawSquareFigure(sizePx, Color.Red)
                                 Figure.FigureType.CIRCLE -> drawCircleFigure(sizePx, Color.Blue)
-                                Figure.FigureType.TRIANGLE -> drawTriangleFigure(
-                                    sizePx,
-                                    Color.Green
-                                )
+                                Figure.FigureType.TRIANGLE -> drawTriangleFigure(sizePx, Color.Green)
                             }
                         }
                     }
                 }
-
             }
         }
-
     }
 }
 
@@ -192,18 +177,9 @@ private fun StyleField(
 private fun AccountScreenPreview() {
     SeekAndCatchTheme {
         AccountScreenContent(
-            user = User(
-                id = "userId",
-                name = "userName"
-            ),
+            user = User(id = "userId", name = "userName"),
             onUserNameChanged = {},
-            availableColors = setOf(
-                Color.Red,
-                Color.Blue,
-                Color.Green,
-                Color.Yellow,
-                Color.Magenta
-            ),
+            availableColors = setOf(Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Magenta),
             selectedColors = setOf(Color.Red, Color.Blue, Color.Green, Color.Yellow),
             onSelectedColorsChanged = {}
         )

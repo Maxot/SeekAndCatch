@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.data.firebase.datasource
 
-import android.util.Log
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObjects
@@ -33,22 +32,24 @@ class LeaderboardFirestoreDataSource
             LEADERBOARD_DOCUMENT_USER_ID_KEY to userId,
             LEADERBOARD_DOCUMENT_SCORE_KEY to record.score,
         )
-        // Add optional fields if present
         record.gameMode?.name?.let { recordMap[LEADERBOARD_DOCUMENT_MODE_KEY] = it }
         record.difficulty?.name?.let { recordMap[LEADERBOARD_DOCUMENT_DIFFICULTY_KEY] = it }
 
         if (userId.isNotEmpty()) {
             val userDocument = leaderboardCollection.document(userId)
             userDocument.set(recordMap)
-                .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+                .addOnSuccessListener {
+                    println("D/$TAG: DocumentSnapshot successfully written!")
+                }
+                .addOnFailureListener { e -> println("W/$TAG: Error writing document $e") }
         } else {
-            // This case should be rare now as we auto-register on app start
             leaderboardCollection
                 .add(recordMap)
                 .addOnSuccessListener { documentReference ->
                     onSuccessful(documentReference.id)
+                    println("D/$TAG: DocumentSnapshot successfully written!")
                 }
-                .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+                .addOnFailureListener { e -> println("W/$TAG: Error writing document $e") }
         }
     }
 

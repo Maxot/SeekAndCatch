@@ -1,14 +1,13 @@
 package com.maxot.seekandcatch.data.datastore
 
 import android.content.Context
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.maxot.seekandcatch.data.model.FigureColor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -32,10 +31,10 @@ class AccountDataStore
     val userIdFlow: Flow<String> = dataStore.data.map { preferences ->
         preferences[userIdKey] ?: ""
     }
-    val selectedColors: Flow<Set<Color>> = dataStore.data.map { preferences ->
+    val selectedColors: Flow<Set<FigureColor>> = dataStore.data.map { preferences ->
         preferences[selectedColorsIdKey]?.map { argbString ->
-            Color(argbString.toInt())
-        }?.toSet() ?: setOf(Color.Red, Color.Blue, Color.Yellow, Color.Green)
+            FigureColor(argbString.toInt())
+        }?.toSet() ?: setOf(FigureColor.Red, FigureColor.Blue, FigureColor.Yellow, FigureColor.Green)
     }
 
     suspend fun setUserName(name: String) {
@@ -50,11 +49,11 @@ class AccountDataStore
         }
     }
 
-    suspend fun setSelectedColors(colors: Set<Color>) {
+    suspend fun setSelectedColors(colors: Set<FigureColor>) {
         dataStore.edit { settings ->
             val colorsSet = mutableSetOf<String>()
             colors.forEach { color ->
-                colorsSet.add(color.toArgb().toString())
+                colorsSet.add(color.argb.toString())
             }
             settings[selectedColorsIdKey] = colorsSet
         }
