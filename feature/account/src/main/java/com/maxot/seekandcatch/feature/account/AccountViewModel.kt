@@ -1,8 +1,8 @@
 package com.maxot.seekandcatch.feature.account
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.repository.AccountRepository
 import com.maxot.seekandcatch.data.repository.ColorsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +28,7 @@ class AccountViewModel
 
     fun getAvailableColors() = colorsRepository.getAvailableColors()
 
-    fun onSelectedColorsChanged(newColors: Set<Color>) {
+    fun onSelectedColorsChanged(newColors: Set<FigureColor>) {
         viewModelScope.launch {
             colorsRepository.setSelectedColors(newColors)
         }

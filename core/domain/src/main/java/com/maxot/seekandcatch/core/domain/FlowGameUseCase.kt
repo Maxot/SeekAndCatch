@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.core.domain
 
-import androidx.annotation.Px
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.core.domain.model.FlowGameData
 import com.maxot.seekandcatch.core.domain.model.FlowGameEvent
@@ -41,7 +40,6 @@ class FlowGameUseCase
     private val figuresRepository: FiguresRepository,
     private val goalsRepository: GoalsRepository
 ) {
-    @Px
     private var itemHeightPx: Int = 100
     private var rowWidth: Int = 4
     private var rowDuration: Int = 500
@@ -361,7 +359,7 @@ class FlowGameUseCase
     /**
      * Set the real height of an item. Used in calculations.
      */
-    private fun setItemHeight(@Px height: Int) {
+    private fun setItemHeight(height: Int) {
         itemHeightPx = height
         updateScrollDuration()
         updatePixelsToScroll()
@@ -408,7 +406,7 @@ class FlowGameUseCase
      *
      * @return amount of pixel needed to scroll to reach the end.
      */
-    private fun getPixelsToScroll(@Px rowHeight: Float): Float {
+    private fun getPixelsToScroll(rowHeight: Float): Float {
         val figures = gameData.value.figures
         val rowCount = figures.size / rowWidth
 //        Log.d(

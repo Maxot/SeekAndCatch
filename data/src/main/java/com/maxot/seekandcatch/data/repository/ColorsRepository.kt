@@ -1,15 +1,15 @@
 package com.maxot.seekandcatch.data.repository
 
-import androidx.compose.ui.graphics.Color
+import com.maxot.seekandcatch.data.model.FigureColor
 import kotlinx.coroutines.flow.Flow
 
 interface ColorsRepository {
 
-    val selectedColors: Flow<Set<Color>>
+    val selectedColors: Flow<Set<FigureColor>>
 
-    fun getAvailableColors(): Set<Color>
+    fun getAvailableColors(): Set<FigureColor>
 
-    suspend fun setSelectedColors(colors: Set<Color>)
+    suspend fun setSelectedColors(colors: Set<FigureColor>)
 
-    suspend fun getRandomSelectedColor(): Color
+    suspend fun getRandomSelectedColor(): FigureColor
 }

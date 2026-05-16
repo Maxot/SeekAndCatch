@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -22,7 +21,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable
@@ -55,7 +56,7 @@ fun GoalsLayout(
                         Modifier
                             .size(50.dp)
                             .padding(4.dp)
-                            .background(goal.getGoal())
+                            .background(goal.getGoal().toComposeColor())
                     )
                     Text(
                         text = "color",
@@ -114,7 +115,7 @@ fun DetailedGoalsLayout(
 @Composable
 fun GoalsLayoutPreview() {
     SeekAndCatchTheme {
-        GoalsLayout(goals = setOf(Goal.Colored(Color.Red)))
+        GoalsLayout(goals = setOf(Goal.Colored(FigureColor.Red)))
     }
 }
 

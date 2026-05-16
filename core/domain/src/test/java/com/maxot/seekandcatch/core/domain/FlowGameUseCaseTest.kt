@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.core.domain
 
-import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.GameParams
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.test.repository.FakeFiguresRepository
@@ -23,26 +23,26 @@ class FlowGameUseCaseTest {
     private val scoreRepository = FakeScoreRepository()
 
     private val testRandomFigures = listOf(
-        Figure(id = 0, type = Figure.FigureType.CIRCLE, color = Color.Red),
-        Figure(id = 1, type = Figure.FigureType.TRIANGLE, color = Color.Blue),
-        Figure(id = 2, type = Figure.FigureType.SQUARE, color = Color.Yellow),
-        Figure(id = 3, type = Figure.FigureType.CIRCLE, color = Color.Red),
-        Figure(id = 4, type = Figure.FigureType.TRIANGLE, color = Color.Red),
-        Figure(id = 5, type = Figure.FigureType.SQUARE, color = Color.Blue),
-        Figure(id = 6, type = Figure.FigureType.CIRCLE, color = Color.Red),
-        Figure(id = 7, type = Figure.FigureType.TRIANGLE, color = Color.Blue),
-        Figure(id = 8, type = Figure.FigureType.SQUARE, color = Color.Yellow),
-        Figure(id = 9, type = Figure.FigureType.CIRCLE, color = Color.Yellow),
-//        Figure(id = 10, type = Figure.FigureType.CIRCLE, color = Color.Red),
-//        Figure(id = 11, type = Figure.FigureType.TRIANGLE, color = Color.Blue),
-//        Figure(id = 12, type = Figure.FigureType.SQUARE, color = Color.Yellow),
-//        Figure(id = 13, type = Figure.FigureType.CIRCLE, color = Color.Red),
-//        Figure(id = 14, type = Figure.FigureType.TRIANGLE, color = Color.Red),
-//        Figure(id = 15, type = Figure.FigureType.SQUARE, color = Color.Blue),
-//        Figure(id = 16, type = Figure.FigureType.CIRCLE, color = Color.Red),
-//        Figure(id = 17, type = Figure.FigureType.TRIANGLE, color = Color.Blue),
-//        Figure(id = 18, type = Figure.FigureType.SQUARE, color = Color.Yellow),
-//        Figure(id = 19, type = Figure.FigureType.CIRCLE, color = Color.Yellow),
+        Figure(id = 0, type = Figure.FigureType.CIRCLE, color = FigureColor.Red),
+        Figure(id = 1, type = Figure.FigureType.TRIANGLE, color = FigureColor.Blue),
+        Figure(id = 2, type = Figure.FigureType.SQUARE, color = FigureColor.Yellow),
+        Figure(id = 3, type = Figure.FigureType.CIRCLE, color = FigureColor.Red),
+        Figure(id = 4, type = Figure.FigureType.TRIANGLE, color = FigureColor.Red),
+        Figure(id = 5, type = Figure.FigureType.SQUARE, color = FigureColor.Blue),
+        Figure(id = 6, type = Figure.FigureType.CIRCLE, color = FigureColor.Red),
+        Figure(id = 7, type = Figure.FigureType.TRIANGLE, color = FigureColor.Blue),
+        Figure(id = 8, type = Figure.FigureType.SQUARE, color = FigureColor.Yellow),
+        Figure(id = 9, type = Figure.FigureType.CIRCLE, color = FigureColor.Yellow),
+//        Figure(id = 10, type = Figure.FigureType.CIRCLE, color = FigureColor.Red),
+//        Figure(id = 11, type = Figure.FigureType.TRIANGLE, color = FigureColor.Blue),
+//        Figure(id = 12, type = Figure.FigureType.SQUARE, color = FigureColor.Yellow),
+//        Figure(id = 13, type = Figure.FigureType.CIRCLE, color = FigureColor.Red),
+//        Figure(id = 14, type = Figure.FigureType.TRIANGLE, color = FigureColor.Red),
+//        Figure(id = 15, type = Figure.FigureType.SQUARE, color = FigureColor.Blue),
+//        Figure(id = 16, type = Figure.FigureType.CIRCLE, color = FigureColor.Red),
+//        Figure(id = 17, type = Figure.FigureType.TRIANGLE, color = FigureColor.Blue),
+//        Figure(id = 18, type = Figure.FigureType.SQUARE, color = FigureColor.Yellow),
+//        Figure(id = 19, type = Figure.FigureType.CIRCLE, color = FigureColor.Yellow),
     )
     private val testGoal = Goal.Shaped(Figure.FigureType.CIRCLE)
 

@@ -13,7 +13,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.getShapeForFigure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.AlphaKey
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout
@@ -30,7 +31,7 @@ class ColoredFigureLayoutTest {
 
     private lateinit var coloredFigureContentDesc: String
 
-    private val figure = Figure(type = Figure.FigureType.CIRCLE, color = Color.Red)
+    private val figure = Figure(type = Figure.FigureType.CIRCLE, color = FigureColor.Red)
 
     @Before
     fun setup() {
@@ -48,10 +49,6 @@ class ColoredFigureLayoutTest {
                 )
             }
         }
-//        Espresso.onView(withContentDescription("Colored Figure")).check(matches(withAlpha(1f)))
-//        composeTestRule.onNodeWithContentDescription("Colored Figure")
-//            .performClick()
-//        Espresso.onView(withContentDescription("Colored Figure")).check(matches(withAlpha(0f)))
 
         composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
             .assert(SemanticsMatcher.expectValue(AlphaKey, 1f))
@@ -76,7 +73,7 @@ class ColoredFigureLayoutTest {
             .assertHasClickAction()
 
         composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
-            .assertBackgroundColor(figure.color!!)
+            .assertBackgroundColor(figure.color!!.toComposeColor())
 
         composeTestRule.onNodeWithContentDescription(coloredFigureContentDesc)
             .assert(SemanticsMatcher.expectValue(ShapeKey, figure.getShapeForFigure()))

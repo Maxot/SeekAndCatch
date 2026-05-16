@@ -36,8 +36,10 @@ import com.maxot.seekandcatch.core.designsystem.ui.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.ui.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.ui.drawTriangleFigure
 import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.getShapeForFigure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.ui.getShapeForFigure
 
 // Used for test
 val AlphaKey = SemanticsPropertyKey<Float>("Alpha")
@@ -58,7 +60,7 @@ fun ColoredFigureLayout(
 
     val shape: Shape = figure.getShapeForFigure()
 
-    val color: Color = figure.color ?: Color.LightGray
+    val color: Color = figure.color?.toComposeColor() ?: Color.LightGray
     val secondColor: Color = Color.White
 
     val interactionSource = remember {
@@ -118,7 +120,7 @@ fun ColoredFigureLayout(
 @Composable
 fun ColoredFigureLayoutActivePreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = Color.Red))
+        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = FigureColor.Red))
     }
 }
 
@@ -129,7 +131,7 @@ fun ColoredFigureLayoutNotActivePreview() {
         ColoredFigureLayout(
             figure = Figure(
                 type = Figure.FigureType.TRIANGLE,
-                color = Color.Red,
+                color = FigureColor.Red,
                 isActive = false
             )
         )
@@ -145,7 +147,7 @@ fun SquareFigurePreview() {
             modifier = Modifier.size(96.dp),
             figure = Figure(
                 type = Figure.FigureType.SQUARE,
-                color = Color.Blue,
+                color = FigureColor.Blue,
                 isActive = true
             )
         )
@@ -160,7 +162,7 @@ fun CircleFigurePreview() {
             modifier = Modifier.size(96.dp),
             figure = Figure(
                 type = Figure.FigureType.CIRCLE,
-                color = Color.Green,
+                color = FigureColor.Green,
                 isActive = true
             )
         )
@@ -175,7 +177,7 @@ fun TriangleFigurePreview() {
             modifier = Modifier.size(96.dp),
             figure = Figure(
                 type = Figure.FigureType.TRIANGLE,
-                color = Color.Red,
+                color = FigureColor.Red,
                 isActive = true
             )
         )

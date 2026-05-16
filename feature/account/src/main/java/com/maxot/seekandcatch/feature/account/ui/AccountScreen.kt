@@ -40,6 +40,9 @@ import com.maxot.seekandcatch.core.designsystem.ui.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.ui.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.ui.drawTriangleFigure
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
+import com.maxot.seekandcatch.data.model.toFigureColor
 import com.maxot.seekandcatch.feature.account.AccountViewModel
 import com.maxot.seekandcatch.feature.account.R
 import com.maxot.seekandcatch.feature.colorpicker.ColorPicker
@@ -62,9 +65,11 @@ fun AccountScreenRoute(
         modifier = modifier,
         userName = userName,
         onUserNameChanged = viewModel::setUserName,
-        availableColors = availableColors.value,
-        selectedColors = selectedColors,
-        onSelectedColorsChanged = viewModel::onSelectedColorsChanged
+        availableColors = availableColors.value.map { it.toComposeColor() }.toSet(),
+        selectedColors = selectedColors.map { it.toComposeColor() }.toSet(),
+        onSelectedColorsChanged = { composeColors ->
+            viewModel.onSelectedColorsChanged(composeColors.map { it.toFigureColor() }.toSet())
+        }
     )
 }
 
@@ -233,13 +238,11 @@ private fun ColorsField(
                             currentlySelectedColor[currentColorIndex] = newColor
 
                             onSelectedColorsChanged(currentlySelectedColor.toSet())
-
                         }
                     }
                 }
             }
         }
-
     }
 }
 
@@ -282,10 +285,8 @@ private fun StyleField(
                         }
                     }
                 }
-
             }
         }
-
     }
 }
 

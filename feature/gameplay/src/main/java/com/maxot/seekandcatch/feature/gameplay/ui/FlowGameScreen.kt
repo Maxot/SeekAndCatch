@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.feature.gameplay.ui
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -107,7 +106,6 @@ fun FlowGameScreenRoute(
     LaunchedEffect(key1 = true) {
         snapshotFlow { gridState.firstVisibleItemIndex }
             .collect {
-                Log.d(TAG, "firstVisibleItemIndex: ${gridState.firstVisibleItemIndex}")
                 viewModel.onEvent(FlowGameUiEvent.FirstVisibleItemIndexChanged(gridState.firstVisibleItemIndex))
             }
     }
