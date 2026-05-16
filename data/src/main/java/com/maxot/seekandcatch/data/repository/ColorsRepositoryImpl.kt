@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.data.repository
 
-import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.data.datastore.AccountDataStore
+import com.maxot.seekandcatch.data.model.FigureColor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -10,35 +10,34 @@ class ColorsRepositoryImpl
 @Inject constructor(
     private val accountDataStore: AccountDataStore
 ) : ColorsRepository {
-    override val selectedColors: Flow<Set<Color>>
+    override val selectedColors: Flow<Set<FigureColor>>
         get() = accountDataStore.selectedColors
 
-    override fun getAvailableColors(): Set<Color> =
+    override fun getAvailableColors(): Set<FigureColor> =
         setOf(
-            Color.Red,
-            Color.Blue,
-            Color.Green,
-            Color.Yellow,
-            Color.Cyan,
-            Color.Magenta,
-            Color.Black
+            FigureColor.Red,
+            FigureColor.Blue,
+            FigureColor.Green,
+            FigureColor.Yellow,
+            FigureColor.Cyan,
+            FigureColor.Magenta,
+            FigureColor.Black
         )
 
-    override suspend fun setSelectedColors(colors: Set<Color>) {
+    override suspend fun setSelectedColors(colors: Set<FigureColor>) {
         try {
             accountDataStore.setSelectedColors(colors)
         } catch (e: Exception) {
-            // Handle the exception as needed
+            println("Error setting selected colors: ${e.message}")
         }
     }
 
-
-    override suspend fun getRandomSelectedColor(): Color {
+    override suspend fun getRandomSelectedColor(): FigureColor {
         return try {
             selectedColors.first().random()
         } catch (e: Exception) {
-            // Return a default color or handle as needed
-            Color.White
+            println("Error getting random selected color: ${e.message}")
+            FigureColor.White
         }
     }
 }

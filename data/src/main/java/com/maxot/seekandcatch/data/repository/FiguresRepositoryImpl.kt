@@ -1,8 +1,8 @@
 package com.maxot.seekandcatch.data.repository
 
-import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.Goal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -13,18 +13,13 @@ class FiguresRepositoryImpl
     private val colorsRepository: ColorsRepository,
     @ApplicationScope private val coroutineScope: CoroutineScope
 ) : FiguresRepository {
-    private var availableColors = setOf<Color>(
-        Color.Red,
-        Color.Blue,
-        Color.Yellow,
-        Color.Green
-    )
+    private var availableColors = mutableSetOf<FigureColor>()
 
     init {
         coroutineScope.launch {
             colorsRepository.selectedColors.collect {
                 if (it.isNotEmpty()) {
-                    availableColors = it
+                    availableColors = it.toMutableSet()
                 }
             }
         }
@@ -32,7 +27,7 @@ class FiguresRepositoryImpl
 
     override fun getRandomFigure(id: Int): Figure {
         val figureType = Figure.FigureType.entries.random()
-        val color = availableColors.randomOrNull() ?: Color.Red
+        val color = availableColors.randomOrNull() ?: FigureColor.Red
         return Figure(id = id, type = figureType, color = color)
     }
 
@@ -71,23 +66,11 @@ class FiguresRepositoryImpl
 
         for (i in startId..<selectedItemsCount + startId) {
             val randomFigure = selectedItems.random()
-            result.add(
-                Figure(
-                    id = i,
-                    type = randomFigure.type,
-                    color = randomFigure.color
-                )
-            )
+            result.add(Figure(id = i, type = randomFigure.type, color = randomFigure.color))
         }
         for (i in startId + selectedItemsCount..<startId + itemsCount) {
             val randomFigure = otherItems.random()
-            result.add(
-                Figure(
-                    id = i,
-                    type = randomFigure.type,
-                    color = randomFigure.color
-                )
-            )
+            result.add(Figure(id = i, type = randomFigure.type, color = randomFigure.color))
         }
 
         return result.shuffled()
@@ -99,16 +82,13 @@ class FiguresRepositoryImpl
             is Goal.Colored -> {
                 val goalColor = goal.getGoal()
                 Figure.FigureType.entries.forEach { type ->
-                    val coloredFigure = Figure(type = type, color = goalColor)
-                    figures.add(coloredFigure)
+                    figures.add(Figure(type = type, color = goalColor))
                 }
             }
-
             is Goal.Shaped -> {
                 val goalFigureType = goal.getGoal()
                 availableColors.forEach { color ->
-                    val shapedFigure = Figure(type = goalFigureType, color = color)
-                    figures.add(shapedFigure)
+                    figures.add(Figure(type = goalFigureType, color = color))
                 }
             }
         }
@@ -122,27 +102,19 @@ class FiguresRepositoryImpl
                 val goalColor = goal.getGoal()
                 Figure.FigureType.entries.forEach { type ->
                     availableColors.forEach { color ->
-                        if (goalColor != color) {
-                            val coloredFigure = Figure(type = type, color = color)
-                            figures.add(coloredFigure)
-                        }
+                        if (goalColor != color) figures.add(Figure(type = type, color = color))
                     }
                 }
             }
-
             is Goal.Shaped -> {
                 val goalFigureType: Figure.FigureType = goal.getGoal()
                 availableColors.forEach { color ->
                     Figure.FigureType.entries.forEach { type ->
-                        if (goalFigureType != type) {
-                            val shapedFigure = Figure(type = type, color = color)
-                            figures.add(shapedFigure)
-                        }
+                        if (goalFigureType != type) figures.add(Figure(type = type, color = color))
                     }
                 }
             }
         }
         return figures
     }
-
 }

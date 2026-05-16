@@ -43,8 +43,10 @@ import com.maxot.seekandcatch.core.designsystem.component.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure
 import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.getShapeForFigure
+import com.maxot.seekandcatch.data.model.FigureColor
+import com.maxot.seekandcatch.data.model.toComposeColor
 import com.maxot.seekandcatch.feature.gameplay.R
+import com.maxot.seekandcatch.feature.gameplay.ui.getShapeForFigure
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -62,7 +64,7 @@ private data class Fragment(
     val velocity: Offset,
     val rotationSpeed: Float,
     val size: Float,
-    val type: Int, // 0: rect, 1: triangle, 2: circle (small shards)
+    val type: Int,
     val color: Color
 )
 
@@ -80,12 +82,10 @@ fun ColoredFigureLayout(
 
     val shape: Shape = figure.getShapeForFigure()
 
-    val color: Color = figure.color ?: Color.LightGray
+    val color: Color = figure.color?.toComposeColor() ?: Color.LightGray
     val secondColor: Color = Color.White
 
-    val interactionSource = remember {
-        MutableInteractionSource()
-    }
+    val interactionSource = remember { MutableInteractionSource() }
     var heightInPx: Float = 0f
 
     val alpha by animateFloatAsState(
@@ -105,14 +105,9 @@ fun ColoredFigureLayout(
             val angle = Random.nextFloat() * 2 * Math.PI
             val speed = 200f + Random.nextFloat() * 600f
             val vx = (Math.cos(angle) * speed).toFloat()
-            val vy = (Math.sin(angle) * speed).toFloat() - 200f // Upward boost
-            
-            // Random initial position within a square roughly the size of the figure
-            // We don't have exact size in Px here yet, but we can use a relative 0-1 range
-            // and scale it later in Canvas. Or just assume a reasonable default.
+            val vy = (Math.sin(angle) * speed).toFloat() - 200f
             val initialX = (Random.nextFloat() - 0.5f) * 60f
             val initialY = (Random.nextFloat() - 0.5f) * 60f
-
             Fragment(
                 id = i,
                 initialOffset = Offset(initialX, initialY),
@@ -136,29 +131,17 @@ fun ColoredFigureLayout(
     LaunchedEffect(isGameOver) {
         if (isGameOver) {
             val jobs = listOf(
-                launch {
-                    gameOverAlpha.animateTo(0f, tween(gameOverAnimDuration))
-                },
+                launch { gameOverAlpha.animateTo(0f, tween(gameOverAnimDuration)) },
                 launch {
                     val angle = Random.nextFloat() * 2 * Math.PI
                     val distance = 1000f
                     gameOverTranslation.animateTo(
-                        Offset(
-                            Math.cos(angle).toFloat() * distance,
-                            Math.sin(angle).toFloat() * distance
-                        ),
+                        Offset(Math.cos(angle).toFloat() * distance, Math.sin(angle).toFloat() * distance),
                         tween(gameOverAnimDuration)
                     )
                 },
-                launch {
-                    gameOverRotation.animateTo(
-                        (Random.nextFloat() * 720 - 360),
-                        tween(gameOverAnimDuration)
-                    )
-                },
-                launch {
-                    gameOverScale.animateTo(0.2f, tween(gameOverAnimDuration))
-                }
+                launch { gameOverRotation.animateTo((Random.nextFloat() * 720 - 360), tween(gameOverAnimDuration)) },
+                launch { gameOverScale.animateTo(0.2f, tween(gameOverAnimDuration)) }
             )
             jobs.joinAll()
         }
@@ -185,9 +168,7 @@ fun ColoredFigureLayout(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = figure.isActive && !isGameOver && figure.pointsReceived == null
-            ) {
-                onItemClick()
-            }
+            ) { onItemClick() }
             .alpha(alpha)
             .then(modifier),
         contentAlignment = Alignment.Center
@@ -203,17 +184,12 @@ fun ColoredFigureLayout(
             } else if (breakingProgress.value < 1f) {
                 fragments.forEach { fragment ->
                     val progress = breakingProgress.value
-                    val time = progress * 1.0f // normalized time for physics
-                    
-                    // Simple physics: s = ut + 0.5at^2
-                    // Gravity a = 1500 px/s^2 (downward)
+                    val time = progress * 1.0f
                     val gravity = 2000f
                     val currentX = fragment.initialOffset.x + fragment.velocity.x * time
                     val currentY = fragment.initialOffset.y + fragment.velocity.y * time + 0.5f * gravity * time * time
-                    
                     val currentRotation = fragment.rotationSpeed * time
                     val currentAlpha = (1f - progress * 1.2f).coerceIn(0f, 1f)
-
                     if (currentAlpha > 0) {
                         withTransform({
                             translate(currentX, currentY)
@@ -228,10 +204,10 @@ fun ColoredFigureLayout(
 
         if (LocalColorblindMode.current) {
             val colorCode = when (figure.color) {
-                Color.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
-                Color.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
-                Color.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
-                Color.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
+                FigureColor.Red -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_red)
+                FigureColor.Blue -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_blue)
+                FigureColor.Green -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_green)
+                FigureColor.Yellow -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_yellow)
                 else -> stringResource(id = com.maxot.seekandcatch.feature.settings.R.string.color_unknown)
             }
             Text(
@@ -258,15 +234,9 @@ fun ColoredFigureLayout(
 
 private fun DrawScope.drawFragment(type: Int, fragmentSize: Float, color: Color) {
     when (type) {
-        0 -> { // Square
-            drawRect(color = color, size = Size(fragmentSize, fragmentSize))
-        }
-
-        2 -> { // Circle
-            drawCircle(color = color, radius = fragmentSize / 2f)
-        }
-
-        1 -> { // Triangle
+        0 -> drawRect(color = color, size = Size(fragmentSize, fragmentSize))
+        2 -> drawCircle(color = color, radius = fragmentSize / 2f)
+        1 -> {
             val path = androidx.compose.ui.graphics.Path().apply {
                 moveTo(fragmentSize / 2, 0f)
                 lineTo(fragmentSize, fragmentSize)
@@ -282,7 +252,7 @@ private fun DrawScope.drawFragment(type: Int, fragmentSize: Float, color: Color)
 @Composable
 fun ColoredFigureLayoutActivePreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = Color.Red))
+        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = FigureColor.Red))
     }
 }
 
@@ -290,29 +260,15 @@ fun ColoredFigureLayoutActivePreview() {
 @Composable
 fun ColoredFigureLayoutNotActivePreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(
-            figure = Figure(
-                type = Figure.FigureType.TRIANGLE,
-                color = Color.Red,
-                isActive = false
-            )
-        )
+        ColoredFigureLayout(figure = Figure(type = Figure.FigureType.TRIANGLE, color = FigureColor.Red, isActive = false))
     }
 }
-
 
 @Preview
 @Composable
 fun SquareFigurePreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(
-            modifier = Modifier.size(96.dp),
-            figure = Figure(
-                type = Figure.FigureType.SQUARE,
-                color = Color.Blue,
-                isActive = true
-            )
-        )
+        ColoredFigureLayout(modifier = Modifier.size(96.dp), figure = Figure(type = Figure.FigureType.SQUARE, color = FigureColor.Blue, isActive = true))
     }
 }
 
@@ -320,14 +276,7 @@ fun SquareFigurePreview() {
 @Composable
 fun CircleFigurePreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(
-            modifier = Modifier.size(96.dp),
-            figure = Figure(
-                type = Figure.FigureType.CIRCLE,
-                color = Color.Green,
-                isActive = true
-            )
-        )
+        ColoredFigureLayout(modifier = Modifier.size(96.dp), figure = Figure(type = Figure.FigureType.CIRCLE, color = FigureColor.Green, isActive = true))
     }
 }
 
@@ -335,13 +284,6 @@ fun CircleFigurePreview() {
 @Composable
 fun TriangleFigurePreview() {
     SeekAndCatchTheme {
-        ColoredFigureLayout(
-            modifier = Modifier.size(96.dp),
-            figure = Figure(
-                type = Figure.FigureType.TRIANGLE,
-                color = Color.Red,
-                isActive = true
-            )
-        )
+        ColoredFigureLayout(modifier = Modifier.size(96.dp), figure = Figure(type = Figure.FigureType.TRIANGLE, color = FigureColor.Red, isActive = true))
     }
 }

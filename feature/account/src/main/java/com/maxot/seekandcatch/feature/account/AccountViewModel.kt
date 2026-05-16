@@ -1,9 +1,9 @@
 package com.maxot.seekandcatch.feature.account
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.common.base.BaseViewModel
 import com.maxot.seekandcatch.core.domain.user.UserUseCase
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.repository.ColorsRepository
 import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenEvent
 import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenUIState
@@ -32,7 +32,6 @@ class AccountViewModel
                 )
             }
         }
-
     }
 
     override fun onEvent(event: AccountScreenEvent) {
@@ -42,7 +41,7 @@ class AccountViewModel
         }
     }
 
-    private fun onSelectedColorsChanged(newColors: Set<Color>) {
+    private fun onSelectedColorsChanged(newColors: Set<FigureColor>) {
         viewModelScope.launch {
             colorsRepository.setSelectedColors(newColors)
         }
@@ -53,5 +52,4 @@ class AccountViewModel
             userUseCase.setName(name)
         }
     }
-
 }
