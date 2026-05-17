@@ -7,11 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class VisualFeedbackManager @Inject constructor() {
+class VisualFeedbackManager {
     private val _isLifeWasted = MutableStateFlow(false)
     val isLifeWasted: StateFlow<Boolean> = _isLifeWasted.asStateFlow()
 
