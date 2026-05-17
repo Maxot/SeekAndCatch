@@ -1,6 +1,7 @@
 package com.maxot.seekandcatch.data.repository
 
 import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.Goal
 import com.maxot.seekandcatch.data.model.isFitForGoal
 import kotlinx.coroutines.flow.flowOf
@@ -12,7 +13,7 @@ import org.mockito.kotlin.mock
 class FigureRepositoryImplTest {
 
     private val colorsRepository: ColorsRepository = mock {
-        on { selectedColors }.thenReturn(flowOf(setOf(androidx.compose.ui.graphics.Color.Red)))
+        on { selectedColors }.thenReturn(flowOf(setOf(FigureColor.Red)))
     }
     private val testScope = TestScope()
 

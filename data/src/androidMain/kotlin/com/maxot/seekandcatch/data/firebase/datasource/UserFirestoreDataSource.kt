@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.data.firebase.datasource
 
-import android.util.Log
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
@@ -21,7 +20,7 @@ class UserFirestoreDataSource @Inject constructor() : UserDataSource {
         try {
             usersCollection.document(user.id).set(user).await()
         } catch (e: Exception) {
-            Log.e(TAG, "Error saving user", e)
+            println("E/$TAG: Error saving user: ${e.message}")
         }
     }
 
@@ -29,7 +28,7 @@ class UserFirestoreDataSource @Inject constructor() : UserDataSource {
         return try {
             usersCollection.document(userId).get().await().toObject<User>()
         } catch (e: Exception) {
-            Log.e(TAG, "Error getting user", e)
+            println("E/$TAG: Error getting user: ${e.message}")
             null
         }
     }
