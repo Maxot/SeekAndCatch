@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.core.domain.flow
 
-import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.core.common.model.GameParams
 import com.maxot.seekandcatch.core.domain.engine.FlowGameEngine
 import com.maxot.seekandcatch.core.domain.engine.GameEngineData
@@ -10,23 +9,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 const val TAG = "FlowGameUseCase"
 
-
-/**
- * Represent game logic for Flow Game Mode.
- * The game consists of grid of [FlowGameData.figures] with fixed [FlowGameData.rowWidth] and the [FlowGameData.goals].
- * Items are auto-scrolled with some speed(px/ms), the amount of pixel to scroll calculated by the engine
- * and the scroll duration calculated by the engine. Then UI pass back first visible item index
- * to process game updates via the engine.
- * During this process user should click on items and the engine will check if the item is fit for the goals
- * and update the score, coefficient, and life accordingly.
- */
-class FlowGameUseCase
-@Inject constructor(
-    @ApplicationScope private val coroutineScope: CoroutineScope,
+class FlowGameUseCase(
+    private val coroutineScope: CoroutineScope,
     private val flowGameEngine: FlowGameEngine
 ) {
 
@@ -45,13 +32,12 @@ class FlowGameUseCase
         flowGameEngine.initGame(gameParams)
     }
 
-
     fun onEvent(event: FlowGameEvent) {
         when (event) {
             FlowGameEvent.ResetGame -> flowGameEngine.reset()
             is FlowGameEvent.OnItemClick -> flowGameEngine.onItemClick(event.itemId)
-            FlowGameEvent.UpdateScrollDuration -> { /* Handled by engine */ }
-            FlowGameEvent.UpdatePixelsToScroll -> { /* Handled by engine */ }
+            FlowGameEvent.UpdateScrollDuration -> {}
+            FlowGameEvent.UpdatePixelsToScroll -> {}
             FlowGameEvent.FinishGame -> flowGameEngine.finishGame()
             FlowGameEvent.PauseGame -> flowGameEngine.pauseGame()
             FlowGameEvent.ResumeGame -> flowGameEngine.resumeGame()
@@ -59,7 +45,6 @@ class FlowGameUseCase
             is FlowGameEvent.FirstVisibleItemIndexChanged -> flowGameEngine.setFirstVisibleItemIndex(event.firstVisibleItemIndex)
             is FlowGameEvent.ItemHeightMeasured -> flowGameEngine.setItemHeight(event.height)
         }
-
     }
 
     private fun mapToFlowGameState(engineState: GameEngineState, engineData: GameEngineData): FlowGameState {
