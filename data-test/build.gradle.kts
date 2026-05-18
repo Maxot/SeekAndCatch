@@ -1,8 +1,29 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.multiplatform)
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "21"
+            }
+        }
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":data"))
+        }
+        androidMain.dependencies {
+            implementation(libs.hilt.android)
+            implementation(libs.hilt.android.testing)
+        }
+    }
 }
 
 android {
@@ -15,14 +36,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-}
-
-dependencies {
-    implementation(project(":data"))
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.android.testing)
 }
