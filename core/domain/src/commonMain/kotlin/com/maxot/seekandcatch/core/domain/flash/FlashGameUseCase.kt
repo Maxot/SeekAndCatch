@@ -8,12 +8,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
-/**
- * Simple implementation of Flash game logic: a grid of cells where figures randomly appear and disappear.
- */
-class FlashGameUseCase @Inject constructor(
+class FlashGameUseCase(
     private val flashGameEngine: FlashGameEngine,
 ) {
     val gameState: StateFlow<FlashGameState> = combine(
@@ -73,7 +69,6 @@ class FlashGameUseCase @Inject constructor(
         )
     }
 
-    // Legacy methods kept for binary compatibility if needed, but they should be unused now
     fun startGame() = flashGameEngine.startGame()
     fun pauseGame() = flashGameEngine.pauseGame()
     fun resumeGame() = flashGameEngine.resumeGame()

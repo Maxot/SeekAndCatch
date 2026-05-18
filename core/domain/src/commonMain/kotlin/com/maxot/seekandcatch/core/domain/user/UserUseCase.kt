@@ -3,10 +3,8 @@ package com.maxot.seekandcatch.core.domain.user
 import com.maxot.seekandcatch.core.common.model.User
 import com.maxot.seekandcatch.data.repository.AuthRepository
 import com.maxot.seekandcatch.data.repository.UserRepository
-import javax.inject.Inject
 
-class UserUseCase
-@Inject constructor(
+class UserUseCase(
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
 ) {

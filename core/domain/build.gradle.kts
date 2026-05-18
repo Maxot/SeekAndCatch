@@ -1,8 +1,32 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.ksp)
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "21"
+            }
+        }
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:common"))
+            implementation(project(":data"))
+            implementation(libs.koin.core)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        androidMain.dependencies {
+            implementation(libs.hilt.android)
+        }
+    }
 }
 
 android {
@@ -15,24 +39,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-    buildFeatures {
-        compose = true
-    }
-
 }
 
 dependencies {
-    implementation(project(":core:common"))
-    implementation(project(":data"))
-    implementation(platform(libs.androidx.compose.bom))
-
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.hilt.android)
-
-    ksp(libs.hilt.compiler)
+    add("kspAndroid", libs.hilt.compiler)
 
     testImplementation(project(":data-test"))
     testImplementation(libs.hilt.android.testing)
@@ -40,5 +50,4 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.androidx.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-
 }
