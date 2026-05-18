@@ -33,8 +33,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
+import org.koin.compose.viewmodel.koinViewModel
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.core.designsystem.component.PixelButton
@@ -46,7 +46,7 @@ import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
 @Composable
 fun SettingsDialog(
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = hiltViewModel(),
+    viewModel: SettingsViewModel = koinViewModel(),
     onDismiss: () -> Unit,
 ) {
     val isSoundEnabled by viewModel.soundState.collectAsState(true)

@@ -8,4 +8,4 @@ data class AccountScreenUIState(
     val user: User? = null,
     val availableColors: Set<FigureColor> = emptySet(),
     val selectedColors: Set<FigureColor> = emptySet()
-): BaseUIState()
+) : BaseUIState()

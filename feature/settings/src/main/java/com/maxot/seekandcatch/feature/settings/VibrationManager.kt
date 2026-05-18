@@ -7,17 +7,12 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import com.maxot.seekandcatch.data.repository.SettingsRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class VibrationManager
-@Inject constructor(
-    @ApplicationContext val context: Context,
+class VibrationManager(
+    val context: Context,
     private val settingsRepository: SettingsRepository
-) {
+) : HapticsController {
     private lateinit var vibratorManager: VibratorManager
 
     init {
@@ -27,7 +22,7 @@ class VibrationManager
         }
     }
 
-    suspend fun vibrateCorrect() {
+    override suspend fun vibrateCorrect() {
         vibrateEffect(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
@@ -37,7 +32,7 @@ class VibrationManager
         )
     }
 
-    suspend fun vibrateError() {
+    override suspend fun vibrateError() {
         val pattern = longArrayOf(0, 100, 50, 100) // Double pulse
         vibrateEffect(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -71,7 +66,7 @@ class VibrationManager
         }
     }
 
-    suspend fun vibrate(duration: Long = 250) {
+    override suspend fun vibrate(duration: Long) {
         vibrateEffect(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 }

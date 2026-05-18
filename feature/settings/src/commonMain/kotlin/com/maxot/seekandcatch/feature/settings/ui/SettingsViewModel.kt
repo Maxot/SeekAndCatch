@@ -2,27 +2,22 @@ package com.maxot.seekandcatch.feature.settings.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.maxot.seekandcatch.core.media.AudioManager
-import com.maxot.seekandcatch.core.media.SoundType
 import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.data.repository.SettingsRepository
-import com.maxot.seekandcatch.feature.settings.SCLocaleManager
-import com.maxot.seekandcatch.feature.settings.VibrationManager
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.maxot.seekandcatch.feature.settings.AudioController
+import com.maxot.seekandcatch.feature.settings.HapticsController
+import com.maxot.seekandcatch.feature.settings.LocaleController
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class SettingsViewModel
-@Inject constructor(
+class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
-    private val localeManager: SCLocaleManager,
-    private val audioManager: AudioManager,
-    private val vibrationManager: VibrationManager
+    private val localeController: LocaleController,
+    private val audioController: AudioController,
+    private val hapticsController: HapticsController
 ) : ViewModel() {
 
     val soundState = settingsRepository.observeSoundState()
@@ -31,31 +26,33 @@ class SettingsViewModel
     val colorblindMode = settingsRepository.observeColorblindModeEnabled()
 
     val darkTheme: StateFlow<Boolean> =
-        settingsRepository.userConfig.map { when(it.darkThemeConfig){
-            DarkThemeConfig.FOLLOW_SYSTEM -> true
-            DarkThemeConfig.LIGHT -> false
-            DarkThemeConfig.DARK -> true
-        } }.stateIn(
+        settingsRepository.userConfig.map {
+            when (it.darkThemeConfig) {
+                DarkThemeConfig.FOLLOW_SYSTEM -> true
+                DarkThemeConfig.LIGHT -> false
+                DarkThemeConfig.DARK -> true
+            }
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = true
         )
 
-    var allSupportedLocales = localeManager.getLocales()
-    var selectedLocale = localeManager.getSelectedLocale()?.toLanguageTag() ?: "en-US"
+    var allSupportedLocales = localeController.getLocales()
+    var selectedLocale = localeController.getSelectedLocaleTag() ?: "en-US"
 
     fun setSoundState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setSoundState(newState)
-            audioManager.onButtonClick()
+            audioController.onButtonClick()
         }
     }
 
     fun setMusicState(newState: Boolean) {
         viewModelScope.launch {
             settingsRepository.setMusicState(newState)
-            audioManager.onMusicSettingChanged(newState)
-            audioManager.onButtonClick()
+            audioController.onMusicSettingChanged(newState)
+            audioController.onButtonClick()
         }
     }
 
@@ -63,30 +60,30 @@ class SettingsViewModel
         viewModelScope.launch {
             settingsRepository.setVibrationState(newState)
             if (newState) {
-                vibrationManager.vibrate(50)
+                hapticsController.vibrate(50)
             }
-            audioManager.onButtonClick()
+            audioController.onButtonClick()
         }
     }
 
     fun updateSelectedLocale(locale: String) {
-        localeManager.setLocale(locale)
-        selectedLocale = localeManager.getSelectedLocale()?.toLanguageTag() ?: "en-US"
-        allSupportedLocales = localeManager.getLocales()
-        audioManager.onButtonClick()
+        localeController.setLocale(locale)
+        selectedLocale = localeController.getSelectedLocaleTag() ?: "en-US"
+        allSupportedLocales = localeController.getLocales()
+        audioController.onButtonClick()
     }
 
     fun setDarkTheme(isDarkTheme: Boolean) {
         viewModelScope.launch {
             settingsRepository.setDarkTheme(isDarkTheme)
-            audioManager.onButtonClick()
+            audioController.onButtonClick()
         }
     }
 
     fun setColorblindModeEnabled(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setColorblindModeEnabled(enabled)
-            audioManager.onButtonClick()
+            audioController.onButtonClick()
         }
     }
 }

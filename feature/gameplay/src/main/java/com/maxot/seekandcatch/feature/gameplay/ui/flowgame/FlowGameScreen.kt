@@ -48,8 +48,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.common.model.GameMode
@@ -72,7 +72,7 @@ const val TAG = "FlowGameScreen"
 
 @Composable
 fun FlowGameScreen(
-    viewModel: FlowGameViewModel = hiltViewModel(),
+    viewModel: FlowGameViewModel = koinViewModel(),
     toGameResultScreen: (Int) -> Unit
 ) {
     val gridState: LazyGridState = rememberLazyGridState()
