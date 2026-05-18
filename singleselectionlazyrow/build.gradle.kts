@@ -1,8 +1,31 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.ksp)
+}
+
+kotlin {
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "21"
+            }
+        }
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:designsystem"))
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+        }
+    }
 }
 
 android {
@@ -15,34 +38,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-    buildFeatures {
-        compose = true
-    }
-}
-
-dependencies {
-//    implementation(project(":data"))
-    implementation(project(":core:designsystem"))
-
-    implementation(platform(libs.androidx.compose.bom))
-
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-//    implementation(libs.androidx.hilt.navigation.compose)
-
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.hilt.android)
-
-    ksp(libs.hilt.compiler)
-
-//    testImplementation(libs.junit)
-//    testImplementation(libs.mockito.kotlin)
-//    testImplementation(libs.mockito.core)
-//
-//    androidTestImplementation(libs.androidx.test.ext)
-//    androidTestImplementation(libs.androidx.test.espresso.core)
 }
