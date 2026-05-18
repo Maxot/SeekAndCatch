@@ -7,14 +7,10 @@ import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.repository.ColorsRepository
 import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenEvent
 import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenUIState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AccountViewModel
-@Inject constructor(
+class AccountViewModel(
     private val userUseCase: UserUseCase,
     private val colorsRepository: ColorsRepository,
 ) : BaseViewModel<AccountScreenUIState, AccountScreenEvent>(AccountScreenUIState()) {

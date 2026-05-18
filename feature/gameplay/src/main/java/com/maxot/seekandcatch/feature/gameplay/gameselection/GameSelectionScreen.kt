@@ -34,8 +34,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavOptions
+import org.koin.compose.viewmodel.koinViewModel
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.drawPixelBorders
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
@@ -54,7 +54,7 @@ import kotlin.random.Random
 
 @Composable
 fun GameSelectionScreen(
-    viewModel: GameSelectionViewModel = hiltViewModel(),
+    viewModel: GameSelectionViewModel = koinViewModel(),
     navigateToFlowGame: (NavOptions?) -> Unit,
     navigateToFlashGame: (NavOptions?) -> Unit
 ) {

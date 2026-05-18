@@ -8,26 +8,23 @@ import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.domain.flash.FlashGameEvent
 import com.maxot.seekandcatch.core.domain.flash.FlashGameState
 import com.maxot.seekandcatch.core.domain.flash.FlashGameUseCase
-import com.maxot.seekandcatch.core.media.AudioManager
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.gameplay.ui.flashgame.model.FlashGameUiState
-import com.maxot.seekandcatch.feature.settings.VibrationManager
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.maxot.seekandcatch.feature.settings.AudioController
+import com.maxot.seekandcatch.feature.settings.HapticsController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class FlashGameViewModel @Inject constructor(
+class FlashGameViewModel(
     private val gameUseCase: FlashGameUseCase,
     private val settingsRepository: SettingsRepository,
-    private val vibrationManager: VibrationManager,
+    private val hapticsController: HapticsController,
     private val visualFeedbackManager: VisualFeedbackManager,
-    private val audioManager: AudioManager,
+    private val audioController: AudioController,
 ) : ViewModel() {
 
     private val selectedGameDifficulty: StateFlow<GameDifficulty?> =
@@ -44,7 +41,6 @@ class FlashGameViewModel @Inject constructor(
             initialValue = GameMode.FLASH
         )
 
-
     private val _uiState = MutableStateFlow(FlashGameUiState())
     val uiState: StateFlow<FlashGameUiState> get() = _uiState
 
@@ -60,7 +56,6 @@ class FlashGameViewModel @Inject constructor(
                 _uiState.update { it.copy(isLifeWasted = isWasted) }
             }
         }
-
         viewModelScope.launch {
             settingsRepository.observeSoundState().collect { enabled ->
                 _uiState.update { it.copy(isSoundEnabled = enabled) }
@@ -83,40 +78,21 @@ class FlashGameViewModel @Inject constructor(
             gameUseCase.gameState.collect { state ->
                 when (state) {
                     FlashGameState.Idle -> _uiState.update {
-                        it.copy(
-                            isLoading = true,
-                            isReady = false,
-                            isActive = false,
-                            isPaused = false
-                        )
+                        it.copy(isLoading = true, isReady = false, isActive = false, isPaused = false)
                     }
-
                     is FlashGameState.Created -> _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isReady = true,
-                            isActive = false,
-                            // Ensure goals info is visible before the game starts
-                            goalSuitableFigures = state.figuresSuitableForGoal
-                        )
+                        it.copy(isLoading = false, isReady = true, isActive = false, goalSuitableFigures = state.figuresSuitableForGoal)
                     }
-
                     FlashGameState.Started -> {}
                     is FlashGameState.Resumed -> {
                         val d = state.data
                         _uiState.update {
                             it.copy(
-                                isLoading = false,
-                                isActive = true,
-                                isPaused = false,
-                                gridSize = d.gridSize,
-                                gridWidth = d.gridWidth,
-                                visibleCells = d.visibleCells,
-                                score = d.score,
-                                lifeCount = d.lifeCount,
-                                coefficient = d.coefficient,
-                                gameDuration = d.gameDuration,
-                                goals = d.goals,
+                                isLoading = false, isActive = true, isPaused = false,
+                                gridSize = d.gridSize, gridWidth = d.gridWidth,
+                                visibleCells = d.visibleCells, score = d.score,
+                                lifeCount = d.lifeCount, coefficient = d.coefficient,
+                                gameDuration = d.gameDuration, goals = d.goals,
                                 goalSuitableFigures = d.goalSuitableFigures,
                                 figuresByCell = d.figuresByCell,
                                 isLifeWasted = d.isLifeWasted || it.isLifeWasted
@@ -125,41 +101,25 @@ class FlashGameViewModel @Inject constructor(
                         processLifeCountChanges(state.data.lifeCount)
                         processCoefficientChanges(state.data.coefficient)
                     }
-
                     FlashGameState.Paused -> _uiState.update {
-                        it.copy(
-                            isPaused = true,
-                            isActive = false
-                        )
+                        it.copy(isPaused = true, isActive = false)
                     }
-
                     is FlashGameState.Finished -> {
-                        viewModelScope.launch {
-                            vibrationManager.vibrateError()
-                        }
-                        audioManager.onGameOver()
+                        viewModelScope.launch { hapticsController.vibrateError() }
+                        audioController.onGameOver()
                         val lastData = state.lastData
                         _uiState.update { currentState ->
                             val base = if (lastData != null) {
                                 currentState.copy(
-                                    gridSize = lastData.gridSize,
-                                    gridWidth = lastData.gridWidth,
-                                    visibleCells = lastData.visibleCells,
-                                    score = lastData.score,
-                                    lifeCount = lastData.lifeCount,
-                                    coefficient = lastData.coefficient,
-                                    gameDuration = lastData.gameDuration,
-                                    goals = lastData.goals,
+                                    gridSize = lastData.gridSize, gridWidth = lastData.gridWidth,
+                                    visibleCells = lastData.visibleCells, score = lastData.score,
+                                    lifeCount = lastData.lifeCount, coefficient = lastData.coefficient,
+                                    gameDuration = lastData.gameDuration, goals = lastData.goals,
                                     goalSuitableFigures = lastData.goalSuitableFigures,
                                     figuresByCell = lastData.figuresByCell,
                                 )
                             } else currentState
-
-                            base.copy(
-                                isActive = false,
-                                isPaused = false,
-                                isFinished = true
-                            )
+                            base.copy(isActive = false, isPaused = false, isFinished = true)
                         }
                     }
                 }
@@ -172,7 +132,7 @@ class FlashGameViewModel @Inject constructor(
             selectedGameDifficulty.collect { diff ->
                 diff?.let {
                     _uiState.update { it.copy(isFinished = false, score = 0) }
-                    audioManager.onGameStart()
+                    audioController.onGameStart()
                     gameUseCase.initGame(it.gameParams)
                     return@collect
                 }
@@ -181,29 +141,29 @@ class FlashGameViewModel @Inject constructor(
     }
 
     fun startGame() {
-        audioManager.onGameplayStarted()
+        audioController.onGameplayStarted()
         gameUseCase.onEvent(FlashGameEvent.StartGame)
     }
 
     fun pauseGame() {
         gameUseCase.onEvent(FlashGameEvent.PauseGame)
-        audioManager.onGamePaused()
+        audioController.onGamePaused()
     }
 
     fun resumeGame() {
         gameUseCase.onEvent(FlashGameEvent.ResumeGame)
-        audioManager.onGameResumed()
+        audioController.onGameResumed()
     }
 
     fun finishGame() {
-        audioManager.onGameOver()
+        audioController.onGameOver()
         gameUseCase.onEvent(FlashGameEvent.FinishGame)
     }
 
     private fun processLifeCountChanges(lifeCount: Int) {
         if (lastLifeCount > lifeCount) {
             updateLifeWastedValue()
-            audioManager.onMiss()
+            audioController.onMiss()
         }
         lastLifeCount = lifeCount
     }
@@ -211,48 +171,37 @@ class FlashGameViewModel @Inject constructor(
     private fun processCoefficientChanges(coefficient: Float) {
         if (lastCoefficient > coefficient) {
             updateLifeWastedValue()
-            audioManager.onMiss()
+            audioController.onMiss()
         }
         lastCoefficient = coefficient
     }
 
-
     private fun updateLifeWastedValue() {
-        viewModelScope.launch {
-            vibrationManager.vibrateError()
-        }
+        viewModelScope.launch { hapticsController.vibrateError() }
         visualFeedbackManager.triggerLifeWasted(viewModelScope)
     }
 
     fun onCellClick(id: Int) {
-        viewModelScope.launch {
-            vibrationManager.vibrateCorrect()
-        }
-        audioManager.onCorrectTap()
+        viewModelScope.launch { hapticsController.vibrateCorrect() }
+        audioController.onCorrectTap()
         gameUseCase.onEvent(FlashGameEvent.OnCellClick(id))
     }
 
     fun toggleSound(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setSoundState(enabled)
-        }
+        viewModelScope.launch { settingsRepository.setSoundState(enabled) }
     }
 
     fun toggleMusic(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setMusicState(enabled)
-        }
+        viewModelScope.launch { settingsRepository.setMusicState(enabled) }
     }
 
     fun toggleVibration(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setVibrationState(enabled)
-        }
+        viewModelScope.launch { settingsRepository.setVibrationState(enabled) }
     }
 
     override fun onCleared() {
         gameUseCase.onEvent(FlashGameEvent.ResetGame)
         super.onCleared()
-        audioManager.release()
+        audioController.release()
     }
 }

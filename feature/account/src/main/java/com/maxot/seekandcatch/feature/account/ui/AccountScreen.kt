@@ -20,8 +20,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
 import com.maxot.seekandcatch.core.common.model.User
 import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.core.designsystem.component.UserInfoPanel
@@ -41,7 +41,7 @@ import com.maxot.seekandcatch.feature.colorpicker.ColorPicker
 @Composable
 fun AccountScreen(
     modifier: Modifier = Modifier,
-    viewModel: AccountViewModel = hiltViewModel()
+    viewModel: AccountViewModel = koinViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 

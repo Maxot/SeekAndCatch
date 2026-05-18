@@ -30,8 +30,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.PixelButton
 import com.maxot.seekandcatch.feature.gameplay.GameResultEvent
@@ -41,7 +41,7 @@ import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable
 fun GameResultScreen(
-    viewModel: GameResultViewModel = hiltViewModel(),
+    viewModel: GameResultViewModel = koinViewModel(),
     toMainScreen: () -> Unit,
     onRestart: (com.maxot.seekandcatch.core.common.model.GameMode) -> Unit,
 ) {

@@ -8,12 +8,11 @@ import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.domain.flow.FlowGameEvent
 import com.maxot.seekandcatch.core.domain.flow.FlowGameState
 import com.maxot.seekandcatch.core.domain.flow.FlowGameUseCase
-import com.maxot.seekandcatch.core.media.AudioManager
 import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
-import com.maxot.seekandcatch.feature.settings.VibrationManager
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.maxot.seekandcatch.feature.settings.AudioController
+import com.maxot.seekandcatch.feature.settings.HapticsController
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,17 +20,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class FlowGameViewModel
-@Inject constructor(
+class FlowGameViewModel(
     private val gameUseCase: FlowGameUseCase,
     private val settingsRepository: SettingsRepository,
-    private val vibrationManager: VibrationManager,
+    private val hapticsController: HapticsController,
     private val visualFeedbackManager: VisualFeedbackManager,
-    private val audioManager: AudioManager
+    private val audioController: AudioController
 ) : ViewModel() {
+
     private var lastLifeCount: Int = 0
     private var lastCoefficient: Float = 0f
 
@@ -41,6 +38,7 @@ class FlowGameViewModel
             started = SharingStarted.Lazily,
             initialValue = null
         )
+
     val selectedGameMode: StateFlow<GameMode> =
         settingsRepository.observeGameMode().stateIn(
             scope = viewModelScope,
@@ -49,8 +47,7 @@ class FlowGameViewModel
         )
 
     private val _flowGameUiState = MutableStateFlow(FlowGameUiState())
-    val flowGameUiState: StateFlow<FlowGameUiState>
-        get() = _flowGameUiState
+    val flowGameUiState: StateFlow<FlowGameUiState> get() = _flowGameUiState
 
     private val _readyToStart = MutableStateFlow(false)
     private val readyToStart: StateFlow<Boolean> = _readyToStart
@@ -58,7 +55,6 @@ class FlowGameViewModel
     init {
         observeFlowGameState()
         launchGame()
-
         processReadyToStart()
 
         viewModelScope.launch {
@@ -66,7 +62,6 @@ class FlowGameViewModel
                 _flowGameUiState.update { it.copy(isLifeWasted = isWasted) }
             }
         }
-
         viewModelScope.launch {
             settingsRepository.observeSoundState().collect { enabled ->
                 _flowGameUiState.update { it.copy(isSoundEnabled = enabled) }
@@ -98,58 +93,29 @@ class FlowGameViewModel
             is FlowGameUiEvent.ToggleSound -> viewModelScope.launch {
                 settingsRepository.setSoundState(event.enabled)
             }
-
             is FlowGameUiEvent.ToggleMusic -> viewModelScope.launch {
                 settingsRepository.setMusicState(event.enabled)
             }
-
             is FlowGameUiEvent.ToggleVibration -> viewModelScope.launch {
                 settingsRepository.setVibrationState(event.enabled)
             }
         }
-
     }
 
     private fun observeFlowGameState() {
         viewModelScope.launch {
             gameUseCase.gameState.collect { gameState ->
                 when (gameState) {
-                    FlowGameState.Idle -> {
-                        _flowGameUiState.update {
-                            it.copy(
-                                isLoading = true,
-                                isReady = false,
-                                isActive = false,
-                                isPaused = false
-                            )
-                        }
+                    FlowGameState.Idle -> _flowGameUiState.update {
+                        it.copy(isLoading = true, isReady = false, isActive = false, isPaused = false)
                     }
-
-                    is FlowGameState.Created -> {
-                        _flowGameUiState.update {
-                            it.copy(
-                                isLoading = false,
-                                isReady = true,
-                                isActive = false,
-                                goalSuitableFigures = gameState.figuresSuitableForGoal
-                            )
-                        }
+                    is FlowGameState.Created -> _flowGameUiState.update {
+                        it.copy(isLoading = false, isReady = true, isActive = false, goalSuitableFigures = gameState.figuresSuitableForGoal)
                     }
-
-                    FlowGameState.Started -> {
-
+                    FlowGameState.Started -> {}
+                    FlowGameState.Paused -> _flowGameUiState.update {
+                        it.copy(isPaused = true, isLoading = false, isActive = false)
                     }
-
-                    FlowGameState.Paused -> {
-                        _flowGameUiState.update {
-                            it.copy(
-                                isPaused = true,
-                                isLoading = false,
-                                isActive = false
-                            )
-                        }
-                    }
-
                     is FlowGameState.Resumed -> {
                         _flowGameUiState.update {
                             it.copy(
@@ -173,22 +139,13 @@ class FlowGameViewModel
                         processLifeCountChanges(gameState.data.lifeCount)
                         processCoefficientChanges(gameState.data.coefficient)
                     }
-
                     is FlowGameState.Finished -> {
-                        viewModelScope.launch {
-                            vibrationManager.vibrateError()
-                        }
-                        audioManager.onGameOver()
+                        viewModelScope.launch { hapticsController.vibrateError() }
+                        audioController.onGameOver()
                         _flowGameUiState.update {
-                            it.copy(
-                                isReady = false,
-                                isActive = false,
-                                isPaused = false,
-                                isFinished = true
-                            )
+                            it.copy(isReady = false, isActive = false, isPaused = false, isFinished = true)
                         }
                     }
-
                 }
             }
         }
@@ -216,14 +173,12 @@ class FlowGameViewModel
         }
     }
 
-    private fun setGameReadyToStart() {
-        _readyToStart.value = true
-    }
+    private fun setGameReadyToStart() { _readyToStart.value = true }
 
     private fun processLifeCountChanges(lifeCount: Int) {
         if (lastLifeCount > lifeCount) {
             updateLifeWastedValue()
-            audioManager.onMiss()
+            audioController.onMiss()
         }
         lastLifeCount = lifeCount
     }
@@ -231,61 +186,56 @@ class FlowGameViewModel
     private fun processCoefficientChanges(coefficient: Float) {
         if (lastCoefficient > coefficient) {
             updateLifeWastedValue()
-            audioManager.onMiss()
+            audioController.onMiss()
         }
         lastCoefficient = coefficient
     }
 
-
     private fun updateLifeWastedValue() {
-        viewModelScope.launch {
-            vibrationManager.vibrateError()
-        }
+        viewModelScope.launch { hapticsController.vibrateError() }
         visualFeedbackManager.triggerLifeWasted(viewModelScope)
     }
 
-
     private fun initGame(gameDifficulty: GameDifficulty) {
         _flowGameUiState.update { it.copy(isFinished = false, score = 0) }
-        audioManager.onGameStart()
+        audioController.onGameStart()
         gameUseCase.initGame(gameDifficulty.gameParams)
     }
 
     fun startGame() {
-        audioManager.onGameplayStarted()
+        audioController.onGameplayStarted()
         gameUseCase.onEvent(FlowGameEvent.StartGame)
     }
 
     fun pauseGame() {
         if (readyToStart.value) {
-            audioManager.onGamePaused()
+            audioController.onGamePaused()
             gameUseCase.onEvent(FlowGameEvent.PauseGame)
         }
     }
 
     fun resumeGame() {
         if (readyToStart.value) {
-            audioManager.onGameResumed()
+            audioController.onGameResumed()
             gameUseCase.onEvent(FlowGameEvent.ResumeGame)
         }
     }
 
     fun finishGame() {
-        audioManager.onGameOver()
+        audioController.onGameOver()
         gameUseCase.onEvent(FlowGameEvent.FinishGame)
     }
 
     private fun onItemClick(id: Int) {
         viewModelScope.launch {
-            vibrationManager.vibrateCorrect()
-            audioManager.onCorrectTap()
+            hapticsController.vibrateCorrect()
+            audioController.onCorrectTap()
             gameUseCase.onEvent(FlowGameEvent.OnItemClick(id))
         }
     }
 
-    private fun onFirstVisibleItemIndexChanged(index: Int) {
+    private fun onFirstVisibleItemIndexChanged(index: Int) =
         gameUseCase.onEvent(FlowGameEvent.FirstVisibleItemIndexChanged(index))
-    }
 
     private fun setItemHeight(height: Int) =
         gameUseCase.onEvent(FlowGameEvent.ItemHeightMeasured(height))
@@ -293,6 +243,6 @@ class FlowGameViewModel
     override fun onCleared() {
         gameUseCase.onEvent(FlowGameEvent.ResetGame)
         super.onCleared()
-        audioManager.release()
+        audioController.release()
     }
 }

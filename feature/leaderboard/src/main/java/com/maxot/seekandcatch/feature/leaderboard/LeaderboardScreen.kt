@@ -30,8 +30,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
@@ -46,7 +46,7 @@ import com.maxot.seekandcatch.core.designsystem.theme.silver
 
 @Composable
 fun LeaderBoardScreen(
-    viewModel: LeaderboardViewModel = hiltViewModel()
+    viewModel: LeaderboardViewModel = koinViewModel()
 ) {
     val uiState by viewModel.leaderboardUiState.collectAsStateWithLifecycle()
 

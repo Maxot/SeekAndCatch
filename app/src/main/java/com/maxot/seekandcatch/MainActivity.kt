@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.compose.rememberNavController
@@ -19,13 +18,11 @@ import com.maxot.seekandcatch.core.media.di.rememberAudioManager
 import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.ui.SeekAndCatchApp
 import com.maxot.seekandcatch.ui.SeekAndCatchAppState
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+import org.koin.compose.viewmodel.koinViewModel
 
-@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    @Inject
-    lateinit var musicController: MusicController
+    private val musicController: MusicController by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -34,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val navController = rememberNavController()
             val coroutineScope = rememberCoroutineScope()
-            val viewModel = hiltViewModel<MainViewModel>()
+            val viewModel = koinViewModel<MainViewModel>()
             val audioManager = rememberAudioManager()
             val appState = SeekAndCatchAppState(navController, coroutineScope, audioManager)
             val uiState = viewModel.uiState.collectAsState()
@@ -73,7 +70,7 @@ private fun isColorblindModeEnabled(uiState: MainActivityUiState): Boolean =
         is MainActivityUiState.Success -> uiState.userConfig.isColorblindModeEnabled
     }
 
-class MusicController @Inject constructor(
+class MusicController(
     private val audioManager: AudioManager
 ) : DefaultLifecycleObserver {
     override fun onPause(owner: LifecycleOwner) {
