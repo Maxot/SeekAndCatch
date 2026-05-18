@@ -8,13 +8,12 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination
-import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.media.di.rememberAudioManager
+import com.maxot.seekandcatch.feature.settings.AudioController
 import com.maxot.seekandcatch.navigation.TopLevelDestination
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 @Composable
 fun BottomNavigationBar(
@@ -23,7 +22,7 @@ fun BottomNavigationBar(
     currentDestination: NavDestination?,
     modifier: Modifier = Modifier,
 ) {
-    val audioManager = rememberAudioManager()
+    val audioController = koinInject<AudioController>()
     NavigationBar(
         modifier = Modifier
             .then(modifier),
@@ -32,12 +31,12 @@ fun BottomNavigationBar(
     ) {
         destinations.forEach { destination ->
             val selected = currentDestination.isTopLevelDestinationInHierarchy(destination)
-            val icon: Int = if (selected) destination.selectedIcon else destination.unselectedIcon
+            val icon = if (selected) destination.selectedIcon else destination.unselectedIcon
 
             NavigationBarItem(
                 label = {
                     Text(
-                        text = stringResource(id = destination.iconTextId),
+                        text = stringResource(destination.iconTextId),
                         style = MaterialTheme.typography.titleSmall,
                         maxLines = 1,
                     )
@@ -51,7 +50,7 @@ fun BottomNavigationBar(
                     indicatorColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 onClick = {
-                    audioManager.onButtonClick()
+                    audioController.onButtonClick()
                     onNavigateToDestination(destination)
                 },
                 icon = {
@@ -62,17 +61,5 @@ fun BottomNavigationBar(
                 },
             )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun BottomNavigationBarPreview() {
-    SeekAndCatchTheme {
-        BottomNavigationBar(
-            destinations = TopLevelDestination.entries,
-            onNavigateToDestination = {},
-            currentDestination = null
-        )
     }
 }

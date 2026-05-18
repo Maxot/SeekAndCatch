@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_account_title">Account</string>
+    <string name="feature_account_selected_colors">Selected colors:</string>
+    <string name="feature_account_screen_content_desc">Account Screen</string>
+    <string name="feature_account_selected_style">Selected Style:</string>
+</resources>

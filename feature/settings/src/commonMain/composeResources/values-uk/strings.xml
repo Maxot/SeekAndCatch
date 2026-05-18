@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_title">Налаштування</string>
+    <string name="feature_settings_sound_title">Звук</string>
+    <string name="feature_settings_music_title">Музика</string>
+    <string name="feature_settings_vibration_title">Вібрація</string>
+    <string name="feature_settings_ok">OK</string>
+    <string name="feature_settings_dialog_content_description">Settings Dialog</string>
+    <string name="feature_settings_top_app_bar_action_icon_content_desc">Settings</string>
+    <string name="feature_settings_colorblind_title">Режим для дальтоніків</string>
+    <string name="feature_settings_dark_theme_title">Темна тема</string>
+    <string name="color_red">R</string>
+    <string name="color_blue">B</string>
+    <string name="color_green">G</string>
+    <string name="color_yellow">Y</string>
+    <string name="color_unknown">?</string>
+</resources>

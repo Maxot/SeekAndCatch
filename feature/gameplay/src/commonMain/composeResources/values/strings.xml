@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_gameplay_title">Game</string>
+    <string name="feature_gameplay_label_score">Score: %1$d</string>
+    <string name="start_game_button_text">Start Game</string>
+    <string name="label_goal">Goals: </string>
+    <string name="label_all_colors">All of color: </string>
+    <string name="label_list_of_goal">All of : </string>
+    <string name="title_pause_dialog">Pause</string>
+    <string name="text_pause_dialog">Do you really want to exit the game?</string>
+    <string name="confirm_button_pause_dialog">Yes</string>
+    <string name="dismiss_button_pause_dialog">Resume</string>
+    <string name="pause_dialog_content_desc">Resume</string>
+    <string name="flow_game_screen_content_desc">FlowGameScreen</string>
+    <string name="colored_figure_content_desc">Colored Figure %1$d</string>
+    <string name="goals_layout_content_desc">Goals</string>
+    <string name="game_difficult_selector_content_desc">Game Difficult Selector</string>
+    <string name="coefficient_progress_layout_content_desc">Coefficient Progress</string>
+    <string name="game_field_layout_content_desc">Game Field</string>
+    <string name="feature_gameplay_game_selection_screen_content_desc">Game Selection</string>
+    <string name="feature_gameplay_button_to_main_screen">To main screen</string>
+    <string name="feature_gameplay_button_restart">Restart</string>
+    <string name="feature_gameplay_label_your_best_score">Your best score: %1$d</string>
+    <string name="feature_gameplay_click_on_items">Click on that items</string>
+    <string name="feature_gameplay_goals_title">Goals</string>
+    <string name="feature_gameplay_coefficient_title">Coefficient</string>
+    <string name="feature_gameplay_loading">Loading…</string>
+    <string name="feature_gameplay_press_to_start">Press to start</string>
+    <string name="feature_gameplay_label_rank">Leaderboard Rank: %1$d</string>
+</resources>

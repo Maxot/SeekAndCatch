@@ -1,0 +1,298 @@
+package com.maxot.seekandcatch.feature.gameplay.gameselection
+
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavOptions
+import org.koin.compose.viewmodel.koinViewModel
+import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
+import com.maxot.seekandcatch.core.designsystem.component.drawPixelBorders
+import com.maxot.seekandcatch.core.common.model.GameDifficulty
+import com.maxot.seekandcatch.core.common.model.GameMode
+import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.feature.gameplay.gameselection.model.GameSelectionUiEvent
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlashGameFieldLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlowGameFieldLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.StartGameLayout
+import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlin.random.Random
+import com.maxot.seekandcatch.core.designsystem.generated.resources.Res as DesignRes
+import com.maxot.seekandcatch.core.designsystem.generated.resources.*
+import com.maxot.seekandcatch.feature.gameplay.generated.resources.Res
+import com.maxot.seekandcatch.feature.gameplay.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+
+@Composable
+fun GameSelectionScreen(
+    viewModel: GameSelectionViewModel = koinViewModel(),
+    navigateToFlowGame: (NavOptions?) -> Unit,
+    navigateToFlashGame: (NavOptions?) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    GameSelectionScreenContent(
+        navigateToFlowGame = { navigateToFlowGame(null) },
+        navigateToFlashGame = { navigateToFlashGame(null) },
+        selectedDifficulty = uiState.selectedDifficulty,
+        onDifficultChanged = { difficulty ->
+            viewModel.onEvent(GameSelectionUiEvent.ChangeGameDifficult(difficulty))
+        },
+        selectedMode = uiState.selectedGameMode,
+        onSelectedModeChanged = { gameMode ->
+            viewModel.onEvent(GameSelectionUiEvent.ChangeGameMode(gameMode))
+        }
+    )
+}
+
+@Composable
+private fun GameSelectionScreenContent(
+    modifier: Modifier = Modifier,
+    navigateToFlowGame: () -> Unit,
+    navigateToFlashGame: () -> Unit,
+    selectedDifficulty: GameDifficulty,
+    onDifficultChanged: (GameDifficulty) -> Unit,
+    selectedMode: GameMode,
+    onSelectedModeChanged: (GameMode) -> Unit
+) {
+    val gameSelectionScreenContentDesc =
+        stringResource(Res.string.feature_gameplay_game_selection_screen_content_desc)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(DesignRes.drawable.background),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        Column(
+            modifier = Modifier
+                .then(modifier)
+                .fillMaxSize()
+                .semantics { contentDescription = gameSelectionScreenContentDesc },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            ModeSelectionLayout(
+                selectedMode = selectedMode,
+                selectedDifficulty = selectedDifficulty,
+                onSelectedModeChanged = onSelectedModeChanged
+            )
+
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            )
+
+            StartGameLayout(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                selectedDifficulty = selectedDifficulty,
+                onDifficultyChanged = {
+                    onDifficultChanged(it)
+                },
+                onStartButtonClick = {
+                    when (selectedMode) {
+                        GameMode.FLASH -> navigateToFlashGame()
+                        else -> navigateToFlowGame()
+                    }
+                })
+        }
+    }
+}
+
+@Composable
+private fun ModeSelectionLayout(
+    selectedMode: GameMode,
+    selectedDifficulty: GameDifficulty,
+    onSelectedModeChanged: (GameMode) -> Unit
+) {
+    val gameModes = GameMode.entries.filter { it != GameMode.DROP }
+
+    SingleSelectionLazyRow(
+        items = gameModes,
+        selectedItemIndex = gameModes.indexOf(selectedMode),
+        onSelectedItemChanged = { index ->
+            onSelectedModeChanged(gameModes[index])
+        }) { modifier, gameMode ->
+        when (gameMode) {
+            GameMode.FLASH -> FlashGamePreviewCard(
+                id = gameMode.ordinal,
+                gameMode = gameMode,
+                selectedDifficulty = selectedDifficulty,
+                modifier = modifier
+            )
+
+            else -> FlowGamePreviewCard(
+                id = gameMode.ordinal,
+                gameMode = gameMode,
+                selectedDifficulty = selectedDifficulty,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@Composable
+private fun FlowGamePreviewCard(
+    id: Int,
+    gameMode: GameMode,
+    selectedDifficulty: GameDifficulty,
+    modifier: Modifier = Modifier,
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
+    gridState: LazyGridState = rememberLazyGridState()
+) {
+    val figures = remember {
+        val list = mutableListOf<Figure>()
+        repeat(100) {
+            list.add(Figure.getRandomFigure(it))
+        }
+        list
+    }
+
+    val gridWidth = when (selectedDifficulty) {
+        GameDifficulty.EASY -> 3
+        GameDifficulty.NORMAL -> 4
+        GameDifficulty.HARD -> 5
+    }
+
+    Column(
+        modifier = Modifier
+            .then(modifier)
+            .height(350.dp)
+            .width(250.dp)
+            .drawBehind {
+                drawPixelBorders(this)
+            }
+            .padding(20.dp),
+    ) {
+        Text(
+            text = gameMode.name,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        FlowGameFieldLayout(
+            gridWidth = gridWidth,
+            spacerHeight = 300.dp,
+            figures = figures.toList(),
+            gridState = gridState,
+            onItemClick = { 0 },
+            reverseLayout = false
+        )
+        LaunchedEffect(key1 = true) {
+            coroutineScope.launch {
+                while (true) {
+                    gridState.animateScrollBy(
+                        value = 5000f,
+                        animationSpec = tween(
+                            durationMillis = 20000,
+                            easing = LinearEasing
+                        )
+                    )
+                    gridState.scrollToItem(0)
+                }
+            }
+
+        }
+    }
+
+}
+
+@Composable
+private fun FlashGamePreviewCard(
+    id: Int,
+    gameMode: GameMode,
+    selectedDifficulty: GameDifficulty,
+    modifier: Modifier = Modifier,
+) {
+    val gridWidth = when (selectedDifficulty) {
+        GameDifficulty.EASY -> 3
+        GameDifficulty.NORMAL -> 4
+        GameDifficulty.HARD -> 5
+    }
+    val gridSize = gridWidth * gridWidth
+
+    val figuresByCell = remember(id, gridWidth) {
+        buildMap {
+            repeat(gridSize) { index ->
+                put(index, Figure.getRandomFigure(index))
+            }
+        }
+    }
+
+    val visibleCellsState = androidx.compose.runtime.remember {
+        mutableStateOf<Set<Int>>(emptySet())
+    }
+
+    LaunchedEffect(key1 = id, key2 = gridWidth) {
+        while (true) {
+            val count = when (selectedDifficulty) {
+                GameDifficulty.EASY -> 2
+                GameDifficulty.NORMAL -> 3
+                GameDifficulty.HARD -> 4
+            }
+            val newVisible = buildSet {
+                repeat(count) {
+                    add(Random.nextInt(0, gridSize))
+                }
+            }
+            visibleCellsState.value = newVisible
+            delay(600)
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .then(modifier)
+            .height(350.dp)
+            .width(250.dp)
+            .drawBehind { drawPixelBorders(this) }
+            .padding(20.dp),
+    ) {
+        Text(
+            text = gameMode.name,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        FlashGameFieldLayout(
+            gridWidth = gridWidth,
+            gridSize = gridSize,
+            figuresByCell = figuresByCell,
+            visibleCells = visibleCellsState.value,
+            onCellClick = { }
+        )
+    }
+}

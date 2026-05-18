@@ -1,47 +1,44 @@
 package com.maxot.seekandcatch.navigation
 
-import androidx.annotation.DrawableRes
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.maxot.seekandcatch.core.designsystem.R
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.feature.account.navigation.ACCOUNT_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_SELECTION_ROUTE
 import com.maxot.seekandcatch.feature.leaderboard.navigation.LEADERBOARD_ROUTE
-import com.maxot.seekandcatch.feature.gameplay.R as gameplayR
-import com.maxot.seekandcatch.feature.leaderboard.R as leaderboardR
-import com.maxot.seekandcatch.feature.account.R as accountR
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
+import com.maxot.seekandcatch.feature.gameplay.generated.resources.Res as GameplayRes
+import com.maxot.seekandcatch.feature.gameplay.generated.resources.feature_gameplay_title
+import com.maxot.seekandcatch.feature.leaderboard.generated.resources.Res as LeaderboardRes
+import com.maxot.seekandcatch.feature.leaderboard.generated.resources.feature_leaderboard_title
+import com.maxot.seekandcatch.feature.account.generated.resources.Res as AccountRes
+import com.maxot.seekandcatch.feature.account.generated.resources.feature_account_title
 
-/**
- * Type for the top level destinations in the application. Each of these destinations
- * can contain one or more screens (based on the window size). Navigation from one screen to the
- * next within a single destination will be handled directly in composables.
- */
 enum class TopLevelDestination(
-    @DrawableRes val selectedIcon: Int,
-    @DrawableRes val unselectedIcon: Int,
-    val iconTextId: Int,
-    val titleTextId: Int,
+    val selectedIcon: DrawableResource,
+    val unselectedIcon: DrawableResource,
+    val iconTextId: StringResource,
+    val titleTextId: StringResource,
     val route: String
 ) {
     LEADERBOARD(
-        selectedIcon = SaCIcons.LeaderboardRes,
-        unselectedIcon =  SaCIcons.LeaderboardRes,
-        iconTextId = leaderboardR.string.feature_leaderboard_title,
-        titleTextId = leaderboardR.string.feature_leaderboard_title,
+        selectedIcon = SaCIcons.Leaderboard,
+        unselectedIcon = SaCIcons.Leaderboard,
+        iconTextId = LeaderboardRes.string.feature_leaderboard_title,
+        titleTextId = LeaderboardRes.string.feature_leaderboard_title,
         route = LEADERBOARD_ROUTE
     ),
     GAME(
-        selectedIcon = SaCIcons.PlayRes,
-        unselectedIcon = SaCIcons.UnselectedPlayRes,
-        iconTextId = gameplayR.string.feature_gameplay_title,
-        titleTextId = gameplayR.string.feature_gameplay_title,
+        selectedIcon = SaCIcons.Play,
+        unselectedIcon = SaCIcons.Play,
+        iconTextId = GameplayRes.string.feature_gameplay_title,
+        titleTextId = GameplayRes.string.feature_gameplay_title,
         route = GAME_SELECTION_ROUTE
     ),
     ACCOUNT(
-        selectedIcon = SaCIcons.AccountRes,
-        unselectedIcon = SaCIcons.UnselectedAccountRes,
-        iconTextId = accountR.string.feature_account_title,
-        titleTextId = accountR.string.feature_account_title,
+        selectedIcon = SaCIcons.Account,
+        unselectedIcon = SaCIcons.Account,
+        iconTextId = AccountRes.string.feature_account_title,
+        titleTextId = AccountRes.string.feature_account_title,
         route = ACCOUNT_ROUTE
     ),
 }

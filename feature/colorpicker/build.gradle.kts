@@ -24,11 +24,17 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
         }
         androidMain.dependencies {
             implementation(libs.androidx.compose.ui.tooling)
         }
     }
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.maxot.seekandcatch.feature.colorpicker.generated.resources"
 }
 
 android {

@@ -30,15 +30,19 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(libs.androidx.navigation.compose)
+            implementation(libs.androidx.lifecycle.runtime.compose)
         }
         androidMain.dependencies {
             implementation(libs.androidx.compose.ui.tooling)
-            implementation(libs.androidx.hilt.navigation.compose)
-            implementation(libs.androidx.navigation.compose)
-            implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.hilt.android)
         }
     }
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.maxot.seekandcatch.feature.account.generated.resources"
 }
 
 android {
@@ -54,7 +58,6 @@ android {
 }
 
 dependencies {
-    add("kspAndroid", libs.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.mockito.core)

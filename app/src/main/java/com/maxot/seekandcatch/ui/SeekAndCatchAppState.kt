@@ -8,8 +8,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navOptions
-import com.maxot.seekandcatch.core.media.AudioManager
-import com.maxot.seekandcatch.core.media.MusicType
 import com.maxot.seekandcatch.feature.account.navigation.ACCOUNT_ROUTE
 import com.maxot.seekandcatch.feature.account.navigation.navigateToAccount
 import com.maxot.seekandcatch.feature.gameplay.navigation.FLASH_GAME_ROUTE
@@ -18,6 +16,7 @@ import com.maxot.seekandcatch.feature.gameplay.navigation.GAME_SELECTION_ROUTE
 import com.maxot.seekandcatch.feature.gameplay.navigation.navigateToGameSelection
 import com.maxot.seekandcatch.feature.leaderboard.navigation.LEADERBOARD_ROUTE
 import com.maxot.seekandcatch.feature.leaderboard.navigation.navigateToLeaderboard
+import com.maxot.seekandcatch.feature.settings.AudioController
 import com.maxot.seekandcatch.navigation.TopLevelDestination
 import kotlinx.coroutines.CoroutineScope
 
@@ -25,7 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 class SeekAndCatchAppState(
     val navController: NavHostController,
     val coroutineScope: CoroutineScope,
-    val audioManager: AudioManager
+    val audioController: AudioController
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController
@@ -42,26 +41,16 @@ class SeekAndCatchAppState(
         @Composable get() = currentDestination.isTopLevelDestination()
 
     fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
-        // Play menu music when navigating to a top-level destination
-        audioManager.playMusic(MusicType.MENU)
+        audioController.playMenuMusic()
         val topLevelNavOptions = navOptions {
-            // Pop up to the start destination of the graph to
-            // avoid building up a large stack of destinations
-            // on the back stack as users select items
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
-            // Avoid multiple copies of the same destination when
-            // reselecting the same item
             launchSingleTop = true
-            // Restore state when reselecting a previously selected item
             restoreState = true
         }
         when (topLevelDestination) {
-            TopLevelDestination.LEADERBOARD -> navController.navigateToLeaderboard(
-                topLevelNavOptions
-            )
-
+            TopLevelDestination.LEADERBOARD -> navController.navigateToLeaderboard(topLevelNavOptions)
             TopLevelDestination.GAME -> navController.navigateToGameSelection(topLevelNavOptions)
             TopLevelDestination.ACCOUNT -> navController.navigateToAccount(topLevelNavOptions)
         }
@@ -71,18 +60,19 @@ class SeekAndCatchAppState(
     fun ObserveMusicByDestination() {
         val destination = currentDestination
         androidx.compose.runtime.LaunchedEffect(destination) {
-            getMusicTypeForRoute(destination?.route)?.let { musicType ->
-                audioManager.playMusic(musicType)
+            when (destination?.route) {
+                GAME_SELECTION_ROUTE, LEADERBOARD_ROUTE, ACCOUNT_ROUTE -> audioController.playMenuMusic()
             }
         }
     }
 }
-    private fun getMusicTypeForRoute(route: String?): MusicType? {
-        return when (route) {
-            GAME_SELECTION_ROUTE, LEADERBOARD_ROUTE, ACCOUNT_ROUTE -> MusicType.MENU
-            else -> null
-        }
+
+private fun getMusicTypeForRoute(route: String?): Boolean {
+    return when (route) {
+        GAME_SELECTION_ROUTE, LEADERBOARD_ROUTE, ACCOUNT_ROUTE -> true
+        else -> false
     }
+}
 
 fun NavDestination?.isTopLevelDestination() =
     this?.hierarchy?.any { navDestination ->
