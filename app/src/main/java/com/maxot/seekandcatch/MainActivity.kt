@@ -1,9 +1,9 @@
 package com.maxot.seekandcatch
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,15 +13,14 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.compose.rememberNavController
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.core.media.AudioManager
-import com.maxot.seekandcatch.core.media.di.rememberAudioManager
 import com.maxot.seekandcatch.core.model.DarkThemeConfig
+import com.maxot.seekandcatch.feature.settings.AudioController
 import com.maxot.seekandcatch.ui.SeekAndCatchApp
 import com.maxot.seekandcatch.ui.SeekAndCatchAppState
 import org.koin.android.ext.android.inject
 import org.koin.compose.viewmodel.koinViewModel
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     private val musicController: MusicController by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,8 +31,8 @@ class MainActivity : AppCompatActivity() {
             val navController = rememberNavController()
             val coroutineScope = rememberCoroutineScope()
             val viewModel = koinViewModel<MainViewModel>()
-            val audioManager = rememberAudioManager()
-            val appState = SeekAndCatchAppState(navController, coroutineScope, audioManager)
+            val audioController = org.koin.compose.koinInject<AudioController>()
+            val appState = SeekAndCatchAppState(navController, coroutineScope, audioController)
             val uiState = viewModel.uiState.collectAsState()
 
             SeekAndCatchTheme(
@@ -71,17 +70,17 @@ private fun isColorblindModeEnabled(uiState: MainActivityUiState): Boolean =
     }
 
 class MusicController(
-    private val audioManager: AudioManager
+    private val audioController: AudioController
 ) : DefaultLifecycleObserver {
     override fun onPause(owner: LifecycleOwner) {
-        audioManager.pauseMusic()
+        audioController.pauseMusic()
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        audioManager.resumeMusic()
+        audioController.resumeMusic()
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        audioManager.stopMusic()
+        audioController.stopMusic()
     }
 }

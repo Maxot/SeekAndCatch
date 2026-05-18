@@ -1,6 +1,5 @@
 package com.maxot.seekandcatch.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,18 +24,24 @@ import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.maxot.seekandcatch.core.common.VisualFeedbackManager
-import com.maxot.seekandcatch.core.designsystem.R
-import com.maxot.seekandcatch.core.media.di.rememberAudioManager
+import com.maxot.seekandcatch.feature.settings.AudioController
 import com.maxot.seekandcatch.feature.settings.ui.SettingsDialog
 import com.maxot.seekandcatch.navigation.SeekCatchNavHost
 import com.maxot.seekandcatch.navigation.TopLevelDestination
-import com.maxot.seekandcatch.feature.settings.R as SettingsR
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import com.maxot.seekandcatch.core.designsystem.generated.resources.Res as DesignRes
+import com.maxot.seekandcatch.core.designsystem.generated.resources.background
+import com.maxot.seekandcatch.core.designsystem.generated.resources.ic_settings
+import com.maxot.seekandcatch.feature.settings.generated.resources.Res as SettingsRes
+import com.maxot.seekandcatch.feature.settings.generated.resources.feature_settings_top_app_bar_action_icon_content_desc
 
 @Composable
 fun SeekAndCatchApp(
@@ -47,7 +52,7 @@ fun SeekAndCatchApp(
         mutableStateOf(false)
     }
 
-    val audioManager = rememberAudioManager()
+    val audioController = koinInject<AudioController>()
     val isLifeWasted by visualFeedbackManager.isLifeWasted.collectAsStateWithLifecycle()
 
     val largeRadialGradient = object : ShaderBrush() {
@@ -84,7 +89,7 @@ fun SeekAndCatchApp(
                     SaCTopBar(
                         titleRes = it.titleTextId,
                         onActionClick = {
-                            audioManager.onButtonClick()
+                            audioController.onButtonClick()
                             showSettingsDialog = true
                         })
                 }
@@ -92,7 +97,7 @@ fun SeekAndCatchApp(
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(
-                    painter = painterResource(id = R.drawable.background),
+                    painter = painterResource(DesignRes.drawable.background),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -118,14 +123,14 @@ fun SeekAndCatchApp(
 @Composable
 fun SaCTopBar(
     modifier: Modifier = Modifier,
-    @StringRes titleRes: Int,
+    titleRes: StringResource,
     onActionClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier.then(modifier),
         title = {
             Text(
-                text = stringResource(id = titleRes)
+                text = stringResource(titleRes)
             )
         },
         actions = {
@@ -133,8 +138,8 @@ fun SaCTopBar(
                 onClick = onActionClick
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = stringResource(id = SettingsR.string.feature_settings_top_app_bar_action_icon_content_desc)
+                    painter = painterResource(DesignRes.drawable.ic_settings),
+                    contentDescription = stringResource(SettingsRes.string.feature_settings_top_app_bar_action_icon_content_desc)
                 )
             }
         })

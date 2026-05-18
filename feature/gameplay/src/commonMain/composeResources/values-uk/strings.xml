@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_gameplay_title">Гра</string>
+    <string name="feature_gameplay_label_score">Ранунок: %1$d</string>
+    <string name="start_game_button_text">Почати гру</string>
+    <string name="label_goal">Цілі: </string>
+    <string name="label_all_colors">Усе кольору: </string>
+    <string name="label_list_of_goal">Усе: </string>
+    <string name="feature_gameplay_click_on_items">Натискайте на такі фігури</string>
+    <string name="title_pause_dialog">Пауза</string>
+    <string name="text_pause_dialog">Ви дійсно хочете завершити гру?</string>
+    <string name="confirm_button_pause_dialog">Так</string>
+    <string name="dismiss_button_pause_dialog">Продовжити</string>
+    <string name="feature_gameplay_button_to_main_screen">До головного екрану</string>
+    <string name="feature_gameplay_button_restart">Спробувати ще раз</string>
+    <string name="feature_gameplay_label_your_best_score">Ваш найкращий рахунок: %1$d</string>
+    <string name="flow_game_screen_content_desc">FlowGameScreen</string>
+    <string name="colored_figure_content_desc">Colored Figure %1$d</string>
+    <string name="goals_layout_content_desc">Goals</string>
+    <string name="game_difficult_selector_content_desc">Game Difficult Selector</string>
+    <string name="coefficient_progress_layout_content_desc">Coefficient Progress</string>
+    <string name="pause_dialog_content_desc">Продовжити</string>
+    <string name="game_field_layout_content_desc">Game Field</string>
+    <string name="feature_gameplay_game_selection_screen_content_desc">Game Selection</string>
+    <string name="feature_gameplay_goals_title">Цілі</string>
+    <string name="feature_gameplay_coefficient_title">Коефіцієнт</string>
+    <string name="feature_gameplay_loading">Завантаження…</string>
+    <string name="feature_gameplay_press_to_start">Натисніть, щоб почати</string>
+    <string name="feature_gameplay_label_rank">Leaderboard Rank: %1$d</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_color_picker_title">Виберіть колір</string>
+    <string name="feature_color_picker_dialog_button_ok">ОК</string>
+    <string name="feature_color_picker_dialog_button_cancel">Відміна</string>
+</resources>
