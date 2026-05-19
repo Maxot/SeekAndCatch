@@ -4,10 +4,8 @@ import com.maxot.seekandcatch.data.datastore.AccountDataStore
 import com.maxot.seekandcatch.data.model.FigureColor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
 
-class ColorsRepositoryImpl
-@Inject constructor(
+class ColorsRepositoryImpl(
     private val accountDataStore: AccountDataStore
 ) : ColorsRepository {
     override val selectedColors: Flow<Set<FigureColor>>

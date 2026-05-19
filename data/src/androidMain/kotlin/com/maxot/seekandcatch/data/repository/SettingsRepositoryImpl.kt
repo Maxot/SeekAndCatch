@@ -5,10 +5,8 @@ import com.maxot.seekandcatch.data.datastore.SettingsDataStore
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.core.common.model.GameMode
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
-class SettingsRepositoryImpl
-@Inject constructor(
+class SettingsRepositoryImpl(
     private val settingsDataStore: SettingsDataStore
 ) : SettingsRepository {
     override val userConfig: Flow<UserConfig> = settingsDataStore.userConfig

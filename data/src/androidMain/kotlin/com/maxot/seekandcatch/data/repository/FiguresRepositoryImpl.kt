@@ -1,17 +1,14 @@
 package com.maxot.seekandcatch.data.repository
 
-import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.FigureColor
 import com.maxot.seekandcatch.data.model.Goal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class FiguresRepositoryImpl
-@Inject constructor(
+class FiguresRepositoryImpl(
     private val colorsRepository: ColorsRepository,
-    @ApplicationScope private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope
 ) : FiguresRepository {
     private var availableColors = mutableSetOf<FigureColor>()
 

@@ -4,24 +4,19 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.media.PlaybackParams
 import com.maxot.seekandcatch.core.media.provider.SettingsProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 enum class MusicType(val resId: Int) {
     GAME(R.raw.game_music),
     MENU(R.raw.menu_music)
 }
 
-@Singleton
-class MusicManager
-@Inject constructor(
-    @ApplicationContext private val context: Context,
+class MusicManager(
+    private val context: Context,
     private val settingsProvider: SettingsProvider
 ) {
     private var mediaPlayer: MediaPlayer? = null

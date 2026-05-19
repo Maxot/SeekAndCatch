@@ -1,10 +1,6 @@
 package com.maxot.seekandcatch.core.media
 
-import javax.inject.Inject
-import javax.inject.Singleton
-
-@Singleton
-class AudioManager @Inject constructor(
+class AudioManager(
     private val soundManager: SoundManager,
     private val musicManager: MusicManager
 ) {

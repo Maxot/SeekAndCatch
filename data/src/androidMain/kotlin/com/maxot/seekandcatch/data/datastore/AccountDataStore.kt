@@ -8,16 +8,13 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.maxot.seekandcatch.data.model.FigureColor
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 val Context.accountDataStore: DataStore<Preferences> by preferencesDataStore(name = AccountDataStore.ACCOUNT_DATA_STORE_NAME)
 
-class AccountDataStore
-@Inject constructor(
-    @ApplicationContext val context: Context
+class AccountDataStore(
+    val context: Context
 ) {
     private val dataStore = context.accountDataStore
 

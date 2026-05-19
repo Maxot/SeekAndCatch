@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -21,14 +20,15 @@ kotlin {
             implementation(project(":core:common"))
             implementation(project(":core:model"))
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.koin.core)
         }
         androidMain.dependencies {
-            implementation(platform(libs.androidx.compose.bom))
+            implementation(libs.koin.android)
+            implementation(platform(libs.androidx.compose.bom.get()))
             implementation("androidx.compose.ui:ui-graphics")
-            implementation(platform(libs.firebase.bom))
+            implementation(platform(libs.firebase.bom.get()))
             implementation(libs.firebase.firestore)
             implementation(libs.firebase.auth)
-            implementation(libs.hilt.android)
             implementation(libs.androidx.datastore.preferences)
         }
     }
@@ -47,9 +47,6 @@ android {
 }
 
 dependencies {
-    add("kspAndroid", libs.hilt.compiler)
-
-    testImplementation(libs.hilt.android.testing)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.mockito.core)
     testImplementation(libs.androidx.junit)

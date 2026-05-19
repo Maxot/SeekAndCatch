@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -22,9 +21,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel)
         }
-        androidMain.dependencies {
-            implementation(libs.hilt.android)
-        }
+
     }
 }
 
@@ -40,6 +37,3 @@ android {
     }
 }
 
-dependencies {
-    add("kspAndroid", libs.hilt.compiler)
-}

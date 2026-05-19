@@ -4,12 +4,9 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
 import com.maxot.seekandcatch.core.media.provider.SettingsProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 enum class SoundType(val resId: Int) {
     FIGURE_CLICK(R.raw.figure_click),
@@ -20,9 +17,8 @@ enum class SoundType(val resId: Int) {
     MISS(R.raw.miss)
 }
 
-@Singleton
-class SoundManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+class SoundManager(
+    private val context: Context,
     private val settingsProvider: SettingsProvider
 ) {
     private val soundPool: SoundPool

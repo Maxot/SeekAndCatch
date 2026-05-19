@@ -9,12 +9,12 @@ import org.koin.dsl.module
 
 val dispatchersModule = module {
     single<CoroutineDispatcher>(named(Qualifiers.DEFAULT_DISPATCHER)) { Dispatchers.Default }
-    single<CoroutineDispatcher>(named(Qualifiers.IO_DISPATCHER)) { Dispatchers.IO }
+    single<CoroutineDispatcher>(named(Qualifiers.IO_DISPATCHER)) { Dispatchers.Default }
     single<CoroutineDispatcher>(named(Qualifiers.MAIN_DISPATCHER)) { Dispatchers.Main }
 }
 
 val coroutineScopesModule = module {
     single<CoroutineScope>(named(Qualifiers.APPLICATION_SCOPE)) {
-        CoroutineScope(SupervisorJob() + get(named(Qualifiers.DEFAULT_DISPATCHER)))
+        CoroutineScope(SupervisorJob() + get<CoroutineDispatcher>(named(Qualifiers.DEFAULT_DISPATCHER)))
     }
 }

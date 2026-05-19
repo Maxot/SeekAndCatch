@@ -1,17 +1,14 @@
 package com.maxot.seekandcatch.data.repository
 
-import com.maxot.seekandcatch.core.common.di.ApplicationScope
 import com.maxot.seekandcatch.data.firebase.datasource.LeaderboardDataSource
 import com.maxot.seekandcatch.data.firebase.datasource.UserDataSource
 import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import javax.inject.Inject
 
-class LeaderboardRepositoryImpl
-@Inject constructor(
-    @ApplicationScope private val externalScope: CoroutineScope,
+class LeaderboardRepositoryImpl(
+    private val externalScope: CoroutineScope,
     private val leaderboardDataSource: LeaderboardDataSource,
     private val userDataSource: UserDataSource,
     private val accountRepository: AuthRepository

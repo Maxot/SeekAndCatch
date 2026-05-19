@@ -9,9 +9,8 @@ import com.maxot.seekandcatch.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
-class UserFirestoreDataSource @Inject constructor() : UserDataSource {
+class UserFirestoreDataSource() : UserDataSource {
 
     private val db = Firebase.firestore
     private val usersCollection = db.collection(COLLECTION_NAME_USERS)

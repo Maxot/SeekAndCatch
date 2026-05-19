@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -23,9 +22,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
         }
-        androidMain.dependencies {
-            implementation(libs.hilt.android)
-        }
+
     }
 }
 
@@ -42,10 +39,7 @@ android {
 }
 
 dependencies {
-    add("kspAndroid", libs.hilt.compiler)
-
     testImplementation(project(":data-test"))
-    testImplementation(libs.hilt.android.testing)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.mockito.core)
     testImplementation(libs.androidx.junit)

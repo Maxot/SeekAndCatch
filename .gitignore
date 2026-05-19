@@ -41,6 +41,9 @@ google-services.json
 # Gradle cache
 .gradle
 
+# Kotlin build metadata cache
+.kotlin/
+
 # Build outputs
 build_output*.txt
 .output.txt

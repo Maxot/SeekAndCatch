@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isValidName(name) {
+      return name is string && name.size() <= 50;
+    }
+
+    function isValidScore(score) {
+      return score is int && score >= 0 && score <= 9999999;
+    }
+
+    function isValidGameMode(mode) {
+      return mode is string && mode in ['FLOW', 'FLASH', 'DROP'];
+    }
+
+    function isValidDifficulty(diff) {
+      return diff is string && diff in ['EASY', 'NORMAL', 'HARD'];
+    }
+
+    // ── users/{userId} ────────────────────────────────────────────────────────
+    // Readable by any authenticated user so the leaderboard screen can join
+    // user names to score records.
+    // Writable only by the document owner.
+    match /users/{userId} {
+      allow read: if isAuthed();
+
+      allow create: if isAuthed()
+        && isOwner(userId)
+        && request.resource.data.keys().hasOnly(['id', 'name'])
+        && request.resource.data.id == userId
+        && isValidName(request.resource.data.name);
+
+      allow update: if isAuthed()
+        && isOwner(userId)
+        && request.resource.data.keys().hasOnly(['id', 'name'])
+        && request.resource.data.id == userId
+        && isValidName(request.resource.data.name);
+
+      allow delete: if false;
+    }
+
+    // ── leaderboard/{recordId} ────────────────────────────────────────────────
+    // Document ID format: {userId}_{gameMode}_{difficulty}
+    // One record per user per mode+difficulty combination.
+    //
+    // Readable by any authenticated user (public leaderboard).
+    // Write: the document ID must exactly match {authUid}_{gameMode}_{difficulty}
+    // so a user cannot write to another user's slot, nor create arbitrary paths.
+    // Updates must not decrease the stored score (server-side best-score guard).
+    match /leaderboard/{recordId} {
+      allow read: if isAuthed();
+
+      allow create: if isAuthed()
+        && recordId == request.auth.uid + '_' + request.resource.data.gameMode + '_' + request.resource.data.difficulty
+        && request.resource.data.keys().hasOnly(['userId', 'score', 'gameMode', 'difficulty'])
+        && request.resource.data.userId == request.auth.uid
+        && isValidScore(request.resource.data.score)
+        && isValidGameMode(request.resource.data.gameMode)
+        && isValidDifficulty(request.resource.data.difficulty);
+
+      allow update: if isAuthed()
+        && recordId == request.auth.uid + '_' + request.resource.data.gameMode + '_' + request.resource.data.difficulty
+        && request.resource.data.keys().hasOnly(['userId', 'score', 'gameMode', 'difficulty'])
+        && request.resource.data.userId == request.auth.uid
+        && isValidScore(request.resource.data.score)
+        && isValidGameMode(request.resource.data.gameMode)
+        && isValidDifficulty(request.resource.data.difficulty)
+        && request.resource.data.score >= resource.data.score;
+
+      allow delete: if false;
+    }
+
+  }
+}

@@ -4,11 +4,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirebaseAuthDataSource @Inject constructor() {
+class FirebaseAuthDataSource() {
     private val auth = Firebase.auth
 
     suspend fun getOrCreateUser(): FirebaseUser? {

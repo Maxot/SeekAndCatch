@@ -11,17 +11,13 @@ import com.maxot.seekandcatch.core.model.DarkThemeConfig
 import com.maxot.seekandcatch.core.model.UserConfig
 import com.maxot.seekandcatch.core.common.model.GameDifficulty
 import com.maxot.seekandcatch.core.common.model.GameMode
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-
 
 val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = SettingsDataStore.SETTINGS_DATA_STORE_NAME)
 
-class SettingsDataStore
-@Inject constructor(
-    @ApplicationContext val context: Context
+class SettingsDataStore(
+    val context: Context
 ) {
     private val dataStore = context.settingsDataStore
 

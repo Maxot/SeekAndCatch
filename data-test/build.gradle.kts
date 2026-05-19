@@ -19,10 +19,6 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":data"))
         }
-        androidMain.dependencies {
-            implementation(libs.hilt.android)
-            implementation(libs.hilt.android.testing)
-        }
     }
 }
 

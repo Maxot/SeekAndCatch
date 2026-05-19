@@ -7,12 +7,10 @@ import com.google.firebase.ktx.Firebase
 import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 const val TAG = "LeaderboardFirestoreDataSource"
 
-class LeaderboardFirestoreDataSource
-@Inject constructor() : LeaderboardDataSource {
+class LeaderboardFirestoreDataSource() : LeaderboardDataSource {
 
     private val db = Firebase.firestore
 

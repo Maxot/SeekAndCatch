@@ -2,10 +2,8 @@ package com.maxot.seekandcatch.data.repository
 
 import com.maxot.seekandcatch.core.common.model.User
 import com.maxot.seekandcatch.data.firebase.datasource.auth.FirebaseAuthDataSource
-import javax.inject.Inject
 
-class AuthRepositoryImpl
-@Inject constructor(
+class AuthRepositoryImpl(
     private val firebaseAuthDataSource: FirebaseAuthDataSource
 ) : AuthRepository {
 

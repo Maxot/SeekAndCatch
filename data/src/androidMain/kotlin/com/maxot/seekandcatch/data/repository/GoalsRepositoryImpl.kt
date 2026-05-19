@@ -3,11 +3,9 @@ package com.maxot.seekandcatch.data.repository
 
 import com.maxot.seekandcatch.data.model.Figure
 import com.maxot.seekandcatch.data.model.Goal
-import javax.inject.Inject
 import kotlin.random.Random
 
-class GoalsRepositoryImpl
-@Inject constructor(
+class GoalsRepositoryImpl(
     private val colorsRepository: ColorsRepository
 ) : GoalsRepository {
     override suspend fun getRandomGoal(): Goal<Any> {
