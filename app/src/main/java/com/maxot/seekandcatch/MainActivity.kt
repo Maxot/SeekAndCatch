@@ -6,7 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             val viewModel = hiltViewModel<MainViewModel>()
             val audioManager = rememberAudioManager()
             val appState = SeekAndCatchAppState(navController, coroutineScope, audioManager)
-            val uiState = viewModel.uiState.collectAsState()
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
             SeekAndCatchTheme(
                 darkTheme = isDarkTheme(uiState.value),

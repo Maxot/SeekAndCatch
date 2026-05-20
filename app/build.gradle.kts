@@ -90,6 +90,7 @@ dependencies {
     implementation(project(":feature:leaderboard"))
     implementation(project(":data"))
 
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)

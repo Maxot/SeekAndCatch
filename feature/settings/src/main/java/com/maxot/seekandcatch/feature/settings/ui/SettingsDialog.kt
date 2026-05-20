@@ -17,7 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,13 +49,13 @@ fun SettingsDialog(
     viewModel: SettingsViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
 ) {
-    val isSoundEnabled by viewModel.soundState.collectAsState(true)
-    val isMusicEnabled by viewModel.musicState.collectAsState(true)
-    val isVibrationEnabled by viewModel.vibrationState.collectAsState(true)
+    val isSoundEnabled by viewModel.soundState.collectAsStateWithLifecycle(true)
+    val isMusicEnabled by viewModel.musicState.collectAsStateWithLifecycle(true)
+    val isVibrationEnabled by viewModel.vibrationState.collectAsStateWithLifecycle(true)
     val allSupportedLocales by remember { mutableStateOf(viewModel.allSupportedLocales) }
     val selectedLocale by remember { mutableStateOf(viewModel.selectedLocale) }
-    val darkTheme by viewModel.darkTheme.collectAsState()
-    val isColorblindModeEnabled by viewModel.colorblindMode.collectAsState(false)
+    val darkTheme by viewModel.darkTheme.collectAsStateWithLifecycle()
+    val isColorblindModeEnabled by viewModel.colorblindMode.collectAsStateWithLifecycle(false)
 
     SettingsDialog(
         modifier = modifier,

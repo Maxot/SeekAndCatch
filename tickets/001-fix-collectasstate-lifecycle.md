@@ -1,6 +1,6 @@
 # Ticket 001 — Fix collectAsState() → collectAsStateWithLifecycle() in All Screens
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---
