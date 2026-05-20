@@ -14,8 +14,8 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.getShapeForFigure
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.designsystem.getShapeForFigure
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.AlphaKey
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.ColoredFigureLayout

@@ -23,6 +23,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":data"))
     implementation(libs.androidx.compose.material3)
     implementation(libs.hilt.android)

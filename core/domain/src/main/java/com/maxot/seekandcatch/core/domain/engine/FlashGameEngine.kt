@@ -1,8 +1,8 @@
 package com.maxot.seekandcatch.core.domain.engine
 
 import com.maxot.seekandcatch.core.common.model.GameParams
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 import com.maxot.seekandcatch.data.repository.GoalsRepository
 import kotlinx.coroutines.CoroutineScope

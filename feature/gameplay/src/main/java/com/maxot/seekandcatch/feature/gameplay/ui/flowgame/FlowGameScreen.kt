@@ -54,8 +54,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.flashRed
 import com.maxot.seekandcatch.feature.gameplay.model.FlowGameUiEvent

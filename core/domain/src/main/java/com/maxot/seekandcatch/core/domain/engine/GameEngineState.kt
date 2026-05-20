@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.core.domain.engine
 
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 
 sealed class GameEngineState {
     data object Idle : GameEngineState()

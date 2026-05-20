@@ -2,8 +2,8 @@ package com.maxot.seekandcatch.data.repository
 
 import androidx.compose.ui.graphics.Color
 import com.maxot.seekandcatch.core.common.di.ApplicationScope
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject

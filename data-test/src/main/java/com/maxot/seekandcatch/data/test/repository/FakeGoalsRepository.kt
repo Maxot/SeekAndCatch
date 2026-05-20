@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.data.test.repository
 
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 import com.maxot.seekandcatch.data.repository.GoalsRepository
 
 class FakeGoalsRepository : GoalsRepository {

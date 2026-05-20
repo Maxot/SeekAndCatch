@@ -53,7 +53,8 @@ SeekAndCatch/
 ├── app/                        — Single-activity entry point; NavHost wiring; Application class
 ├── core/
 │   ├── common/                 — Shared DI qualifiers, coroutine scopes, cross-module models
-│   │                             (GameDifficulty, GameMode, GameParams, LeaderboardRecord, User)
+│   │                             (GameDifficulty, GameMode, GameParams, LeaderboardRecord, User,
+│   │                              Figure, Goal)
 │   ├── designsystem/           — SeekAndCatchTheme, color/type/shape tokens, reusable Composables
 │   ├── domain/                 — Game use cases and engine (FlowGameUseCase, FlashGameUseCase,
 │   │                             AuthUseCase, BaseGameEngine, FlowGameEngine, FlashGameEngine)

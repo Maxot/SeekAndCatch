@@ -42,8 +42,8 @@ import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
 import com.maxot.seekandcatch.core.designsystem.component.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.getShapeForFigure
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.designsystem.getShapeForFigure
 import com.maxot.seekandcatch.feature.gameplay.R
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch

@@ -29,7 +29,7 @@ import com.maxot.seekandcatch.core.designsystem.component.drawCircleFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawSquareFigure
 import com.maxot.seekandcatch.core.designsystem.component.drawTriangleFigure
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.core.common.model.Figure
 import com.maxot.seekandcatch.feature.account.AccountViewModel
 import com.maxot.seekandcatch.feature.account.R
 import com.maxot.seekandcatch.feature.account.ui.model.AccountScreenEvent

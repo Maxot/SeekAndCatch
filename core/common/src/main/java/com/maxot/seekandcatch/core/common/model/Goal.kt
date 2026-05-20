@@ -1,11 +1,7 @@
-package com.maxot.seekandcatch.data.model
+package com.maxot.seekandcatch.core.common.model
 
 import androidx.compose.ui.graphics.Color
-import kotlin.random.Random
 
-/**
- * Represent goal in game process. Used to determine if user click on correct object in game.
- */
 sealed class Goal<out T : Any> {
     abstract fun getGoal(): T
 

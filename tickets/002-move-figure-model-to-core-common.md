@@ -1,6 +1,6 @@
 # Ticket 002 — Move Figure and Goal Models from data:model to core:common
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---

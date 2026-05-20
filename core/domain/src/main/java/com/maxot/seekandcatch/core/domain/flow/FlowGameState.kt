@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.core.domain.flow
 
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 
 sealed class FlowGameState {
     data object Idle:  FlowGameState()

@@ -8,8 +8,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.FlowGameScreenContent
 import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState

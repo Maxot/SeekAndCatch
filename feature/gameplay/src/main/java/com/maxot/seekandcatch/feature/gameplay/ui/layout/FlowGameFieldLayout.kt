@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.data.model.Figure
+import com.maxot.seekandcatch.core.common.model.Figure
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @Composable

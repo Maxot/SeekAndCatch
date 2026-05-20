@@ -1,9 +1,9 @@
 package com.maxot.seekandcatch.data.test.repository
 
 import androidx.compose.ui.graphics.Color
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
-import com.maxot.seekandcatch.data.model.isFitForGoal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
+import com.maxot.seekandcatch.core.common.model.isFitForGoal
 import com.maxot.seekandcatch.data.repository.FiguresRepository
 
 class FakeFiguresRepository() : FiguresRepository {

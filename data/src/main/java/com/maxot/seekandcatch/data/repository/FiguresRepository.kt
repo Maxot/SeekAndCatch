@@ -1,7 +1,7 @@
 package com.maxot.seekandcatch.data.repository
 
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 
 interface FiguresRepository {
     fun getRandomFigure(id: Int): Figure

@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.designsystem.component.PixelBorderBox
 import com.maxot.seekandcatch.core.designsystem.icon.SaCIcons
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 import com.maxot.seekandcatch.feature.gameplay.R
 
 @OptIn(ExperimentalMaterial3Api::class)

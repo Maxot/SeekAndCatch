@@ -6,8 +6,8 @@ import com.maxot.seekandcatch.core.domain.flow.FlowGameEvent
 import com.maxot.seekandcatch.core.domain.flow.FlowGameData
 import com.maxot.seekandcatch.core.domain.flow.FlowGameState
 import com.maxot.seekandcatch.core.domain.flow.FlowGameUseCase
-import com.maxot.seekandcatch.data.model.Figure
-import com.maxot.seekandcatch.data.model.Goal
+import com.maxot.seekandcatch.core.common.model.Figure
+import com.maxot.seekandcatch.core.common.model.Goal
 import com.maxot.seekandcatch.data.test.repository.FakeFiguresRepository
 import com.maxot.seekandcatch.data.test.repository.FakeGoalsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
