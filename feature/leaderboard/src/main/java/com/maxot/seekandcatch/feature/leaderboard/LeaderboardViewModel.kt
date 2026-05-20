@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -28,22 +29,16 @@ class LeaderboardViewModel
     private val selectedMode = MutableStateFlow<GameMode?>(null) // null = All modes
     private val selectedDifficulty = MutableStateFlow<GameDifficulty?>(null) // null = All difficulty
 
-    // Source of truth: all records
-    private val allRecords = repository.observeRecords()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
     // Single UI state flow (MVI output)
     val leaderboardUiState: StateFlow<LeaderboardUiState> =
-        combine(allRecords, selectedMode, selectedDifficulty) { list, mode, difficulty ->
+        combine(
+            repository.observeRecords(),
+            selectedMode,
+            selectedDifficulty
+        ) { list, mode, difficulty ->
             val filtered = list.asSequence()
-                .filter { record ->
-                    // Mode filter: if a specific mode is selected, include only matching; if All (null), include all (even nulls)
-                    mode == null || record.gameMode == mode
-                }
-                .filter { record ->
-                    // Difficulty filter: if a specific difficulty is selected, include only matching; if All (null), include all (even nulls)
-                    difficulty == null || record.difficulty == difficulty
-                }
+                .filter { record -> mode == null || record.gameMode == mode }
+                .filter { record -> difficulty == null || record.difficulty == difficulty }
                 .sortedByDescending { it.score ?: 0 }
                 .toList()
             LeaderboardUiState.Successful(
@@ -52,7 +47,9 @@ class LeaderboardViewModel
                 userData = userUseCase.getUser(),
                 selectedDifficulty = difficulty
             ) as LeaderboardUiState
-        }.stateIn(
+        }
+        .catch { emit(LeaderboardUiState.Failed) }
+        .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
             LeaderboardUiState.Loading

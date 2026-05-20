@@ -14,9 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -120,7 +122,14 @@ private fun LeaderBoardPageContent(
     val contentDesc = stringResource(id = R.string.feature_leaderboard_screen_content_desc)
     when (leaderboardUiState) {
         is LeaderboardUiState.Failed -> {
-
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(id = R.string.feature_leaderboard_error_state),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         is LeaderboardUiState.Loading -> {
@@ -238,5 +247,13 @@ private fun LeaderboardScreenSuccessfulPreview() {
 private fun LeaderboardScreenLoadingPreview() {
     SeekAndCatchTheme {
         LeaderBoardScreenContent(leaderboardUiState = LeaderboardUiState.Loading)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LeaderboardScreenFailedPreview() {
+    SeekAndCatchTheme {
+        LeaderBoardScreenContent(leaderboardUiState = LeaderboardUiState.Failed)
     }
 }

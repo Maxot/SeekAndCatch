@@ -1,6 +1,6 @@
 # Ticket 003 — Add Error UI to Leaderboard Failed State
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---
