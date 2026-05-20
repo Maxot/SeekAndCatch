@@ -3,5 +3,5 @@
     <string name="feature_leaderboard_title">Лідери</string>
     <string name="feature_leaderboard_screen_content_desc">Екран лідерів</string>
     <string name="feature_leaderboard_empty_state">Поки що немає записів</string>
-    <string name="feature_leaderboard_error_state">Не вдалося завантажити результати.\nПеревірте з'єднання та спробуйте ще раз.</string>
+    <string name="feature_leaderboard_error_state">Не вдалося завантажити результати.\nПеревірте з\'єднання та спробуйте ще раз.</string>
 </resources>
