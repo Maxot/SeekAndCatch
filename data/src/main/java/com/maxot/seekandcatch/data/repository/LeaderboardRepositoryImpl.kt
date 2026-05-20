@@ -30,9 +30,6 @@ class LeaderboardRepositoryImpl
 
     override suspend fun addRecord(record: LeaderboardRecord) {
         val userId = accountRepository.getUserId()
-
-        leaderboardDataSource.addRecord(record = record, userId) { documentId ->
-
-        }
+        leaderboardDataSource.addRecord(record = record, userId = userId)
     }
 }
