@@ -1,0 +1,28 @@
+#!/bin/bash
+COMMIT_MSG_FILE=$1
+SUBJECT=$(head -1 "$COMMIT_MSG_FILE")
+
+if echo "$SUBJECT" | grep -qE "^(Merge|Revert|fixup!|squash!)"; then
+  exit 0
+fi
+
+if ! echo "$SUBJECT" | grep -qE "^(feat|fix|refactor|docs|test|chore): .+"; then
+  echo "commit-msg: subject must start with a valid type followed by a description"
+  echo "  valid types: feat | fix | refactor | docs | test | chore"
+  echo "  got: $SUBJECT"
+  exit 1
+fi
+
+TYPE=$(echo "$SUBJECT" | sed 's/:.*//')
+
+if [[ "$TYPE" == "feat" || "$TYPE" == "fix" ]]; then
+  if ! echo "$SUBJECT" | grep -qE "^(feat|fix): ticket [0-9]+ — .+"; then
+    echo "commit-msg: '$TYPE' commits must reference a ticket"
+    echo "  expected: $TYPE: ticket NNN — description"
+    echo "  got:      $SUBJECT"
+    echo "  use 'chore:' for process work without a ticket"
+    exit 1
+  fi
+fi
+
+exit 0

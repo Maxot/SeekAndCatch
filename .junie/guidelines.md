@@ -3,10 +3,10 @@
 ## Source of Truth
 Before changing code, **always** consult:
 
-- `/docs/prd.md`       → product requirements
-- `/docs/tech-spec.md` → technical rules, formulas, and game logic
+- `/docs/PRD.md`       → product requirements
+- `/docs/TECH_SPEC.md` → technical rules, formulas, and game logic
 
-**Priority:** Tech-spec overrides PRD in case of mismatch.
+**Priority:** TECH_SPEC overrides PRD in case of mismatch.
 
 ## Junie Behavior Rules
 1. Junie **must read** PRD + Tech Spec before executing a ticket.
@@ -29,7 +29,7 @@ Before changing code, **always** consult:
 - Tickets must reference relevant files and docs.
 
 ## Forbidden Actions
-- Changing core rules without updating tech-spec
+- Changing core rules without updating TECH_SPEC
 - Adding hidden mechanics
 - Merging changes without review
 - Executing multiple tickets at once
