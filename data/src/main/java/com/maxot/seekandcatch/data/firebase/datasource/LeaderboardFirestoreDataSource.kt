@@ -1,10 +1,9 @@
 package com.maxot.seekandcatch.data.firebase.datasource
 
 import android.util.Log
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObjects
-import com.google.firebase.ktx.Firebase
 import com.maxot.seekandcatch.core.common.model.LeaderboardRecord
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -13,9 +12,7 @@ import javax.inject.Inject
 private const val TAG = "LeaderboardFirestoreDataSource"
 
 class LeaderboardFirestoreDataSource
-@Inject constructor() : LeaderboardDataSource {
-
-    private val db = Firebase.firestore
+@Inject constructor(private val db: FirebaseFirestore) : LeaderboardDataSource {
 
     private val leaderboardCollection = db.collection(COLLECTION_NAME_LEADERBOARD)
 

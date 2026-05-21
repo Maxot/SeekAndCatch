@@ -1,20 +1,17 @@
 package com.maxot.seekandcatch.data.firebase.datasource
 
 import android.util.Log
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
-import com.google.firebase.ktx.Firebase
 import com.maxot.seekandcatch.core.common.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class UserFirestoreDataSource @Inject constructor() : UserDataSource {
-
-    private val db = Firebase.firestore
+class UserFirestoreDataSource @Inject constructor(private val db: FirebaseFirestore) : UserDataSource {
     private val usersCollection = db.collection(COLLECTION_NAME_USERS)
 
     override suspend fun saveUser(user: User) {

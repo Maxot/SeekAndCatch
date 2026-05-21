@@ -18,10 +18,17 @@ import com.maxot.seekandcatch.data.repository.SettingsRepository
 import com.maxot.seekandcatch.data.repository.SettingsRepositoryImpl
 import com.maxot.seekandcatch.data.repository.UserRepository
 import com.maxot.seekandcatch.data.repository.impl.UserRepositoryImpl
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestoreSettings
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.persistentCacheSettings
+import com.google.firebase.ktx.Firebase
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -54,4 +61,14 @@ interface DataModule {
     @Binds
     fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 
+    companion object {
+        @Provides
+        @Singleton
+        fun provideFirestore(): FirebaseFirestore {
+            val settings = firestoreSettings {
+                setLocalCacheSettings(persistentCacheSettings {})
+            }
+            return Firebase.firestore.apply { firestoreSettings = settings }
+        }
+    }
 }

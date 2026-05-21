@@ -1,6 +1,6 @@
 # Ticket 008 — Enable Firestore Offline Persistence
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---
