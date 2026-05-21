@@ -5,4 +5,5 @@ import com.maxot.seekandcatch.core.common.model.User
 interface UserRepository {
     suspend fun getUser(userId: String): User?
     suspend fun saveUser(user: User)
+    suspend fun deleteUser(userId: String)
 }

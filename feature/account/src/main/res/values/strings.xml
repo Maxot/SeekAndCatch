@@ -5,5 +5,10 @@
 
     <string name="feature_account_screen_content_desc">Account Screen</string>
     <string name="feature_account_selected_style">Selected Style:</string>
+    <string name="feature_account_delete_account">Delete Account</string>
+    <string name="feature_account_delete_confirm_title">Delete Account?</string>
+    <string name="feature_account_delete_confirm_message">This will permanently delete your account and all your scores.</string>
+    <string name="feature_account_delete_confirm_button">Delete</string>
+    <string name="feature_account_cancel">Cancel</string>
 
 </resources>

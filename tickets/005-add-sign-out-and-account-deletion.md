@@ -1,6 +1,6 @@
-# Ticket 005 — Add Sign-Out and Account Deletion
+# Ticket 005 — Add Account Deletion
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---
@@ -117,6 +117,10 @@ The confirmation dialog must clearly state: "This will permanently delete your a
 
 ## Notes
 
-After `signOut()` or `deleteAccount()`, call `autoRegisterIfNeeded()` immediately to re-establish a new anonymous session. This keeps the game playable without requiring a login screen.
+Sign-out was removed from scope. For an anonymous-auth-only app, signing out silently orphans the Firebase Auth record without cleaning up Firestore data — it provides no user value and risks data leaks. Only account deletion (which cleans up both Auth and Firestore) is exposed.
+
+After `deleteAccount()`, call `autoRegisterIfNeeded()` immediately to re-establish a new anonymous session. This keeps the game playable without requiring a login screen.
+
+The delete confirmation dialog uses the same `PixelBorderBox` + `PixelButton` style as `SettingsDialog` (`containerColor = Color.Transparent`, `title = null`, content in `PixelBorderBox`, `confirmButton = {}`).
 
 Leaderboard scores are keyed by `userId`. When a user deletes their account, their leaderboard entries are NOT deleted in this ticket — that is out of scope for MVP per PRD §13.

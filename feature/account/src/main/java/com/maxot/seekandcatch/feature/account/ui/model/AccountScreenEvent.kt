@@ -6,4 +6,5 @@ import com.maxot.seekandcatch.core.common.base.BaseEvent
 sealed interface AccountScreenEvent: BaseEvent {
     data class ChangeName(val name: String): AccountScreenEvent
     data class ChangeSelectedColors(val colors: Set<Color>): AccountScreenEvent
+    data object DeleteAccount : AccountScreenEvent
 }

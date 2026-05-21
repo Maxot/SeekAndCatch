@@ -1,5 +1,6 @@
 package com.maxot.seekandcatch.data.firebase.datasource.auth
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -23,5 +24,21 @@ class FirebaseAuthDataSource @Inject constructor() {
         } catch (e: Exception) {
             null
         }
+    }
+
+    suspend fun signOut() {
+        auth.signOut()
+    }
+
+    suspend fun deleteAccount(): Boolean = try {
+        auth.currentUser?.delete()?.await()
+        true
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to delete account", e)
+        false
+    }
+
+    companion object {
+        private const val TAG = "FirebaseAuthDataSource"
     }
 }

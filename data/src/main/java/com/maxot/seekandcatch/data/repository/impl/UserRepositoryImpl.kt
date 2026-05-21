@@ -18,4 +18,8 @@ class UserRepositoryImpl
         userDataSource.saveUser(user = user)
     }
 
+    override suspend fun deleteUser(userId: String) {
+        userDataSource.deleteUser(userId)
+    }
+
 }

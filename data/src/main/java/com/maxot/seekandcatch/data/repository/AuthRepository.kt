@@ -8,4 +8,8 @@ interface AuthRepository {
 
     suspend fun getUserId(): String
 
+    suspend fun signOut()
+
+    suspend fun deleteAccount(): Boolean
+
 }

@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface UserDataSource {
     suspend fun saveUser(user: User)
     suspend fun getUser(userId: String): User?
+    suspend fun deleteUser(userId: String)
     fun observeUsers(): Flow<List<User>>
 }

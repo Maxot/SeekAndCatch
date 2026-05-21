@@ -34,6 +34,14 @@ class UserFirestoreDataSource @Inject constructor() : UserDataSource {
         }
     }
 
+    override suspend fun deleteUser(userId: String) {
+        try {
+            usersCollection.document(userId).delete().await()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting user", e)
+        }
+    }
+
     override fun observeUsers(): Flow<List<User>> =
         usersCollection.snapshots().map { querySnapshot ->
             querySnapshot.toObjects<User>()

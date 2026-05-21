@@ -28,4 +28,12 @@ class AuthRepositoryImpl
         }
     }
 
+    override suspend fun signOut() {
+        firebaseAuthDataSource.signOut()
+    }
+
+    override suspend fun deleteAccount(): Boolean {
+        return firebaseAuthDataSource.deleteAccount()
+    }
+
 }

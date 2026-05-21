@@ -22,4 +22,16 @@ class AuthUseCase
         }
     }
 
+    suspend fun signOut() {
+        authRepository.signOut()
+    }
+
+    suspend fun deleteAccountAndData() {
+        val userId = authRepository.getUserId()
+        if (userId.isNotEmpty()) {
+            userRepository.deleteUser(userId)
+        }
+        authRepository.deleteAccount()
+    }
+
 }

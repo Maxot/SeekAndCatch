@@ -3,4 +3,9 @@
     <string name="feature_account_title">Аккаунт</string>
     <string name="feature_account_your_info">Ваша інформація:</string>
     <string name="feature_account_selected_colors">Вибрані кольори:</string>
+    <string name="feature_account_delete_account">Видалити акаунт</string>
+    <string name="feature_account_delete_confirm_title">Видалити акаунт?</string>
+    <string name="feature_account_delete_confirm_message">Це назавжди видалить ваш акаунт і всі ваші результати.</string>
+    <string name="feature_account_delete_confirm_button">Видалити</string>
+    <string name="feature_account_cancel">Скасувати</string>
 </resources>
