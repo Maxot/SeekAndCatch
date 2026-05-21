@@ -1,8 +1,13 @@
 package com.maxot.seekandcatch.data.repository
 
+import android.util.Log
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.maxot.seekandcatch.core.common.model.User
 import com.maxot.seekandcatch.data.firebase.datasource.auth.FirebaseAuthDataSource
 import javax.inject.Inject
+
+private const val TAG = "AuthRepositoryImpl"
 
 class AuthRepositoryImpl
 @Inject constructor(
@@ -24,6 +29,8 @@ class AuthRepositoryImpl
             val result = firebaseAuthDataSource.getOrCreateUser()?.uid
             result ?: throw IllegalStateException("Failed to get UID after anonymous sign in")
         } catch (e: Exception) {
+            Firebase.crashlytics.recordException(e)
+            Log.w(TAG, "getUserId failed", e)
             ""
         }
     }

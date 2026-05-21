@@ -1,6 +1,6 @@
 # Ticket 009 — Fix Silent Error Swallowing in AuthRepositoryImpl
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---
