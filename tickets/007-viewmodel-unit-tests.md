@@ -1,6 +1,6 @@
 # Ticket 007 — Add Unit Tests for Feature ViewModels
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** 003 (LeaderboardViewModel tests are in ticket 003), 005 (AccountViewModel tests are in ticket 005)
 
 ---
