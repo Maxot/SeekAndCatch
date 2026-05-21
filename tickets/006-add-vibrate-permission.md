@@ -1,6 +1,6 @@
 # Ticket 006 — Add VIBRATE Permission to AndroidManifest
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---
