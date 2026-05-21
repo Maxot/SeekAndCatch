@@ -88,25 +88,34 @@ fun Modifier.moveAndScale(
     var currentCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     val translationX by animateFloatAsState(
-        targetValue = if (isAtTarget && targetCoordinates != null && currentCoordinates != null) {
-            targetCoordinates.positionInRoot().x - currentCoordinates!!.positionInRoot().x
-        } else 0f,
+        targetValue = run {
+            val coords = currentCoordinates
+            if (isAtTarget && targetCoordinates != null && coords != null)
+                targetCoordinates.positionInRoot().x - coords.positionInRoot().x
+            else 0f
+        },
         animationSpec = tween(durationMillis = animationDuration, easing = easing),
         label = "translationX"
     )
 
     val translationY by animateFloatAsState(
-        targetValue = if (isAtTarget && targetCoordinates != null && currentCoordinates != null) {
-            targetCoordinates.positionInRoot().y - currentCoordinates!!.positionInRoot().y
-        } else 0f,
+        targetValue = run {
+            val coords = currentCoordinates
+            if (isAtTarget && targetCoordinates != null && coords != null)
+                targetCoordinates.positionInRoot().y - coords.positionInRoot().y
+            else 0f
+        },
         animationSpec = tween(durationMillis = animationDuration, easing = easing),
         label = "translationY"
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isAtTarget && targetCoordinates != null && currentCoordinates != null && currentCoordinates!!.size.toSize().width > 0) {
-            targetCoordinates.size.toSize().width / currentCoordinates!!.size.toSize().width
-        } else 1f,
+        targetValue = run {
+            val coords = currentCoordinates
+            if (isAtTarget && targetCoordinates != null && coords != null && coords.size.toSize().width > 0)
+                targetCoordinates.size.toSize().width / coords.size.toSize().width
+            else 1f
+        },
         animationSpec = tween(durationMillis = animationDuration, easing = easing),
         label = "scale"
     )

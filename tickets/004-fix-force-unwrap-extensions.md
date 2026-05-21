@@ -1,6 +1,6 @@
 # Ticket 004 — Fix Force-Unwrap (!!) in moveAndScale Modifier
 
-**Status:** Draft
+**Status:** Done
 **Depends on:** (none)
 
 ---
