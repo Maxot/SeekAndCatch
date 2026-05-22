@@ -241,6 +241,7 @@ private fun PixelSettingRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
+            modifier = Modifier.weight(3f),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -257,10 +258,13 @@ private fun PixelSettingRow(
             )
         }
 
-        PixelToggle(
-            isOn = checked,
-            onToggle = { onCheckedChange(!checked) }
-        )
+        Box(modifier = Modifier.weight(1f)) {
+            PixelToggle(
+                isOn = checked,
+                onToggle = { onCheckedChange(!checked) }
+            )
+        }
+
     }
 }
 
