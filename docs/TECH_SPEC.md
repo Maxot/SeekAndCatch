@@ -262,18 +262,22 @@ min(actualDurationPercentage) = 0.35  ← hard floor
 ## 14. Flash Speed Model
 
 ```
-flashMillis       = (rowDuration × 2.0 × 1.2) / coefficient   ← coerced ≥ MIN_FLASH_MILLIS (300 ms)
-spawnPeriodMillis = (rowDuration × 1.2 × 1.5) / coefficient   ← coerced ≥ MIN_SPAWN_PERIOD_MILLIS (300 ms)
-visibleAtOnce     = max(1, gridWidth − 1)                      ← fixed at init; difficulty-only
+visibleAtOnce          = random(visibleAtOnceMin, visibleAtOnceMax)            ← drawn per cycle from difficulty range
+minCorrect             = ceil(visibleAtOnce / 2)                               ← at least half the visible slots are correct
+correctCount           = random(minCorrect, visibleAtOnce)                     ← drawn per cycle; inclusive both ends
+flashMillis            = (correctCount × flashTimePerItemMillis) / sqrt(floor(coefficient)) ← coerced ≥ MIN_FLASH_MILLIS (300 ms)
+spawnPeriodMillis      = (rowDuration × 1.2 × 1.5) / coefficient              ← unchanged; coerced ≥ MIN_SPAWN_PERIOD_MILLIS (300 ms)
+flashTimePerItemMillis — per-difficulty constant (Easy=700, Normal=500, Hard=350)
+visibleAtOnceMin/Max   — per-difficulty range: Easy (3–4), Normal (5–6), Hard (7–8)
 ```
 
-**Timing base:** `GameParams.rowDuration` is a Flow concept ("time for one row to scroll by, in ms"). Flash reuses it as a timing baseline via fixed multipliers: `×2×1.2` for flash display duration and `×1.2×1.5` for spawn period. This is intentional — it ties Flash pacing to the same difficulty parameter without introducing a separate Flash-specific timing field.
+**Recalculation:** `flashMillis` is recalculated at the start of each flash cycle, not on `onTimeTick`. `spawnPeriodMillis` is kept current by `updateDurations()` (called from `onTimeTick`) and updates immediately on every correct tap and coefficient decrease.
 
-**Recalculation:** `onTimeTick` fires every game second and calls `updateDurations()`, which recomputes both values from the current coefficient. Duration also updates immediately on every correct tap and on every coefficient decrease.
-
-**Density:** `visibleAtOnce` is set once at game init and never changes. Coefficient does not affect density — pressure is applied through shorter, faster flashes only.
+**Density:** Total items shown per cycle is always `visibleAtOnce`. Of those, `correctCount` are goal-matching; `(visibleAtOnce − correctCount)` are decoys. Coefficient does not affect density — pressure is applied through shorter, faster flashes only.
 
 **Time decay:** Flash uses no time-decay multiplier. `calculateDurationPercentage` (the time-decay formula used in Flow §13) was evaluated and explicitly removed; Flash is coefficient-only.
+
+**Floor dominance at high coefficient:** At coefficient ×5 with `flashTimePerItemMillis=350` (Hard) and `correctCount=1`, raw duration is 70 ms — well below the 300 ms floor. The floor defines the maximum playable speed cap; the formula controls pacing in the low-to-mid coefficient range.
 
 ---
 

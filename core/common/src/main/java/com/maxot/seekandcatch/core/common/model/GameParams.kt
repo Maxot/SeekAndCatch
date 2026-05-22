@@ -21,5 +21,8 @@ data class GameParams(
     val rowWidth: Int = 4,
     val maxLifeCount: Int = 5,
     val lifeCount: Int = 3,
-    val itemsPassedWithoutMissToGetLife: Int = 30
+    val itemsPassedWithoutMissToGetLife: Int = 30,
+    val flashTimePerItemMillis: Int = 500,
+    val visibleAtOnceMin: Int = 2,
+    val visibleAtOnceMax: Int = 3
 )

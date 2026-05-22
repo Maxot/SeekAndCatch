@@ -10,16 +10,19 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 class FlashGameEngine(
     coroutineScope: CoroutineScope,
     figuresRepository: FiguresRepository,
-    goalsRepository: GoalsRepository
+    goalsRepository: GoalsRepository,
+    private val random: Random = Random.Default
 ) : BaseGameEngine(coroutineScope, figuresRepository, goalsRepository) {
 
     private var flashJob: Job? = null
-    private var visibleAtOnce: Int = 2
+    private var visibleAtOnceMin: Int = 2
+    private var visibleAtOnceMax: Int = 3
     private var nextFigureId: Int = 1000
 
     override fun startInitJob(params: GameParams) {
@@ -27,7 +30,7 @@ class FlashGameEngine(
             val goal = goalsRepository.getRandomGoal()
             val goals = setOf(goal)
             val suitable = figuresRepository.getFigureSuitableForGoal(goal)
-            
+
             val gridWidth = params.rowWidth.coerceAtLeast(1)
             val gridCount = gridWidth * gridWidth
 
@@ -35,12 +38,12 @@ class FlashGameEngine(
                 itemsCount = maxOf(32, gridCount),
                 percentageOfSuitableGoalItems = params.percentOfSuitableItem,
                 goal = goal
-            ).take(gridCount) // We only need gridCount figures for the initial set
+            ).take(gridCount)
 
-            visibleAtOnce = maxOf(1, gridWidth - 1)
+            visibleAtOnceMin = params.visibleAtOnceMin.coerceAtLeast(1)
+            visibleAtOnceMax = params.visibleAtOnceMax.coerceAtLeast(visibleAtOnceMin)
 
             val initialCoefficient = 1f
-            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
             val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
 
             val initialData = GameEngineData(
@@ -54,7 +57,7 @@ class FlashGameEngine(
                 rowWidth = gridWidth,
             )
             val dataWithDurations = initialData.copy(
-                flashMillis = calculateFlashDuration(baseFlashMillis, initialData),
+                flashMillis = calculateFlashDuration(visibleAtOnceMax, params, initialCoefficient),
                 spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, initialData)
             )
             _gameData.value = dataWithDurations
@@ -89,6 +92,11 @@ class FlashGameEngine(
         flashJob = coroutineScope.launch {
             while (_gameState.value is GameEngineState.Started) {
                 val current = _gameData.value
+                val params = gameParams
+                if (params == null) {
+                    delay(100)
+                    continue
+                }
                 val gridCount = current.figures.size
                 if (gridCount == 0) {
                     delay(100)
@@ -98,71 +106,83 @@ class FlashGameEngine(
                 delay(current.spawnPeriodMillis)
                 if (_gameState.value !is GameEngineState.Started) break
 
-                // Only pick figures that haven't been correctly clicked yet (isActive)
-                val activeIndices = _gameData.value.figures.indices.filter { 
-                    _gameData.value.figures[it].isActive 
-                }
-                
+                val snapshot = _gameData.value
+                val activeIndices = snapshot.figures.indices.filter { snapshot.figures[it].isActive }
+
                 if (activeIndices.isEmpty()) {
                     delay(100)
                     continue
                 }
-                
-                var suitableIndices = activeIndices.filter { 
-                    isItemFitForGoals(_gameData.value.goals, _gameData.value.figures[it])
+
+                var suitableIndices = activeIndices.filter {
+                    isItemFitForGoals(snapshot.goals, snapshot.figures[it])
                 }
-                
-                var forceGeneratedFigure: Figure? = null
-                var indexToMakeSuitable: Int = -1
-                
-                if (suitableIndices.isEmpty()) {
-                    // Force generate a suitable item at a random active index
-                    indexToMakeSuitable = activeIndices.random()
-                    val goal = _gameData.value.goals.random()
-                    forceGeneratedFigure = figuresRepository.getRandomFigures(
+
+                // Draw how many total items to show this cycle, then derive the minimum correct
+                val visibleAtOnce = random.nextInt(visibleAtOnceMin, visibleAtOnceMax + 1)
+                val minCorrect = ((visibleAtOnce + 1) / 2).coerceAtLeast(1)
+                val forcedReplacements = mutableMapOf<Int, Figure>()
+
+                while (suitableIndices.size < minCorrect) {
+                    val candidates = activeIndices.filter { it !in suitableIndices && it !in forcedReplacements.keys }
+                    if (candidates.isEmpty()) break
+                    val idx = candidates.random(random)
+                    val goal = snapshot.goals.random(random)
+                    val fig = figuresRepository.getRandomFigures(
                         itemsCount = 1,
                         startId = nextFigureId++,
                         percentageOfSuitableGoalItems = 1f,
                         goal = goal
                     ).first().copy(isActive = true)
-                    suitableIndices = listOf(indexToMakeSuitable)
+                    forcedReplacements[idx] = fig
+                    suitableIndices = suitableIndices + idx
                 }
 
-                val targetCount = minOf(visibleAtOnce, activeIndices.size)
-                val newlyVisible = mutableSetOf<Int>()
-                
-                // Guaranteed at least one suitable item
-                newlyVisible.add(suitableIndices[Random.nextInt(0, suitableIndices.size)])
-                
-                while (newlyVisible.size < targetCount) {
-                    newlyVisible.add(activeIndices[Random.nextInt(0, activeIndices.size)])
+                // Draw correctCount in [minCorrect, visibleAtOnce] for more varied cycles
+                val correctCount = random.nextInt(minCorrect, visibleAtOnce + 1)
+                val actualCorrectCount = minOf(correctCount, suitableIndices.size)
+                val cycleFlashMillis = calculateFlashDuration(actualCorrectCount, params, snapshot.coefficient)
+
+                // Pick suitable items
+                val pickedSuitable = suitableIndices.shuffled(random).take(actualCorrectCount).toMutableSet()
+                val newlyVisible = pickedSuitable.toMutableSet()
+
+                // Fill remaining slots with non-suitable items
+                val nonSuitable = activeIndices.filter { it !in suitableIndices.toSet() && it !in newlyVisible }
+                val needed = visibleAtOnce - newlyVisible.size
+                newlyVisible.addAll(nonSuitable.shuffled(random).take(needed))
+
+                // Fallback: fill any remaining slots from active indices not already picked
+                if (newlyVisible.size < minOf(visibleAtOnce, activeIndices.size)) {
+                    val fallback = activeIndices.filter { it !in newlyVisible }
+                    newlyVisible.addAll(
+                        fallback.shuffled(random).take(minOf(visibleAtOnce, activeIndices.size) - newlyVisible.size)
+                    )
                 }
 
-                // Atomic update for figures and visible cells
                 var figuresAtFlashStart = emptyList<Figure>()
                 var goalsAtFlashStart = emptySet<Goal<Any>>()
 
                 _gameData.update { current ->
-                    val updatedFigures = if (forceGeneratedFigure != null) {
+                    val updatedFigures = if (forcedReplacements.isNotEmpty()) {
                         val list = current.figures.toMutableList()
-                        list[indexToMakeSuitable] = forceGeneratedFigure
+                        forcedReplacements.forEach { (idx, fig) -> list[idx] = fig }
                         list
                     } else {
                         current.figures
                     }
                     figuresAtFlashStart = updatedFigures.toList()
                     goalsAtFlashStart = current.goals
-                    current.copy(figures = updatedFigures, visibleCells = newlyVisible)
+                    current.copy(figures = updatedFigures, visibleCells = newlyVisible, flashMillis = cycleFlashMillis)
                 }
 
-                delay(_gameData.value.flashMillis)
+                delay(cycleFlashMillis)
 
                 var snapshotClicked = emptySet<Int>()
                 _gameData.update {
                     snapshotClicked = it.clickedSuitableCells
                     it.copy(visibleCells = emptySet(), clickedSuitableCells = emptySet())
                 }
-                // Process missed items using the figures that were actually shown
                 handleMissedItems(newlyVisible, snapshotClicked, figuresAtFlashStart, goalsAtFlashStart)
             }
         }
@@ -207,7 +227,7 @@ class FlashGameEngine(
 
             val figure = currentData.figures.getOrNull(index) ?: return@update currentData
             if (!figure.isActive) return@update currentData
-            
+
             if (isItemFitForGoals(currentData.goals, figure)) {
                 figureToHandle = figure
                 indexToHandle = index
@@ -236,20 +256,17 @@ class FlashGameEngine(
 
         _gameData.update { current ->
             val updatedFigures = current.figures.toMutableList()
-            
-            // Replace with a new figure instead of marking as inactive to keep the game infinite
+
             val newFigure = figuresRepository.getRandomFigures(
                 itemsCount = 1,
                 startId = nextFigureId++,
                 percentageOfSuitableGoalItems = params.percentOfSuitableItem,
                 goal = current.goals.first()
             ).first()
-            
+
             updatedFigures[index] = newFigure.copy(isActive = true, pointsReceived = pointsAdded)
-            
+
             val newCoefficient = current.coefficient + (params.coefficientStep ?: 0f)
-            
-            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
             val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
 
             val updated = current.copy(
@@ -258,7 +275,6 @@ class FlashGameEngine(
                 coefficient = newCoefficient,
             )
             updated.copy(
-                flashMillis = calculateFlashDuration(baseFlashMillis, updated),
                 spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, updated)
             )
         }
@@ -268,7 +284,6 @@ class FlashGameEngine(
             itemsPassedWithoutMissing = 0
         }
 
-        // Clear points after delay
         coroutineScope.launch {
             delay(1000)
             _gameData.update { current ->
@@ -281,13 +296,12 @@ class FlashGameEngine(
             }
         }
     }
+
     override fun decreaseCoefficient() {
         val params = gameParams ?: return
         var shouldDecreaseLife = false
         _gameData.update { current ->
             val newCoefficient = (current.coefficient / 2f).coerceAtLeast(1f)
-            
-            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
             val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
 
             val updated = current.copy(
@@ -295,7 +309,6 @@ class FlashGameEngine(
                 isLifeWasted = true
             )
             val finalData = updated.copy(
-                flashMillis = calculateFlashDuration(baseFlashMillis, updated),
                 spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, updated)
             )
             if (finalData.coefficient <= 1.0f && current.coefficient <= 1.0f) {
@@ -317,10 +330,8 @@ class FlashGameEngine(
     private fun updateDurations() {
         val params = gameParams ?: return
         _gameData.update { current ->
-            val baseFlashMillis = (params.rowDuration * 2L * 1.2f).toLong()
             val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
             current.copy(
-                flashMillis = calculateFlashDuration(baseFlashMillis, current),
                 spawnPeriodMillis = calculateSpawnDuration(baseSpawnPeriodMillis, current)
             )
         }
@@ -331,8 +342,10 @@ class FlashGameEngine(
         updateDurations()
     }
 
-    private fun calculateFlashDuration(base: Long, data: GameEngineData): Long {
-        return (base / data.coefficient).toLong().coerceAtLeast(MIN_FLASH_MILLIS)
+    private fun calculateFlashDuration(correctCount: Int, params: GameParams, coefficient: Float): Long {
+        val divisor = sqrt(coefficient.toInt().toFloat()).coerceAtLeast(1f)
+        return (correctCount * params.flashTimePerItemMillis / divisor).toLong()
+            .coerceAtLeast(MIN_FLASH_MILLIS)
     }
 
     private fun calculateSpawnDuration(base: Long, data: GameEngineData): Long {

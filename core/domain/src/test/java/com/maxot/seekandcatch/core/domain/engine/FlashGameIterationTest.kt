@@ -55,24 +55,24 @@ class FlashGameIterationTest {
     @Test
     fun iterations_noFalseMissesWhenItemsClickedAtEdge() = testScope.runTest {
         engine.startGame()
-        
-        // baseSpawnPeriodMillis = (1000 * 1.2 * 1.5) = 1800
-        // baseFlashMillis = (1000 * 2 * 1.2) = 2400
-        
+
         // Wait for first spawn
-        advanceTimeBy(1801)
-        
+        val spawnMs = engine.gameData.value.spawnPeriodMillis
+        advanceTimeBy(spawnMs + 1)
+
         val visibleCells1 = engine.gameData.value.visibleCells
         assertTrue("Should have visible cells", visibleCells1.isNotEmpty())
-        
-        // Click all items in the first iteration exactly at the end of flashMillis
-        advanceTimeBy(2399)
+
+        val flashMs1 = engine.gameData.value.flashMillis
+
+        // Click all items 2 ms before the flash ends (1 ms buffer on each side)
+        advanceTimeBy(flashMs1 - 2)
         visibleCells1.forEach { engine.onItemClick(it) }
-        
-        // Move past flash duration
-        advanceTimeBy(2) 
-        
-        // It should have processed iteration 1. No misses expected because we clicked all.
+
+        // Advance past the flash end
+        advanceTimeBy(2)
+
+        // No misses — all suitable items were clicked before flash ended
         assertEquals("Should have no health loss", 5, engine.gameData.value.lifeCount)
         assertEquals("Coefficient should have increased", 1.0f + visibleCells1.size * 0.5f, engine.gameData.value.coefficient, 0.01f)
 

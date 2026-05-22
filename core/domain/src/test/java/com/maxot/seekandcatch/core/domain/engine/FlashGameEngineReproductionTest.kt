@@ -42,7 +42,9 @@ class FlashGameEngineReproductionTest {
         maxLifeCount = 3,
         lifeCount = 3,
         rowWidth = 2,
-        rowDuration = 1000
+        rowDuration = 1000,
+        visibleAtOnceMin = 1,
+        visibleAtOnceMax = 1
     )
 
     @Before
@@ -57,30 +59,29 @@ class FlashGameEngineReproductionTest {
     @Test
     fun reproduceFalseMiss_whenClickHappensJustAtFlashEnd() = testScope.runTest {
         engine.startGame()
-        
-        // baseSpawnPeriodMillis = (1000 * 1.2 * 1.5) = 1800
-        // baseFlashMillis = (1000 * 2 * 1.2) = 2400
-        
-        advanceTimeBy(1800) // Spawn
+
+        val spawnMs = engine.gameData.value.spawnPeriodMillis
+        advanceTimeBy(spawnMs)
         runCurrent()
-        
+
         val visibleCells = engine.gameData.value.visibleCells.toSet()
         assertEquals("Should have 1 visible cell", 1, visibleCells.size)
         val firstVisible = visibleCells.first()
-        
-        // Advance time to just BEFORE the flash ends
-        advanceTimeBy(2399) // Flash almost ends
+
+        val flashMs = engine.gameData.value.flashMillis
+
+        // Advance to just BEFORE the flash ends (1 ms before)
+        advanceTimeBy(flashMs - 1)
         runCurrent()
-        
-        // Now we click. It should succeed because it's still visible
+
+        // Click while still within the flash window
         engine.onItemClick(firstVisible)
-        
-        // Finish the flash
+
+        // Advance past the flash end
         advanceTimeBy(1)
         runCurrent()
-        
-        // 1 clicked, 0 missed.
-        // Life should remain 3. Coefficient should be 1.1.
+
+        // 1 clicked, 0 missed — life stays at 3, coefficient increases by coefficientStep (0.1)
         assertEquals("Life count should be 3", 3, engine.gameData.value.lifeCount)
         assertEquals("Coefficient should be 1.1", 1.1f, engine.gameData.value.coefficient, 0.01f)
     }
@@ -126,36 +127,38 @@ class FlashGameEngineReproductionTest {
             Figure(id = 3, type = Figure.FigureType.SQUARE, color = Color.Red)  // Unsuitable
         )
         figuresRepository.setRandomFigures(mixedFigures)
-        
+
         // 100 lives to avoid dying from misses
         val manyLivesParams = gameParams.copy(maxLifeCount = 100, lifeCount = 100)
-        
+
         engine = FlashGameEngine(testScope, figuresRepository, goalsRepository)
         engine.initGame(manyLivesParams)
         testScope.testScheduler.advanceUntilIdle()
 
         engine.startGame()
-        
+
         repeat(10) {
-            advanceTimeBy(1801) // Wait for spawn
+            val spawnMs = engine.gameData.value.spawnPeriodMillis
+            advanceTimeBy(spawnMs + 1)
             runCurrent()
-            
+
             val currentData = engine.gameData.value
             val visibleIndices = currentData.visibleCells
             val figures = currentData.figures
             val goals = currentData.goals
-            
+
             assertTrue("Iteration $it: Visible cells should not be empty", visibleIndices.isNotEmpty())
 
             val suitableVisible = visibleIndices.filter { index ->
                 val figure = figures[index]
                 goals.any { figure.isFitForGoal(it) }
             }
-            
-            assertTrue("Iteration $it: Should have at least one suitable visible item, but got: $visibleIndices", 
+
+            assertTrue("Iteration $it: Should have at least one suitable visible item, but got: $visibleIndices",
                 suitableVisible.isNotEmpty())
-            
-            advanceTimeBy(2399) // Wait until almost end of flash
+
+            val flashMs = engine.gameData.value.flashMillis
+            advanceTimeBy(flashMs + 1)
             runCurrent()
         }
     }

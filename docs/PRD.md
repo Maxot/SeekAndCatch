@@ -99,9 +99,9 @@ Enable players to survive as long as possible and achieve the highest possible s
 
 ### 5.2 Flash Mode
 - Items appear at random positions on a `gridWidth × gridWidth` grid.
-- Each cycle, `visibleAtOnce = max(1, gridWidth − 1)` items are shown simultaneously, guaranteed to include at least one goal-matching item.
-- Flash display duration and spawn period both decrease as coefficient rises (see TECH_SPEC Flash Speed Model).
-- Density (items per flash) depends on difficulty only; it does not scale with coefficient.
+- Each cycle, `visibleAtOnce` is drawn from a per-difficulty range (Easy 3–4, Normal 5–6, Hard 7–8). Between `ceil(visibleAtOnce / 2)` and `visibleAtOnce` of those are correct items. Flash display duration is proportional to the number of correct items: `flashMillis = correctCount × timePerItem / sqrt(floor(coefficient))`. Spawn period is coefficient-driven only.
+- Total items shown per cycle varies within the difficulty range; remaining slots are filled with decoys.
+- Density (total items per flash) depends on difficulty only; it does not scale with coefficient.
 - No continuous scrolling.
 
 Both modes share the same scoring, coefficient, and health rules.
@@ -178,6 +178,13 @@ Both modes share the same scoring, coefficient, and health rules.
 | Easy | 10 |
 | Normal | 15 |
 | Hard | 20 |
+
+### Flash Time Per Item (Flash Mode)
+| Difficulty | `flashTimePerItemMillis` | `visibleAtOnce` range |
+|---|---|---|
+| Easy | 700 ms | 3–4 |
+| Normal | 500 ms | 5–6 |
+| Hard | 350 ms | 7–8 |
 
 ---
 
