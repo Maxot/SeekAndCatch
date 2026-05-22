@@ -98,9 +98,10 @@ Enable players to survive as long as possible and achieve the highest possible s
 - Player reacts to moving items in real time.
 
 ### 5.2 Flash Mode
-- Items appear instantly at random positions on the grid.
-- After a short interval, items are replaced with a new set.
-- Refresh rate and density depend on difficulty and coefficient.
+- Items appear at random positions on a `gridWidth × gridWidth` grid.
+- Each cycle, `visibleAtOnce = max(1, gridWidth − 1)` items are shown simultaneously, guaranteed to include at least one goal-matching item.
+- Flash display duration and spawn period both decrease as coefficient rises (see TECH_SPEC Flash Speed Model).
+- Density (items per flash) depends on difficulty only; it does not scale with coefficient.
 - No continuous scrolling.
 
 Both modes share the same scoring, coefficient, and health rules.

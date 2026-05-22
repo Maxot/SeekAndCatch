@@ -55,24 +55,18 @@ class FlashGameEngineTest {
     @Test
     fun flashLoop_updatesVisibleCells() = testScope.runTest {
         engine.startGame()
-        
-        // At start, visibleCells should be empty
-        // FlashGameEngine calculates:
-        // baseSpawnPeriodMillis = (rowDuration * 1.5f * 1.5f).toLong() = 2250
-        // baseFlashMillis = (rowDuration * 2L * 1.5f).toLong() = 3000
-        
-        // Wait for first spawn delay to pass (2250ms)
-        advanceTimeBy(2251) 
-        
+
+        // baseSpawnPeriodMillis = (rowDuration * 1.2f * 1.5f).toLong() = 1800
+        // baseFlashMillis       = (rowDuration * 2L   * 1.2f).toLong() = 2400
+
+        advanceTimeBy(1801)
         val visibleCells = engine.gameData.value.visibleCells
         assertTrue("visibleCells should not be empty after spawnPeriod. Current: $visibleCells", visibleCells.isNotEmpty())
-        
-        // Wait for flash delay to pass (3000ms)
-        advanceTimeBy(3001)
+
+        advanceTimeBy(2401)
         assertTrue("visibleCells should be empty after flash ends", engine.gameData.value.visibleCells.isEmpty())
-        
-        // Wait for next spawn period to pass (2250ms)
-        advanceTimeBy(2251)
+
+        advanceTimeBy(1801)
         assertTrue("visibleCells should not be empty for second flash. Current: ${engine.gameData.value.visibleCells}", engine.gameData.value.visibleCells.isNotEmpty())
     }
 
@@ -119,35 +113,57 @@ class FlashGameEngineTest {
     @Test
     fun durations_clampedToMinimum() = testScope.runTest {
         engine.startGame()
-        
+
+        // baseSpawnPeriodMillis = (rowDuration * 1.2f * 1.5f).toLong() = 1800
+        // baseFlashMillis       = (rowDuration * 2L   * 1.2f).toLong() = 2400
         repeat(20) {
-            // Wait for spawn. baseSpawnPeriod is 2250 (1000 * 1.5 * 1.5).
-            advanceTimeBy(2500)
+            advanceTimeBy(2000)
             testScope.testScheduler.advanceUntilIdle()
-            
+
             val visibleIndices = engine.gameData.value.visibleCells.toSet()
             visibleIndices.forEach { index ->
                 if (engine.gameData.value.figures[index].type == Figure.FigureType.CIRCLE) {
                     engine.onItemClick(index)
                 }
             }
-            
-            // Allow flash to end. baseFlash is 3000 (1000 * 2 * 1.5). 
-            advanceTimeBy(3500)
+
+            advanceTimeBy(2500)
             testScope.testScheduler.advanceUntilIdle()
         }
 
         val finalData = engine.gameData.value
         assertTrue("Coefficient should be high: ${finalData.coefficient}", finalData.coefficient > 1.0f)
-        
-        val baseFlashMillis = (gameParams.rowDuration * 2L * 1.5f).toLong()
-        val baseSpawnPeriodMillis = (gameParams.rowDuration * 1.5f * 1.5f).toLong()
-        
+
+        val baseFlashMillis = (gameParams.rowDuration * 2L * 1.2f).toLong()
+        val baseSpawnPeriodMillis = (gameParams.rowDuration * 1.2f * 1.5f).toLong()
+
         val expectedFlash = (baseFlashMillis / finalData.coefficient).toLong().coerceAtLeast(300L)
         val expectedSpawn = (baseSpawnPeriodMillis / finalData.coefficient).toLong().coerceAtLeast(300L)
-        
+
         assertEquals("flashMillis should be updated by formula", expectedFlash, finalData.flashMillis)
         assertEquals("spawnPeriodMillis should be updated by formula", expectedSpawn, finalData.spawnPeriodMillis)
+    }
+
+    @Test
+    fun initialDurations_matchFlashSpeedModelFormula() = testScope.runTest {
+        // §14 Flash Speed Model: flashMillis = (rowDuration × 2 × 1.2) / coefficient
+        //                        spawnPeriodMillis = (rowDuration × 1.2 × 1.5) / coefficient
+        // At init: coefficient = 1.0, rowDuration = 1000
+        val data = engine.gameData.value
+        val expectedFlash = (gameParams.rowDuration * 2L * 1.2f).toLong()          // 2400
+        val expectedSpawn = (gameParams.rowDuration * 1.2f * 1.5f).toLong()        // 1800
+        assertEquals("Initial flashMillis must match §14 formula", expectedFlash, data.flashMillis)
+        assertEquals("Initial spawnPeriodMillis must match §14 formula", expectedSpawn, data.spawnPeriodMillis)
+    }
+
+    @Test
+    fun visibleAtOnce_isGridWidthMinusOne() = testScope.runTest {
+        // §14: visibleAtOnce = max(1, gridWidth − 1); difficulty-only, not coefficient-driven
+        // gameParams.rowWidth = 4, so visibleAtOnce = 3
+        engine.startGame()
+        advanceTimeBy(1801)
+        val visibleCount = engine.gameData.value.visibleCells.size
+        assertTrue("visibleAtOnce should be max(1, gridWidth-1) = 3; got $visibleCount", visibleCount <= 3)
     }
 
     @Test

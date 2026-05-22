@@ -344,12 +344,6 @@ class FlashGameEngine(
         stopFlashLoop()
     }
 
-    private fun calculateDurationPercentage(data: GameEngineData): Float {
-        val coefPercentage = (data.coefficient * data.coefficient / 100f)
-        val timePercentage = (((data.gameDuration / 1000 / 30) * 5) / 100f)
-        return (1f - coefPercentage - timePercentage).coerceAtLeast(0.35f)
-    }
-
     companion object {
         private const val MIN_FLASH_MILLIS = 300L
         private const val MIN_SPAWN_PERIOD_MILLIS = 300L

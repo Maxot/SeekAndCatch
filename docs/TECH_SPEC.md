@@ -259,7 +259,25 @@ min(actualDurationPercentage) = 0.35  ← hard floor
 
 ---
 
-## 14. Firebase Integration Pattern
+## 14. Flash Speed Model
+
+```
+flashMillis       = (rowDuration × 2.0 × 1.2) / coefficient   ← coerced ≥ MIN_FLASH_MILLIS (300 ms)
+spawnPeriodMillis = (rowDuration × 1.2 × 1.5) / coefficient   ← coerced ≥ MIN_SPAWN_PERIOD_MILLIS (300 ms)
+visibleAtOnce     = max(1, gridWidth − 1)                      ← fixed at init; difficulty-only
+```
+
+**Timing base:** `GameParams.rowDuration` is a Flow concept ("time for one row to scroll by, in ms"). Flash reuses it as a timing baseline via fixed multipliers: `×2×1.2` for flash display duration and `×1.2×1.5` for spawn period. This is intentional — it ties Flash pacing to the same difficulty parameter without introducing a separate Flash-specific timing field.
+
+**Recalculation:** `onTimeTick` fires every game second and calls `updateDurations()`, which recomputes both values from the current coefficient. Duration also updates immediately on every correct tap and on every coefficient decrease.
+
+**Density:** `visibleAtOnce` is set once at game init and never changes. Coefficient does not affect density — pressure is applied through shorter, faster flashes only.
+
+**Time decay:** Flash uses no time-decay multiplier. `calculateDurationPercentage` (the time-decay formula used in Flow §13) was evaluated and explicitly removed; Flash is coefficient-only.
+
+---
+
+## 15. Firebase Integration Pattern
 
 ### Authentication
 - Class: `FirebaseAuthDataSource` (`data/firebase/datasource/auth/`)
@@ -287,7 +305,7 @@ min(actualDurationPercentage) = 0.35  ← hard floor
 
 ---
 
-## 15. Data Model — Firestore
+## 16. Data Model — Firestore
 
 ### Collection: `leaderboard`
 Document path: `leaderboard/{userId}`
@@ -310,7 +328,7 @@ Fields derived from `UserFirestoreDataSource` and `UserRepositoryImpl` — exact
 
 ---
 
-## 16. Audio & Haptics
+## 17. Audio & Haptics
 
 ### Sounds
 - Countdown start (3s)
@@ -336,7 +354,7 @@ Fields derived from `UserFirestoreDataSource` and `UserRepositoryImpl` — exact
 
 ---
 
-## 17. Pause UX Guarantees
+## 18. Pause UX Guarantees
 - Timers stopped.
 - Animations frozen.
 - Input disabled.
@@ -344,14 +362,14 @@ Fields derived from `UserFirestoreDataSource` and `UserRepositoryImpl` — exact
 
 ---
 
-## 18. Result Screen
+## 19. Result Screen
 - Displays: Final Score, Best Score (local + remote), Leaderboard Rank.
 - Restart: same mode + difficulty, full state reset, countdown replayed, no cached state.
 - "To Main": navigate back to Game Selection.
 
 ---
 
-## 19. Leaderboard System
+## 20. Leaderboard System
 
 ### Auth
 - Auto anonymous login on first launch.
@@ -369,7 +387,7 @@ Fields derived from `UserFirestoreDataSource` and `UserRepositoryImpl` — exact
 
 ---
 
-## 20. Naming Conventions
+## 21. Naming Conventions
 
 | Artefact | Convention | Example |
 |---|---|---|
@@ -390,7 +408,7 @@ Fields derived from `UserFirestoreDataSource` and `UserRepositoryImpl` — exact
 
 ---
 
-## 21. Architecture Boundary Rules
+## 22. Architecture Boundary Rules
 
 | Layer | May depend on | Must NOT import |
 |---|---|---|
@@ -404,7 +422,7 @@ Fields derived from `UserFirestoreDataSource` and `UserRepositoryImpl` — exact
 
 ---
 
-## 22. Testing Approach
+## 23. Testing Approach
 
 - **Unit tests:** `src/test/java/` in each module.
 - **Instrumentation tests:** `src/androidTest/java/` (Compose UI Testing + Espresso).
@@ -414,7 +432,7 @@ Fields derived from `UserFirestoreDataSource` and `UserRepositoryImpl` — exact
 
 ---
 
-## 23. Invariants (Must Never Break)
+## 24. Invariants (Must Never Break)
 
 - Wrong tap = instant game over.
 - Goals do not change mid-game.
