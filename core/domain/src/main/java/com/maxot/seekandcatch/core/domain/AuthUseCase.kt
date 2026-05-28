@@ -16,7 +16,8 @@ class AuthUseCase
         user?.id?.let { uid ->
             val existingUser = userRepository.getUser(uid)
             if (existingUser == null) {
-                val user = User(id = uid)
+                val defaultName = "Player_" + uid.take(4).uppercase()
+                val user = User(id = uid, name = defaultName)
                 userRepository.saveUser(user)
             }
         }

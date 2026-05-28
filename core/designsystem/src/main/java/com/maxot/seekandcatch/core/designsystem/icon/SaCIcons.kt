@@ -1,6 +1,7 @@
 package com.maxot.seekandcatch.core.designsystem.icon
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.Edit
 import com.maxot.seekandcatch.core.designsystem.R
@@ -20,6 +21,7 @@ object SaCIcons {
 
     val Edit = Icons.Rounded.Edit
     val Done = Icons.Rounded.Done
+    val Copy = Icons.Rounded.ContentCopy
 
 
     val SoundsRes = R.drawable.baseline_volume_up_24

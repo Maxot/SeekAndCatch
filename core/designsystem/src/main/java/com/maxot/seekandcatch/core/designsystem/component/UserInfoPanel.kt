@@ -1,12 +1,13 @@
 package com.maxot.seekandcatch.core.designsystem.component
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -14,11 +15,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.maxot.seekandcatch.core.common.model.User
@@ -32,11 +42,27 @@ fun UserInfoPanel(
     user: User,
     onUserNameChanged: (userName: String) -> Unit
 ) {
-    var text by rememberSaveable { mutableStateOf("") }
-    var editTextEnabled by rememberSaveable { mutableStateOf(false) }
+    var editText by rememberSaveable { mutableStateOf("") }
+    var isEditing by rememberSaveable { mutableStateOf(false) }
+    var hasFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    @Suppress("DEPRECATION")
+    val clipboardManager = LocalClipboardManager.current
 
-    LaunchedEffect(key1 = user) {
-        text = user.name
+    LaunchedEffect(isEditing) {
+        if (isEditing) focusRequester.requestFocus()
+    }
+
+    fun confirmEdit() {
+        if (editText.isNotEmpty()) onUserNameChanged(editText)
+        isEditing = false
+        keyboardController?.hide()
+    }
+
+    fun cancelEdit() {
+        isEditing = false
+        keyboardController?.hide()
     }
 
     PixelBorderBox(
@@ -48,58 +74,77 @@ fun UserInfoPanel(
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
                 text = stringResource(R.string.feature_account_your_info),
-                modifier = Modifier
-                    .padding(5.dp)
+                modifier = Modifier.padding(5.dp)
             )
 
             Row(
-                modifier = Modifier
-                    .then(modifier),
-                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.feature_account_user_id_title),
                     style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.secondary),
-                    modifier = Modifier
-                        .padding(5.dp),
+                    modifier = Modifier.padding(5.dp)
                 )
-
                 Text(
                     text = user.id,
                     style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.onSecondary),
+                    modifier = Modifier.weight(1f).padding(5.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Icon(
+                    imageVector = SaCIcons.Copy,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .padding(5.dp)
+                        .clickable { clipboardManager.setText(AnnotatedString(user.id)) }
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .then(modifier),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (isEditing) {
                 TextField(
-                    modifier = Modifier.weight(3f),
-                    enabled = editTextEnabled,
-                    value = text,
-                    onValueChange = {
-                        text = it
-                    },
-                    label = {
-                        Text(stringResource(id = R.string.feature_account_user_name_title))
-                    })
-
-                IconButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        editTextEnabled = !editTextEnabled
-                        if (text.isNotEmpty() && !editTextEnabled)
-                            onUserNameChanged(text)
-                    }) {
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { state ->
+                            if (state.isFocused) hasFocused = true
+                            else if (hasFocused) cancelEdit()
+                        },
+                    value = editText,
+                    onValueChange = { editText = it },
+                    label = { Text(stringResource(id = R.string.feature_account_user_name_title)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { confirmEdit() })
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            hasFocused = false
+                            editText = ""
+                            isEditing = true
+                        },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.feature_account_user_name_title),
+                        style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.secondary),
+                        modifier = Modifier.padding(5.dp)
+                    )
+                    Text(
+                        text = user.name,
+                        style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.onSecondary),
+                        modifier = Modifier.weight(1f).padding(5.dp)
+                    )
                     Icon(
-                        imageVector = if (editTextEnabled) SaCIcons.Done else SaCIcons.Edit,
-                        contentDescription = ""
+                        imageVector = SaCIcons.Edit,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(5.dp)
                     )
                 }
             }
@@ -114,7 +159,7 @@ private fun UserInfoPanelPreview() {
         UserInfoPanel(
             user = User(
                 id = "user id",
-                name = "user name"
+                name = "Player_3F9A"
             ),
             onUserNameChanged = {}
         )

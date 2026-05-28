@@ -56,6 +56,7 @@ class AccountViewModel
     private fun setUserName(name: String) {
         viewModelScope.launch {
             userUseCase.setName(name)
+            updateState { it.copy(user = it.user?.copy(name = name)) }
         }
     }
 
