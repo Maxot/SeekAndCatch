@@ -188,7 +188,7 @@ fun ColoredFigureLayout(
             ) {
                 onItemClick()
             }
-            .alpha(alpha)
+            .alpha(if (figure.pointsReceived != null) 1f else alpha)
             .then(modifier),
         contentAlignment = Alignment.Center
     ) {
