@@ -85,6 +85,6 @@ class MusicController @Inject constructor(
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        audioManager.stopMusic()
+        audioManager.pauseMusic()
     }
 }
