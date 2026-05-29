@@ -37,7 +37,7 @@ fun NavController.navigateToGameResult(score: Int, navOptions: NavOptions? = nul
 fun NavGraphBuilder.gameSelectionScreen(
     navigateToFlowGame: (NavOptions?) -> Unit,
     navigateToFlashGame: (NavOptions?) -> Unit,
-    navigateToGameResult: (Int) -> Unit,
+    navigateToGameResult: (Int, NavOptions?) -> Unit,
     navigateToGameSelection: (NavOptions?) -> Unit
 ) {
     navigation(
@@ -79,7 +79,14 @@ fun NavGraphBuilder.gameSelectionScreen(
                 )
             },
         ) {
-            FlowGameScreen(toGameResultScreen = navigateToGameResult)
+            FlowGameScreen(
+                toGameResultScreen = { score ->
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(FLOW_GAME_ROUTE, inclusive = true)
+                        .build()
+                    navigateToGameResult(score, navOptions)
+                }
+            )
         }
         composable(
             route = FLASH_GAME_ROUTE,
@@ -96,7 +103,14 @@ fun NavGraphBuilder.gameSelectionScreen(
                 )
             },
         ) {
-            FlashGameScreen(toGameResultScreen = navigateToGameResult)
+            FlashGameScreen(
+                toGameResultScreen = { score ->
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(FLASH_GAME_ROUTE, inclusive = true)
+                        .build()
+                    navigateToGameResult(score, navOptions)
+                }
+            )
         }
         composable(
             route = GAME_RESULT_ROUTE,
@@ -116,7 +130,13 @@ fun NavGraphBuilder.gameSelectionScreen(
                 )
             }) {
             GameResultScreen(
-                toMainScreen = { navigateToGameSelection(null) },
+                toMainScreen = {
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(GAME_SELECTION_ROUTE, inclusive = true)
+                        .setLaunchSingleTop(true)
+                        .build()
+                    navigateToGameSelection(navOptions)
+                },
                 onRestart = { mode ->
                     val navOptions = NavOptions.Builder()
                         .setPopUpTo(GAME_SELECTION_ROUTE, inclusive = false)

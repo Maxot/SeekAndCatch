@@ -29,7 +29,7 @@ fun SeekCatchNavHost(
         gameSelectionScreen(
             navigateToFlowGame = { navOptions -> navController.navigateToFlowGame(navOptions) },
             navigateToFlashGame = { navOptions -> navController.navigateToFlashGame(navOptions) },
-            navigateToGameResult = { score -> navController.navigateToGameResult(score) },
+            navigateToGameResult = { score, navOptions -> navController.navigateToGameResult(score, navOptions) },
             navigateToGameSelection = { navOptions -> navController.navigateToGameSelection(navOptions) }
         )
         accountScreen()

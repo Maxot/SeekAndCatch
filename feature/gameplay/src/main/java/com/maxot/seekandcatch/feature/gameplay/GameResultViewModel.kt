@@ -16,7 +16,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,72 +41,44 @@ class GameResultViewModel
     )
     val uiState: StateFlow<GameResultUiState> = _uiState
 
+    private var scoreSubmitted = false
+
     init {
-        // Explicitly stop any playing music on initialization of result screen
         audioManager.stopMusic()
 
-        // Observe game mode and difficulty for restarting with same settings
         viewModelScope.launch {
-            combine(
-                settingsRepository.observeGameMode(),
-                settingsRepository.observeDifficulty()
-            ) { mode, difficulty ->
-                mode to difficulty
-            }.collectLatest { (mode, difficulty) ->
-                _uiState.update {
-                    it.copy(
-                        gameMode = mode,
-                        gameDifficulty = difficulty
-                    )
-                }
-            }
-        }
-
-        // Track remote best for current user, mode and difficulty
-        viewModelScope.launch {
+            // Capture game context once — settings changes after this point cannot affect submission
+            val mode = settingsRepository.observeGameMode().first()
+            val difficulty = settingsRepository.observeDifficulty().first()
             val userId = authRepository.getUserId()
-            combine(
-                settingsRepository.observeGameMode(),
-                settingsRepository.observeDifficulty(),
-                leaderboardRepository.observeRecords()
-            ) { mode, difficulty, records ->
-                val best = records.asSequence()
+
+            _uiState.update { it.copy(gameMode = mode, gameDifficulty = difficulty) }
+
+            // Only observeRecords() drives reactivity from here
+            leaderboardRepository.observeRecords().collectLatest { records ->
+                val inContext = records.asSequence()
                     .filter { it.gameMode == mode && it.difficulty == difficulty }
+
+                val remoteBest = inContext
                     .filter { it.userId == userId }
                     .mapNotNull { it.score }
                     .maxOrNull() ?: 0
-                best
-            }.collectLatest { remoteBest ->
+
+                val rank = inContext
+                    .sortedByDescending { it.score }
+                    .toList()
+                    .indexOfFirst { it.userId == userId }
+                    .let { if (it >= 0) it + 1 else null }
+
                 _uiState.update {
                     it.copy(
                         remoteBestForContext = remoteBest,
-                        isNewBest = it.lastScore > remoteBest || it.isNewBest
+                        isNewBest = it.lastScore > remoteBest || it.isNewBest,
+                        rank = rank
                     )
                 }
-                autoSubmitScore()
-            }
-        }
 
-        // Calculate rank
-        viewModelScope.launch {
-            combine(
-                settingsRepository.observeGameMode(),
-                settingsRepository.observeDifficulty(),
-                leaderboardRepository.observeRecords()
-            ) { mode, difficulty, records ->
-                val sortedRecords = records.asSequence()
-                    .filter { it.gameMode == mode && it.difficulty == difficulty }
-                    .sortedByDescending { it.score }
-                    .toList()
-                
-                val currentScore = _uiState.value.lastScore
-                val userId = authRepository.getUserId()
-                
-                // Find rank based on current score or user's best score in that context
-                val rank = sortedRecords.indexOfFirst { it.userId == userId } + 1
-                if (rank > 0) rank else null
-            }.collectLatest { rank ->
-                _uiState.update { it.copy(rank = rank) }
+                autoSubmitScore(mode, difficulty, userId)
             }
         }
     }
@@ -135,33 +106,23 @@ class GameResultViewModel
         // Score submission is already handled by autoSubmitScore
     }
 
-    private fun autoSubmitScore() {
+    private suspend fun autoSubmitScore(mode: GameMode, difficulty: GameDifficulty, userId: String) {
         val current = _uiState.value
-        val score = current.lastScore
-
-        // Submit to remote leaderboard if it's a new best
-        if (score > current.remoteBestForContext) {
-            viewModelScope.launch {
-                val userId = authRepository.getUserId()
-
-                _uiState.update { it.copy(isProcessing = true) }
-                val mode: GameMode = settingsRepository.observeGameMode().first()
-                val difficulty: GameDifficulty = settingsRepository.observeDifficulty().first()
-
-                // Re-verify it's still a new best before adding
-                if (score > _uiState.value.remoteBestForContext) {
-                    leaderboardRepository.addRecord(
-                        LeaderboardRecord(
-                            userId = userId,
-                            userName = current.userName,
-                            score = score,
-                            gameMode = mode,
-                            difficulty = difficulty
-                        )
+        if (!scoreSubmitted && current.lastScore > current.remoteBestForContext) {
+            _uiState.update { it.copy(isProcessing = true) }
+            if (!scoreSubmitted && current.lastScore > _uiState.value.remoteBestForContext) {
+                scoreSubmitted = true
+                leaderboardRepository.addRecord(
+                    LeaderboardRecord(
+                        userId = userId,
+                        userName = current.userName,
+                        score = current.lastScore,
+                        gameMode = mode,
+                        difficulty = difficulty
                     )
-                }
-                _uiState.update { it.copy(isProcessing = false) }
+                )
             }
+            _uiState.update { it.copy(isProcessing = false) }
         }
     }
 }
