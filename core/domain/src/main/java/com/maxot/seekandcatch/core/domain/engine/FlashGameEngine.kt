@@ -90,24 +90,37 @@ class FlashGameEngine(
     private fun startFlashLoop() {
         flashJob?.cancel()
         flashJob = coroutineScope.launch {
+            // Cells tapped in the previous cycle, carried into the next iteration so
+            // replacement happens after spawnPeriodMillis when all alphas have settled to 0.
+            var pendingReplacements: Set<Int> = emptySet()
+
             while (_gameState.value is GameEngineState.Started) {
-                val current = _gameData.value
                 val params = gameParams
                 if (params == null) {
                     delay(100)
                     continue
                 }
-                val gridCount = current.figures.size
-                if (gridCount == 0) {
+                if (_gameData.value.figures.isEmpty()) {
                     delay(100)
                     continue
                 }
 
-                delay(current.spawnPeriodMillis)
+                // ── PHASE 1: inter-cycle pause ────────────────────────────────────────
+                // The grid is invisible here. Alpha animations from the previous cycle
+                // have time to fully settle to 0.
+                delay(_gameData.value.spawnPeriodMillis)
                 if (_gameState.value !is GameEngineState.Started) break
 
+                // ── PHASE 2: replace figures from the previous cycle ─────────────────
+                // All cells are at alpha 0, so swapping figures is invisible.
+                replaceTappedFigures(pendingReplacements, params)
+                pendingReplacements = emptySet()
+
+                // ── PHASE 3: build the batch to display ──────────────────────────────
                 val snapshot = _gameData.value
-                val activeIndices = snapshot.figures.indices.filter { snapshot.figures[it].isActive }
+                val activeIndices = snapshot.figures.indices.filter {
+                    snapshot.figures[it].isActive && snapshot.figures[it].pointsReceived == null
+                }
 
                 if (activeIndices.isEmpty()) {
                     delay(100)
@@ -118,7 +131,6 @@ class FlashGameEngine(
                     isItemFitForGoals(snapshot.goals, snapshot.figures[it])
                 }
 
-                // Draw how many total items to show this cycle, then derive the minimum correct
                 val visibleAtOnce = random.nextInt(visibleAtOnceMin, visibleAtOnceMax + 1)
                 val minCorrect = ((visibleAtOnce + 1) / 2).coerceAtLeast(1)
                 val forcedReplacements = mutableMapOf<Int, Figure>()
@@ -138,21 +150,16 @@ class FlashGameEngine(
                     suitableIndices = suitableIndices + idx
                 }
 
-                // Draw correctCount in [minCorrect, visibleAtOnce] for more varied cycles
                 val correctCount = random.nextInt(minCorrect, visibleAtOnce + 1)
                 val actualCorrectCount = minOf(correctCount, suitableIndices.size)
                 val cycleFlashMillis = calculateFlashDuration(actualCorrectCount, params, snapshot.coefficient)
 
-                // Pick suitable items
                 val pickedSuitable = suitableIndices.shuffled(random).take(actualCorrectCount).toMutableSet()
                 val newlyVisible = pickedSuitable.toMutableSet()
 
-                // Fill remaining slots with non-suitable items
                 val nonSuitable = activeIndices.filter { it !in suitableIndices.toSet() && it !in newlyVisible }
-                val needed = visibleAtOnce - newlyVisible.size
-                newlyVisible.addAll(nonSuitable.shuffled(random).take(needed))
+                newlyVisible.addAll(nonSuitable.shuffled(random).take(visibleAtOnce - newlyVisible.size))
 
-                // Fallback: fill any remaining slots from active indices not already picked
                 if (newlyVisible.size < minOf(visibleAtOnce, activeIndices.size)) {
                     val fallback = activeIndices.filter { it !in newlyVisible }
                     newlyVisible.addAll(
@@ -160,6 +167,7 @@ class FlashGameEngine(
                     )
                 }
 
+                // ── PHASE 4: show the batch ──────────────────────────────────────────
                 var figuresAtFlashStart = emptyList<Figure>()
                 var goalsAtFlashStart = emptySet<Goal<Any>>()
 
@@ -178,12 +186,14 @@ class FlashGameEngine(
 
                 delay(cycleFlashMillis)
 
+                // ── PHASE 5: process ─────────────────────────────────────────────────
                 var snapshotClicked = emptySet<Int>()
                 _gameData.update {
                     snapshotClicked = it.clickedSuitableCells
                     it.copy(visibleCells = emptySet(), clickedSuitableCells = emptySet())
                 }
                 handleMissedItems(newlyVisible, snapshotClicked, figuresAtFlashStart, goalsAtFlashStart)
+                pendingReplacements = snapshotClicked
             }
         }
     }
@@ -254,17 +264,11 @@ class FlashGameEngine(
         val pointsAdded = calculatePoints()
         val params = gameParams ?: return
 
+        // Mark the original figure with pointsReceived so the UI plays the break animation.
+        // The slot is replaced with a fresh figure at cycle end (replaceTappedFigures).
         _gameData.update { current ->
             val updatedFigures = current.figures.toMutableList()
-
-            val newFigure = figuresRepository.getRandomFigures(
-                itemsCount = 1,
-                startId = nextFigureId++,
-                percentageOfSuitableGoalItems = params.percentOfSuitableItem,
-                goal = current.goals.first()
-            ).first()
-
-            updatedFigures[index] = newFigure.copy(isActive = true, pointsReceived = pointsAdded)
+            updatedFigures[index] = figure.copy(pointsReceived = pointsAdded)
 
             val newCoefficient = current.coefficient + (params.coefficientStep ?: 0f)
             val baseSpawnPeriodMillis = (params.rowDuration * 1.2f * 1.5f).toLong()
@@ -283,17 +287,24 @@ class FlashGameEngine(
             increaseLifeCount()
             itemsPassedWithoutMissing = 0
         }
+    }
 
-        coroutineScope.launch {
-            delay(1000)
-            _gameData.update { current ->
-                val f = current.figures.getOrNull(index)
-                if (f?.pointsReceived != null) {
-                    val updatedFigures = current.figures.toMutableList()
-                    updatedFigures[index] = f.copy(pointsReceived = null)
-                    current.copy(figures = updatedFigures)
-                } else current
+    private fun replaceTappedFigures(clickedIndices: Set<Int>, params: GameParams) {
+        if (clickedIndices.isEmpty()) return
+        _gameData.update { current ->
+            val updatedFigures = current.figures.toMutableList()
+            clickedIndices.forEach { index ->
+                if (index < updatedFigures.size) {
+                    val newFigure = figuresRepository.getRandomFigures(
+                        itemsCount = 1,
+                        startId = nextFigureId++,
+                        percentageOfSuitableGoalItems = params.percentOfSuitableItem,
+                        goal = current.goals.first()
+                    ).first()
+                    updatedFigures[index] = newFigure.copy(isActive = true)
+                }
             }
+            current.copy(figures = updatedFigures)
         }
     }
 

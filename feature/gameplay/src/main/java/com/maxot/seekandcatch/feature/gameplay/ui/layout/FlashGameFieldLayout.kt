@@ -48,7 +48,7 @@ fun FlashGameFieldLayout(
             val visible = isCurrentlyVisible && !hiddenIds.contains(id)
             val base = figuresByCell[id]
             if (base != null) {
-                val figure = base.copy(isActive = visible)
+                val figure = base.copy(isActive = visible || hiddenIds.contains(id))
                 ColoredFigureLayout(
                     figure = figure,
                     onItemClick = {
