@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -64,6 +67,7 @@ fun FlashGameScreen(
         onResume = { viewModel.resumeGame() },
         onFinish = { viewModel.finishGame() },
         onCellClick = { id -> viewModel.onCellClick(id) },
+        onGridRowCountMeasured = { viewModel.setGridRowCount(it) },
         isGameOverAnimating = isGameOverAnimating.value,
         onSoundToggle = { viewModel.toggleSound(it) },
         onMusicToggle = { viewModel.toggleMusic(it) },
@@ -89,6 +93,7 @@ private fun FlashGameScreenContent(
     onResume: () -> Unit,
     onFinish: () -> Unit,
     onCellClick: (Int) -> Unit,
+    onGridRowCountMeasured: (Int) -> Unit = {},
     isGameOverAnimating: Boolean = false,
     onSoundToggle: (Boolean) -> Unit = {},
     onMusicToggle: (Boolean) -> Unit = {},
@@ -137,33 +142,55 @@ private fun FlashGameScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            if (uiState.isLoading) {
-                Text(
-                    text = stringResource(id = R.string.feature_gameplay_loading),
-                    style = MaterialTheme.typography.titleLarge
-                )
-            } else {
-                GameInfoPanel(
-                    modifier = Modifier
-                        .alpha(infoPanelAlpha)
-                        .shake(enabled = uiState.isLifeWasted)
-                        .flashRed(enabled = uiState.isLifeWasted)
-                        .onGloballyPositioned {
-                            targetGameInfoCoordinates = it
-                        },
-                    maxLifeCount = 5,
-                    lifeCount = uiState.lifeCount,
-                    goals = uiState.goals,
-                    goalsSuitableFigures = uiState.goalSuitableFigures,
-                    score = uiState.score,
-                    coefficient = uiState.coefficient,
-                    gameDuration = uiState.gameDuration,
-                    showScoreAndTime = uiState.isActive || isGameOverAnimating,
-                    showCoefficient = uiState.isActive || isGameOverAnimating
-                )
+            GameInfoPanel(
+                modifier = Modifier
+                    .alpha(infoPanelAlpha)
+                    .shake(enabled = uiState.isLifeWasted)
+                    .flashRed(enabled = uiState.isLifeWasted)
+                    .onGloballyPositioned {
+                        targetGameInfoCoordinates = it
+                    },
+                maxLifeCount = 5,
+                lifeCount = uiState.lifeCount,
+                goals = uiState.goals,
+                goalsSuitableFigures = uiState.goalSuitableFigures,
+                score = uiState.score,
+                coefficient = uiState.coefficient,
+                gameDuration = uiState.gameDuration,
+                showScoreAndTime = true,
+                showCoefficient = true
+            )
 
-                if (uiState.isActive || isGameOverAnimating) {
-                    FlashGameFieldLayout(
+            val density = LocalDensity.current
+            var boxWidthPx by remember { mutableStateOf(0) }
+            var boxHeightPx by remember { mutableStateOf(0) }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .onSizeChanged { size ->
+                        boxWidthPx = size.width
+                        boxHeightPx = size.height
+                    }
+            ) {
+                val gridPaddingPx = with(density) { 16.dp.toPx() }
+                val gridWidth = uiState.gridWidth.coerceAtLeast(1)
+                val cellSizePx = if (boxWidthPx > 0) (boxWidthPx - 2 * gridPaddingPx) / gridWidth else 0f
+                val rowCount = if (cellSizePx > 0f) {
+                    ((boxHeightPx - 2 * gridPaddingPx) / cellSizePx).toInt().coerceAtLeast(1)
+                } else 0
+
+                LaunchedEffect(rowCount) {
+                    if (rowCount > 0) onGridRowCountMeasured(rowCount)
+                }
+
+                when {
+                    uiState.isLoading -> Text(
+                        text = stringResource(id = R.string.feature_gameplay_loading),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    uiState.isActive || isGameOverAnimating -> FlashGameFieldLayout(
                         modifier = Modifier
                             .padding(16.dp)
                             .shake(enabled = isGameOverAnimating),

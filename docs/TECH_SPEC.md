@@ -180,11 +180,21 @@ DataSource / DataStore / Firestore
 ## 9. Grid & Item Rules
 
 ### Grid Size by Difficulty
-| Difficulty | Items per Row |
+| Difficulty | Items per Row (`gridWidth`) |
 |---|---|
 | Easy | 3 |
 | Normal | 4 |
 | Hard | 5 |
+
+**Row count (Flash only):** `rowCount` is not fixed; it is computed in `FlashGameScreen` using `BoxWithConstraints` before the game starts and forwarded to `FlashGameViewModel` via `setGridRowCount(rowCount)`:
+
+```
+cellSizePx  = (constraints.maxWidth − 2 × gridPaddingPx) / gridWidth
+rowCount    = floor((constraints.maxHeight − 2 × gridPaddingPx) / cellSizePx)
+              coerced to ≥ 1
+```
+
+`gridPadding` is the fixed `16.dp` padding applied to the grid container. The total cell count passed to `FlashGameEngine` is `gridWidth × rowCount`. `GameParams.gridRowCount` carries this value; `null` falls back to `gridWidth` (square grid, used by unit tests).
 
 ### Distribution
 - Random placement.

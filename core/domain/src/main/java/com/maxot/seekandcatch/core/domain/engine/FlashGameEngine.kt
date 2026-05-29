@@ -32,7 +32,8 @@ class FlashGameEngine(
             val suitable = figuresRepository.getFigureSuitableForGoal(goal)
 
             val gridWidth = params.rowWidth.coerceAtLeast(1)
-            val gridCount = gridWidth * gridWidth
+            val rowCount = (params.gridRowCount ?: gridWidth).coerceAtLeast(1)
+            val gridCount = gridWidth * rowCount
 
             val allFigures = figuresRepository.getRandomFigures(
                 itemsCount = maxOf(32, gridCount),

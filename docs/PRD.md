@@ -98,7 +98,7 @@ Enable players to survive as long as possible and achieve the highest possible s
 - Player reacts to moving items in real time.
 
 ### 5.2 Flash Mode
-- Items appear at random positions on a `gridWidth × gridWidth` grid.
+- Items appear at random positions on a `gridWidth × rowCount` grid. `gridWidth` is fixed by difficulty (Easy 3, Normal 4, Hard 5). `rowCount` is computed at runtime from available screen height so the grid fills the space below the info panel without clipping the last row: `rowCount = floor((availableHeight − 2×gridPadding) / cellSize)`, where `cellSize = (screenWidth − 2×gridPadding) / gridWidth`.
 - Each cycle, `visibleAtOnce` is drawn from a per-difficulty range (Easy 3–4, Normal 5–6, Hard 7–8). Between `ceil(visibleAtOnce / 2)` and `visibleAtOnce` of those are correct items. Flash display duration is proportional to the number of correct items: `flashMillis = correctCount × timePerItem / sqrt(floor(coefficient))`. Spawn period is coefficient-driven only.
 - Total items shown per cycle varies within the difficulty range; remaining slots are filled with decoys.
 - Density (total items per flash) depends on difficulty only; it does not scale with coefficient.

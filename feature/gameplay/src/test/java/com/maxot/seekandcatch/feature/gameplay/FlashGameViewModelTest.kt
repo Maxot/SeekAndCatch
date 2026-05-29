@@ -23,7 +23,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import com.maxot.seekandcatch.core.common.model.GameParams
+import org.junit.Assert.assertEquals
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -121,5 +125,27 @@ class FlashGameViewModelTest {
 
         assertTrue(viewModel.uiState.value.isActive)
         assert(viewModel.uiState.value.score == 5)
+    }
+
+    @Test
+    fun `setGridRowCount forwards gridRowCount to initGame — NORMAL gridWidth=4, rowCount=6 produces gridSize=24`() = runTest {
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.setGridRowCount(6)
+        advanceUntilIdle()
+
+        val captor = argumentCaptor<GameParams>()
+        verify(gameUseCase).initGame(captor.capture())
+        assertEquals(6, captor.firstValue.gridRowCount)
+        assertEquals(4, captor.firstValue.rowWidth)
+    }
+
+    @Test
+    fun `uiState gridWidth is set from difficulty before game starts`() = runTest {
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertEquals(GameDifficulty.NORMAL.gameParams.rowWidth, viewModel.uiState.value.gridWidth)
     }
 }

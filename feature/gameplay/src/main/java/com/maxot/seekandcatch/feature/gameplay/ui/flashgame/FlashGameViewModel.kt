@@ -19,6 +19,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -57,12 +59,15 @@ class FlashGameViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(FlashGameUiState())
     val uiState: StateFlow<FlashGameUiState> get() = _uiState
 
+    private val _gridRowCount = MutableStateFlow<Int?>(null)
+
     private var lastLifeCount = 0
     private var lastCoefficient = 1f
 
     init {
         ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver)
         observeGameState()
+        observeGridWidth()
         launchGame()
 
         viewModelScope.launch {
@@ -177,17 +182,30 @@ class FlashGameViewModel @Inject constructor(
         }
     }
 
-    private fun launchGame() {
+    private fun observeGridWidth() {
         viewModelScope.launch {
-            selectedGameDifficulty.collect { diff ->
-                diff?.let {
-                    _uiState.update { it.copy(isFinished = false, score = 0) }
-                    audioManager.onGameStart()
-                    gameUseCase.initGame(it.gameParams)
-                    return@collect
-                }
+            selectedGameDifficulty.filterNotNull().collect { diff ->
+                _uiState.update { it.copy(gridWidth = diff.gameParams.rowWidth) }
             }
         }
+    }
+
+    private fun launchGame() {
+        viewModelScope.launch {
+            combine(selectedGameDifficulty, _gridRowCount) { diff, rowCount ->
+                Pair(diff, rowCount)
+            }.collect { (diff, rowCount) ->
+                if (diff == null || rowCount == null) return@collect
+                if (gameUseCase.gameState.value !is FlashGameState.Idle) return@collect
+                _uiState.update { it.copy(isFinished = false, score = 0) }
+                audioManager.onGameStart()
+                gameUseCase.initGame(diff.gameParams.copy(gridRowCount = rowCount))
+            }
+        }
+    }
+
+    fun setGridRowCount(rowCount: Int) {
+        _gridRowCount.value = rowCount
     }
 
     fun startGame() {

@@ -8,6 +8,7 @@ package com.maxot.seekandcatch.core.common.model
  * @param scorePoint the minimum amount of points that confer for right action.
  * @param rowDuration the amount ot time for one row of items to be scrolled by, in mils.
  * @param rowWidth the items count in one row.
+ * @param gridRowCount Flash only: number of rows. Null falls back to rowWidth (square grid).
  * @param maxLifeCount the maximal count of possible mistake.
  * @param lifeCount the default count of possible mistake
  * @param itemsPassedWithoutMissToGetLife the required number of items passed without a single miss to gain one more life.
@@ -19,6 +20,7 @@ data class GameParams(
     val scorePoint: Int = 10,
     val rowDuration: Int = 1000,
     val rowWidth: Int = 4,
+    val gridRowCount: Int? = null,
     val maxLifeCount: Int = 5,
     val lifeCount: Int = 3,
     val itemsPassedWithoutMissToGetLife: Int = 30,
