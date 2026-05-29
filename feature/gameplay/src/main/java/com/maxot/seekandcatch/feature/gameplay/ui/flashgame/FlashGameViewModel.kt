@@ -1,5 +1,8 @@
 package com.maxot.seekandcatch.feature.gameplay.ui.flashgame
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.common.VisualFeedbackManager
@@ -30,6 +33,12 @@ class FlashGameViewModel @Inject constructor(
     private val audioManager: AudioManager,
 ) : ViewModel() {
 
+    private val appLifecycleObserver = object : DefaultLifecycleObserver {
+        override fun onPause(owner: LifecycleOwner) {
+            if (_uiState.value.isActive) pauseGame()
+        }
+    }
+
     private val selectedGameDifficulty: StateFlow<GameDifficulty?> =
         settingsRepository.observeDifficulty().stateIn(
             scope = viewModelScope,
@@ -52,6 +61,7 @@ class FlashGameViewModel @Inject constructor(
     private var lastCoefficient = 1f
 
     init {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver)
         observeGameState()
         launchGame()
 
@@ -251,6 +261,7 @@ class FlashGameViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(appLifecycleObserver)
         gameUseCase.onEvent(FlashGameEvent.ResetGame)
         super.onCleared()
         audioManager.release()

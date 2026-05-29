@@ -8,6 +8,9 @@ class AudioManager @Inject constructor(
     private val soundManager: SoundManager,
     private val musicManager: MusicManager
 ) {
+    // Prevents MusicController.onResume() from restarting music while a game is paused.
+    @Volatile private var isGamePaused = false
+
     fun playSound(soundType: SoundType) {
         soundManager.playSound(soundType)
     }
@@ -25,6 +28,7 @@ class AudioManager @Inject constructor(
     }
 
     fun resumeMusic() {
+        if (isGamePaused) return
         musicManager.resumeMusic()
     }
 
@@ -33,8 +37,7 @@ class AudioManager @Inject constructor(
     }
 
     fun release() {
-        // Only stop music and release sound manager, do not cancel MusicManager's scope
-        // since AudioManager is a Singleton and should persist across screens.
+        isGamePaused = false
         stopMusic()
     }
 
@@ -42,39 +45,28 @@ class AudioManager @Inject constructor(
         musicManager.setMusicSpeed(speed)
     }
 
-    /**
-     * Call this when game starts (countdown begins)
-     */
     fun onGameStart() {
+        isGamePaused = false
         stopMusic()
         playSound(SoundType.COUNTDOWN)
     }
 
-    /**
-     * Call this when gameplay actually begins (after countdown)
-     */
     fun onGameplayStarted() {
         playMusic(MusicType.GAME)
     }
 
-    /**
-     * Call this when game is paused
-     */
     fun onGamePaused() {
+        isGamePaused = true
         pauseMusic()
     }
 
-    /**
-     * Call this when game is resumed
-     */
     fun onGameResumed() {
+        isGamePaused = false
         resumeMusic()
     }
 
-    /**
-     * Call this when game is over
-     */
     fun onGameOver() {
+        isGamePaused = false
         stopMusic()
         playSound(SoundType.GAME_OVER)
     }

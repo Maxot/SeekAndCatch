@@ -50,7 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.designsystem.theme.SeekAndCatchTheme
@@ -66,7 +67,9 @@ import com.maxot.seekandcatch.feature.gameplay.ui.flowgame.model.FlowGameUiState
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.DetailedGoalsLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlowGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameInfoPanel
+import androidx.compose.runtime.DisposableEffect
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 const val TAG = "FlowGameScreen"
 
@@ -83,6 +86,17 @@ fun FlowGameScreen(
     val isGameOverAnimating = remember { mutableStateOf(false) }
 
     val showPauseDialog = remember { mutableStateOf(false) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                coroutineScope.launch { gridState.stopScroll() }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     FlowGameScreenContent(
         gameMode = gameMode.value,
@@ -146,16 +160,6 @@ fun FlowGameScreen(
         viewModel.onEvent(FlowGameUiEvent.PauseGame)
     }
 
-    LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
-        if (!flowGameUiState.isFinished)
-            viewModel.onEvent(FlowGameUiEvent.PauseGame)
-    }
-
-    LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
-        val event =
-            if (showPauseDialog.value) FlowGameUiEvent.PauseGame else FlowGameUiEvent.ResumeGame
-        viewModel.onEvent(event)
-    }
 }
 
 @Composable

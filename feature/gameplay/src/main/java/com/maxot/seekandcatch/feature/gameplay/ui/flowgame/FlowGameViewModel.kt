@@ -1,5 +1,8 @@
 package com.maxot.seekandcatch.feature.gameplay.ui.flowgame
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxot.seekandcatch.core.common.VisualFeedbackManager
@@ -32,6 +35,12 @@ class FlowGameViewModel
     private val visualFeedbackManager: VisualFeedbackManager,
     private val audioManager: AudioManager
 ) : ViewModel() {
+    private val appLifecycleObserver = object : DefaultLifecycleObserver {
+        override fun onPause(owner: LifecycleOwner) {
+            if (_flowGameUiState.value.isActive) pauseGame()
+        }
+    }
+
     private var lastLifeCount: Int = 0
     private var lastCoefficient: Float = 0f
 
@@ -56,6 +65,7 @@ class FlowGameViewModel
     private val readyToStart: StateFlow<Boolean> = _readyToStart
 
     init {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver)
         observeFlowGameState()
         launchGame()
 
@@ -291,6 +301,7 @@ class FlowGameViewModel
         gameUseCase.onEvent(FlowGameEvent.ItemHeightMeasured(height))
 
     override fun onCleared() {
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(appLifecycleObserver)
         gameUseCase.onEvent(FlowGameEvent.ResetGame)
         super.onCleared()
         audioManager.release()
