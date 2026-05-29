@@ -47,7 +47,8 @@ class MainActivity : AppCompatActivity() {
                 appState.ObserveMusicByDestination()
                 SeekAndCatchApp(
                     appState = appState,
-                    visualFeedbackManager = viewModel.visualFeedbackManager
+                    visualFeedbackManager = viewModel.visualFeedbackManager,
+                    isAppReady = { uiState.value is MainActivityUiState.Success },
                 )
             }
         }

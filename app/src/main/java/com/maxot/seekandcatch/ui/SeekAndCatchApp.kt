@@ -41,7 +41,8 @@ import com.maxot.seekandcatch.feature.settings.R as SettingsR
 @Composable
 fun SeekAndCatchApp(
     appState: SeekAndCatchAppState,
-    visualFeedbackManager: VisualFeedbackManager
+    visualFeedbackManager: VisualFeedbackManager,
+    isAppReady: () -> Boolean,
 ) {
     var showSettingsDialog by rememberSaveable {
         mutableStateOf(false)
@@ -99,7 +100,8 @@ fun SeekAndCatchApp(
                 )
                 SeekCatchNavHost(
                     appState = appState,
-                    modifier = Modifier.padding(padding)
+                    isAppReady = isAppReady,
+                    modifier = Modifier.padding(padding),
                 )
             }
         }

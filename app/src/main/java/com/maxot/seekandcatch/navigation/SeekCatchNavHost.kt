@@ -16,6 +16,7 @@ import com.maxot.seekandcatch.ui.SeekAndCatchAppState
 @Composable
 fun SeekCatchNavHost(
     appState: SeekAndCatchAppState,
+    isAppReady: () -> Boolean,
     modifier: Modifier = Modifier,
 ) {
     val navController = appState.navController
@@ -23,8 +24,16 @@ fun SeekCatchNavHost(
     NavHost(
         modifier = Modifier.then(modifier),
         navController = navController,
-        startDestination = GAME_MAIN_ROUTE
+        startDestination = SPLASH_ROUTE,
     ) {
+        splashScreen(
+            isAppReady = isAppReady,
+            onSplashComplete = {
+                navController.navigate(GAME_MAIN_ROUTE) {
+                    popUpTo(SPLASH_ROUTE) { inclusive = true }
+                }
+            },
+        )
         leaderboardScreen()
         gameSelectionScreen(
             navigateToFlowGame = { navOptions -> navController.navigateToFlowGame(navOptions) },
@@ -33,7 +42,5 @@ fun SeekCatchNavHost(
             navigateToGameSelection = { navOptions -> navController.navigateToGameSelection(navOptions) }
         )
         accountScreen()
-
     }
-
 }

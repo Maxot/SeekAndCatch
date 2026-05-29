@@ -156,17 +156,31 @@ File: `component/UserInfoPanel.kt`
 
 Displays the current user's name/ID in the Account screen.
 
+### PixelProgressBar
+File: `component/PixelProgressBar.kt`
+
+A horizontal progress bar with pixel-art border styling. Uses `drawPixelBorders` for the outer frame, with a pixel-snapped fill rectangle drawn on top of the track.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `progress` | `Float` (0f–1f) | — | Current fill level; caller manages animation |
+| `modifier` | Modifier | Modifier | Standard modifier; caller sets width and height |
+| `trackColor` | Color | `MaterialTheme.colorScheme.surfaceVariant` | Empty track background colour |
+| `fillColor` | Color | `MaterialTheme.colorScheme.primary` | Fill colour |
+
+Fill width is pixel-snapped (`(progress * innerWidth).toInt()`) to preserve the retro aesthetic. Animation (e.g. `animateFloatAsState`) is the caller's responsibility. Used in `SplashScreen` with a `tween(1500, LinearEasing)` driving 0→1 over the minimum splash duration.
+
 ### drawPixelBorders (utility function)
 File: `component/PixelBorderBox.kt`
 
-Standalone `DrawScope` extension used by both `PixelBorderBox` and `PixelButton`. Call directly on a `Modifier.drawBehind {}` block for inline pixel border styling.
+Standalone `DrawScope` extension used by `PixelBorderBox`, `PixelButton`, and `PixelProgressBar`. Call directly on a `Modifier.drawBehind {}` block or inside a `Canvas` composable for inline pixel border styling.
 
 ---
 
 ## 7. Navigation Philosophy
 
 - **Single activity** (`MainActivity`).
-- **Single `NavHost`** (`SeekCatchNavHost`) with `startDestination = GAME_MAIN_ROUTE`.
+- **Single `NavHost`** (`SeekCatchNavHost`) with `startDestination = SPLASH_ROUTE` (auto-advances to `GAME_MAIN_ROUTE`).
 - **Top-level destinations** (bottom navigation): Game Selection, Leaderboard, Account.
 - **Push (non-top-level):** FlowGameScreen, FlashGameScreen, GameResultScreen — pushed onto the back stack from Game Selection.
 - **Modal:** Pause dialog (in-place overlay, not a navigation destination), Settings dialog (modal bottom sheet or dialog over the current screen).

@@ -211,6 +211,13 @@ min(actualDurationPercentage) = 0.35  ← hard floor
 
 ## 10. Screens
 
+### 10.0 Splash Screen
+- Shown once on cold start; not accessible via back navigation (popped from back stack on transition).
+- Displays app logo (`ic_launcher_foreground`) centred on screen.
+- Displays game name "Seek & Catch" in Press Start 2P (`displayLarge`).
+- Animated `PixelProgressBar` fills over 1.5 s minimum display time.
+- Auto-navigates to Game Selection once both the minimum display time has elapsed and settings have loaded (`MainActivityUiState.Success`).
+
 ### 10.1 Game Selection Screen (Main / Start)
 - Select Game Mode (Flow / Flash) via animated carousel with live previews.
 - Select Difficulty (Easy / Normal / Hard).
