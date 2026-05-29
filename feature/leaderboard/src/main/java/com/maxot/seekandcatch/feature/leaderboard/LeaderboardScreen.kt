@@ -1,15 +1,14 @@
 package com.maxot.seekandcatch.feature.leaderboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
@@ -207,27 +206,66 @@ private fun LeaderLayout(
             .fillMaxWidth(),
         middleBorderColor = borderColor
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 20.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = ((("${itemIndex + 1}. " + leaderRecord.userName))))
-            Spacer(modifier = Modifier.width(50.dp))
-            Text(text = "${leaderRecord.score}")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "${itemIndex + 1}. ${leaderRecord.userName}")
+                Text(text = "${leaderRecord.score}")
+            }
+            if (leaderRecord.gameMode != null || leaderRecord.difficulty != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    leaderRecord.gameMode?.let { mode ->
+                        LeaderboardBadge(
+                            label = mode.name,
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    leaderRecord.difficulty?.let { diff ->
+                        val (bg, fg) = when (diff) {
+                            GameDifficulty.EASY -> MaterialTheme.colorScheme.secondary to MaterialTheme.colorScheme.onSecondary
+                            GameDifficulty.NORMAL -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
+                            GameDifficulty.HARD -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
+                        }
+                        LeaderboardBadge(label = diff.name, containerColor = bg, contentColor = fg)
+                    }
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun LeaderboardBadge(
+    label: String,
+    containerColor: Color,
+    contentColor: Color,
+) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.displaySmall,
+        color = contentColor,
+        modifier = Modifier
+            .background(containerColor, shape = Shapes.small)
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LeaderboardScreenSuccessfulPreview() {
     val leaderRecords = listOf(
-        LeaderboardRecord(userName = "Max", score = 555),
-        LeaderboardRecord(userName = "John", score = 435),
-        LeaderboardRecord(userName = "Piter", score = 235),
+        LeaderboardRecord(userName = "Max", score = 555, gameMode = GameMode.FLOW, difficulty = GameDifficulty.HARD),
+        LeaderboardRecord(userName = "John", score = 435, gameMode = GameMode.FLASH, difficulty = GameDifficulty.NORMAL),
+        LeaderboardRecord(userName = "Piter", score = 235, gameMode = GameMode.FLOW, difficulty = GameDifficulty.EASY),
         LeaderboardRecord(userName = "Stas", score = 125),
     )
     SeekAndCatchTheme {
