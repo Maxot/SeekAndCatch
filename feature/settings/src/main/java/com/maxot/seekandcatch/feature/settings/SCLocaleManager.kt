@@ -16,12 +16,7 @@ class SCLocaleManager
         AppCompatDelegate.setApplicationLocales(appLocale)
     }
 
-    fun getLocales(): List<String> {
-        val locales: MutableSet<String> = mutableSetOf()
-        locales.add(AppCompatDelegate.getApplicationLocales().toLanguageTags())
-        locales.addAll(allSupportedLocales)
-        return locales.toList()
-    }
+    fun getLocales(): List<String> = allSupportedLocales
 
 
     fun getSelectedLocale() = AppCompatDelegate.getApplicationLocales()[0]
