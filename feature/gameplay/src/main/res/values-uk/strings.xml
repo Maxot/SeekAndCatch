@@ -21,15 +21,17 @@
     <string name="feature_gameplay_label_your_best_score">Ваш найкращий рахунок: %1$d</string>
 
     <string name="flow_game_screen_content_desc">FlowGameScreen</string>
-    <string name="colored_figure_content_desc">Colored Figure %1$d</string>
-    <string name="goals_layout_content_desc">Goals</string>
-    <string name="game_difficult_selector_content_desc">Game Difficult Selector</string>
-    <string name="coefficient_progress_layout_content_desc">Coefficient Progress</string>
+    <string name="colored_figure_content_desc">Кольорова фігура %1$d</string>
+    <string name="goals_layout_content_desc">Цілі</string>
+    <string name="game_difficult_selector_content_desc">Вибір складності</string>
+    <string name="coefficient_progress_layout_content_desc">Прогрес коефіцієнту</string>
     <string name="pause_dialog_content_desc">Продовжити</string>
-    <string name="game_field_layout_content_desc">Game Field</string>
-    <string name="feature_gameplay_game_selection_screen_content_desc">Game Selection</string>
+    <string name="game_field_layout_content_desc">Ігрове поле</string>
+    <string name="feature_gameplay_game_selection_screen_content_desc">Вибір гри</string>
     <string name="feature_gameplay_goals_title">Цілі</string>
     <string name="feature_gameplay_coefficient_title">Коефіцієнт</string>
     <string name="feature_gameplay_loading">Завантаження…</string>
     <string name="feature_gameplay_press_to_start">Натисніть, щоб почати</string>
+    <string name="feature_gameplay_label_rank">Позиція в таблиці лідерів: %1$d</string>
+    <string name="feature_gameplay_label_time">Час: %1$s</string>
 </resources>

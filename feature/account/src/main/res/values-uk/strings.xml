@@ -8,4 +8,6 @@
     <string name="feature_account_delete_confirm_message">Це назавжди видалить ваш акаунт і всі ваші результати.</string>
     <string name="feature_account_delete_confirm_button">Видалити</string>
     <string name="feature_account_cancel">Скасувати</string>
+    <string name="feature_account_screen_content_desc">Екран акаунту</string>
+    <string name="feature_account_selected_style">Вибраний стиль:</string>
 </resources>

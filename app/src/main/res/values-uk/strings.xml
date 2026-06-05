@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_score">Рахунок: %1$d</string>
+    <string name="main_screen_content_desc">Головний екран</string>
+    <string name="button_start_game_text">Почати гру</string>
+    <string name="label_your_best_score">Ваш найкращий рахунок: %1$d</string>
+</resources>

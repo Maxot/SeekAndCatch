@@ -54,7 +54,7 @@ fun GameInfoPanel(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = "Time: ${formatMilliseconds(gameDuration)}",
+                            text = stringResource(id = R.string.feature_gameplay_label_time, formatMilliseconds(gameDuration)),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -114,7 +114,7 @@ private fun formatMilliseconds(milliseconds: Long): String {
     val totalSeconds = milliseconds / 1000
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
+    return String.format(java.util.Locale.ROOT, "%02d:%02d", minutes, seconds)
 }
 
 @Preview(showBackground = true)
