@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -120,10 +122,23 @@ fun DetailedGoalsLayout(
     ) {
         Text(
             text = stringResource(id = R.string.label_goal),
-            style = textStyle
+            style = textStyle,
+            softWrap = false
         )
-        goalsSuitableFigures.forEach { figure ->
-            ColoredFigureLayout(figure = figure, size = 50.dp)
+        BoxWithConstraints(modifier = Modifier.weight(1f)) {
+            val count = goalsSuitableFigures.size.coerceAtLeast(1)
+            // ColoredFigureLayout adds 10dp padding on all sides before sizing,
+            // so each figure's actual footprint is (size + 20dp).
+            val figureSize = (maxWidth / count - 20.dp).coerceIn(16.dp, 50.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                goalsSuitableFigures.forEach { figure ->
+                    ColoredFigureLayout(figure = figure, size = figureSize)
+                }
+            }
         }
     }
 }

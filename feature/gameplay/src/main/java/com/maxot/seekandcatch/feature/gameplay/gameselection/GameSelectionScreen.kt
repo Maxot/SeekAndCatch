@@ -7,7 +7,8 @@ import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,9 +44,10 @@ import com.maxot.seekandcatch.core.common.model.GameMode
 import com.maxot.seekandcatch.core.common.model.Figure
 import com.maxot.seekandcatch.feature.gameplay.R
 import com.maxot.seekandcatch.feature.gameplay.gameselection.model.GameSelectionUiEvent
+import com.maxot.seekandcatch.core.designsystem.component.PixelButton
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlashGameFieldLayout
 import com.maxot.seekandcatch.feature.gameplay.ui.layout.FlowGameFieldLayout
-import com.maxot.seekandcatch.feature.gameplay.ui.layout.StartGameLayout
+import com.maxot.seekandcatch.feature.gameplay.ui.layout.GameDifficultSelectorLayout
 import com.maxot.singleselectionlazyrow.SingleSelectionLazyRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -101,33 +103,54 @@ private fun GameSelectionScreenContent(
                 .fillMaxSize()
                 .semantics { contentDescription = gameSelectionScreenContentDesc },
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
-            ModeSelectionLayout(
-                selectedMode = selectedMode,
-                selectedDifficulty = selectedDifficulty,
-                onSelectedModeChanged = onSelectedModeChanged
-            )
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .weight(4f)
+                .padding(vertical = 40.dp)) {
+                ModeSelectionLayout(
+                    selectedMode = selectedMode,
+                    selectedDifficulty = selectedDifficulty,
+                    onSelectedModeChanged = onSelectedModeChanged
+                )
+            }
 
-            Spacer(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-            )
-
-            StartGameLayout(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                selectedDifficulty = selectedDifficulty,
-                onDifficultyChanged = {
-                    onDifficultChanged(it)
-                },
-                onStartButtonClick = {
-                    when (selectedMode) {
-                        GameMode.FLASH -> navigateToFlashGame()
-                        else -> navigateToFlowGame()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                PixelButton(
+                    paddingValues = PaddingValues(horizontal = 40.dp, vertical = 30.dp),
+                    onClick = {
+                        when (selectedMode) {
+                            GameMode.FLASH -> navigateToFlashGame()
+                            else -> navigateToFlowGame()
+                        }
                     }
-                })
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.start_game_button_text),
+                        style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                GameDifficultSelectorLayout(
+                    variants = GameDifficulty.entries,
+                    defaultVariant = selectedDifficulty,
+                    onDifficultChanged = { onDifficultChanged(it) }
+                )
+            }
         }
     }
 }
@@ -190,7 +213,7 @@ private fun FlowGamePreviewCard(
     Column(
         modifier = Modifier
             .then(modifier)
-            .height(350.dp)
+            .fillMaxHeight()
             .width(250.dp)
             .drawBehind {
                 drawPixelBorders(this)
@@ -275,7 +298,7 @@ private fun FlashGamePreviewCard(
     Column(
         modifier = Modifier
             .then(modifier)
-            .height(350.dp)
+            .fillMaxHeight()
             .width(250.dp)
             .drawBehind { drawPixelBorders(this) }
             .padding(20.dp),
